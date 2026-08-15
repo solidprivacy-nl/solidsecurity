@@ -1,113 +1,68 @@
 # Encryption and Key Management V1
 
-Status: `DESIGN / PROVIDER-NEUTRAL REQUIREMENTS`
+Status: `DESIGN / SIMPLE BASELINE`
 
 ## Principle
 
-Encryption is layered. SolidSecurity must not describe provider encryption at rest as end-to-end encryption or as protection against every storage-provider or credential-compromise scenario.
+SolidSecurity should use strong standard provider encryption and good secret handling before building custom cryptography.
+
+The V1 rule is:
+
+> Do not create an application-level encryption subsystem unless a concrete threat, contract or regulatory requirement demonstrates that provider encryption plus access control is insufficient.
 
 ## Mandatory baseline
 
 For every real client-data environment:
 
 - TLS for data in transit;
-- provider-managed encryption at rest for database, primary object storage and provider-managed backups;
+- provider-managed encryption at rest for PostgreSQL and primary object storage;
 - private-by-default evidence objects;
-- no secret/key material in GitHub, source code, object names or ordinary logs;
-- role-scoped access to decryption-capable services;
-- key and credential rotation/revocation procedures;
-- encrypted independent logical database backups before they are written to a secondary recovery provider.
+- secrets outside GitHub, source code and ordinary logs;
+- least-privilege credentials;
+- MFA for material privileged/reviewer actions as defined elsewhere;
+- encrypted portable database/backup archives before or during off-site transfer;
+- separate credentials for the off-site backup target.
 
-## Data-classification-driven profiles
+## Database
 
-### STANDARD / INTERNAL
+Use the selected PostgreSQL provider's encryption at rest and normal database authorization/RLS.
 
-Provider encryption at rest plus application authorization may be sufficient when approved by the data classification and threat model.
+Do not introduce transparent column encryption by default. It complicates queries, migrations, indexing and operations while often providing little additional protection when the same application identity must transparently decrypt every value.
 
-### CLIENT_CONFIDENTIAL
+Targeted field encryption is a later exception for specifically identified high-value fields when justified.
 
-Provider encryption is mandatory. Application-layer envelope encryption is available where the threat model, customer contract or evidence sensitivity justifies stronger separation.
+## Evidence objects
 
-### CLIENT_HIGH_SENSITIVITY
+Evidence remains in private object storage with tenant-scoped authorization. Provider-managed encryption at rest is the V1 default.
 
-The runtime design must support application-layer authenticated encryption before persistent object storage unless a documented security/data-governance decision approves an equivalent architecture.
-
-High-sensitivity content remains deny-by-default for unapproved external AI processing regardless of storage encryption.
-
-## Envelope encryption model
-
-Do not invent cryptography. Use a standard authenticated-encryption implementation from a reviewed cryptographic library.
-
-Conceptual flow:
-
-```text
-Evidence bytes
-    |
-    | generate random data-encryption key (DEK)
-    v
-Authenticated encryption (e.g. approved AEAD)
-    |
-    +---- encrypted object ----> primary/secondary object storage
-    |
-    +---- wrapped DEK ---------> controlled metadata store
-                                  |
-                                  | unwrap only through
-                                  v
-                         Key Management Service
-                         master/key-encryption key
-```
-
-Rules:
-
-- unique random DEK per evidence version or recovery package;
-- master/key-encryption key is never stored next to the plaintext DEK;
-- only wrapped/encrypted DEKs may be stored with dossier metadata;
-- authenticated additional data should bind ciphertext to stable context such as tenant/evidence/version identifiers;
-- rotation of the key-encryption key should normally re-wrap DEKs rather than re-encrypt every large object;
-- decryption is a server-side authorized operation and is auditable;
-- customer-facing direct object URLs must not bypass decryption authorization.
-
-## KMS boundary
-
-The architecture requires a `KeyManagementService` abstraction but does not select the final KMS in this design stage.
-
-A production KMS must provide, directly or through an approved service boundary:
-
-- strong managed key protection/HSM-backed controls where available;
-- access control distinct from ordinary object-store credentials;
-- rotation and revocation;
-- auditability of key use/administration;
-- EU/data-location suitability where material;
-- recovery/escrow procedure that does not put plaintext master keys into the same backup archive as encrypted data.
-
-A general secrets store can hold API credentials but is not automatically a cryptographic KMS suitable for bulk envelope-encryption operations.
-
-## Database encryption
-
-The baseline database is provider-encrypted at rest. Do not introduce transparent column encryption by default: it creates query, indexing, key-rotation and operational complexity and may add little protection if the same application identity can transparently decrypt all rows.
-
-Use targeted application-level field encryption only for narrowly identified fields whose confidentiality threat justifies it.
-
-Passwords and authentication secrets follow the identity provider's approved storage mechanisms rather than custom encryption.
+Reviewed evidence versions are immutable at the application level and have an integrity hash. A hash provides integrity checking, not confidentiality.
 
 ## Backup encryption
 
-Independent logical database dumps and recovery packages must be encrypted before leaving the trusted backup process.
+Portable database dumps and off-site backup packages must not be stored as readable plaintext on the secondary target.
 
-The recovery store may also encrypt at rest; this is defense in depth, not a substitute for backup-package encryption when independent-provider compromise is in scope.
+Use a mature standard encryption capability supplied by the backup/sync tool or an established cryptographic utility. Do not design a SolidSecurity encryption algorithm.
 
-Backup encryption metadata records algorithm/profile/key reference and creation time, but never plaintext keys.
+Backup decryption material is kept separately from the backup archive and is stored through normal secret-management practices.
 
-## Crypto-shredding
+## Future escalation
 
-Where contractually and legally appropriate, tenant-specific wrapped-key design may support cryptographic erasure after normal retention/deletion conditions are met. This is not used to evade documented backup-expiry behavior and does not replace required deletion from active stores.
+Application-level envelope encryption, customer-managed keys, dedicated KMS/HSM services or per-customer cryptographic keys may be introduced only when justified by one of the following:
+
+- explicit customer contract;
+- regulator/professional requirement;
+- materially higher data classification;
+- threat-model finding not adequately mitigated by the baseline;
+- demonstrated need for cryptographic separation from the storage provider.
+
+Such an escalation requires its own ADR and recovery design because stronger encryption can also make data unrecoverable when key management fails.
 
 ## Prohibited patterns
 
-- one static encryption key committed to environment files or source control;
-- client names or sensitive labels in object keys;
-- storing plaintext master keys with backups;
-- home-grown encryption algorithms;
-- logging plaintext evidence during encryption/decryption errors;
-- treating a hash as encryption;
-- automatic AI access to a KMS because the AI can request document analysis.
+- secrets or encryption keys committed to GitHub;
+- plaintext portable database backups on the secondary server;
+- public evidence buckets/URLs as the default access model;
+- client names or sensitive labels unnecessarily exposed in object keys;
+- home-grown cryptography;
+- describing provider encryption at rest as end-to-end encryption;
+- adding a KMS or envelope-encryption stack merely because it is theoretically stronger.
