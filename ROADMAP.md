@@ -1,164 +1,265 @@
-# SolidSecurity Roadmap
+# SolidSecurity Mission-Driven Roadmap
 
-## Roadmap doctrine
+## Doctrine
 
-Build the **operating model before the platform**, prove the **service before the integrations**, and introduce automation only where it reduces verified work rather than creating unverified complexity.
+The roadmap is subordinate to `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md` and the canonical Control Mission Contract.
 
-## Phase 0 — Foundation V1
+The roadmap does not exist to maximize delivered features. It exists to close the highest-value unsatisfied mission gaps with the smallest coherent change.
 
-**Status: IN PROGRESS — issue #2**
+Core rules:
 
-Deliver:
+- customer outcome over software output;
+- managed service before self-service;
+- evidence and professional assurance before green status;
+- service workflow before integrations;
+- simplest safe architecture first;
+- one common-control backbone rather than duplicated framework products;
+- mission evidence, not issue closure, determines progress.
 
-- target positioning and service boundaries;
-- common-control model;
-- conceptual data model;
+## Current completed/advanced foundation
+
+The existing foundation and synthetic work has already established substantial reusable doctrine:
+
+- positioning for Care and compliance-exposed suppliers;
+- common-control backbone;
 - Proof Ladder;
-- AI authority model;
-- care and supplier workflows;
-- open-source adoption register;
-- source/licensing registry;
-- public-repo information classification;
-- architecture and ADRs;
-- roadmap and commercial hypotheses.
+- AI Authority Matrix;
+- requirement/control/implementation/evidence/review separation;
+- synthetic Care and Supplier workflow findings;
+- provider-neutral pilot-readiness/security boundaries;
+- runtime acceptance contract;
+- service-claim authority boundaries;
+- lean shared data-resilience decision.
 
-Exit gate:
+These are inputs to the mission. They are not themselves the finished product.
 
-- coherent candidate in PR;
-- independent governance/release assurance;
-- no contradiction with project assurance contract.
+---
 
-## Phase 1 — Service MVP / synthetic execution
+# Mission sequence
 
-Goal: prove that the full managed-service workflow works **without** building a GRC platform.
+The central machine-readable Control contract determines the exact eligible gap and work order. The sequence below is the human-readable product roadmap.
 
-Work packages:
+## M1 — Freeze the minimum domain/data model
 
-1. create a synthetic small home-care organization dossier;
-2. define Care Baseline V1 control subset;
-3. execute intake → facts → scope → assessment → evidence requests → gaps → 90-day plan → policies → professional review → baseline report;
-4. create synthetic SME supplier dossier;
-5. execute security questionnaire/passport workflow;
-6. measure AI versus professional effort at each step;
-7. capture failure modes and review burden;
-8. refine common controls/evidence expectations.
+**Mission focus:** SS-SC-02, SS-SC-04, SS-SC-05, SS-SC-06.
 
-No real customer data. No environment connectors.
+Goal: define the smallest relational model that can run the managed-service workflow without later forcing avoidable data migrations.
 
-Exit gate:
+Must define at minimum:
 
-- two end-to-end synthetic cases reproducible;
-- professional reviewer can reconstruct each material conclusion;
-- initial unit-economics model based on measured workload.
+- tenant/organization/legal entity/organizational scope;
+- user/membership/role;
+- engagement/service variant;
+- source/requirement/control/control assertion;
+- client implementation;
+- evidence/evidence version;
+- assessment/finding/action;
+- client request/response;
+- AI proposal/provenance;
+- professional review/decision/approval;
+- report/approved assertion;
+- audit event;
+- recurring review/expiry state.
 
-## Phase 2 — Controlled pilot readiness
+Design constraint:
 
-Goal: become safe enough for first real pilot customer.
+`one shared Postgres + tenant_id + private object storage`.
 
-Before any real client data:
+Exit evidence:
 
-- client data-plane ADR;
-- tenant isolation design;
-- retention/deletion rules;
-- DPA/subprocessor model;
-- LLM/data-processing policy;
-- secrets management;
-- access control and audit logging;
-- incident response for SolidSecurity itself;
-- client export/offboarding model;
-- public/private repository transition decision.
+- ER/domain model is coherent against Care + Supplier synthetic workflows;
+- no entity merges concepts prohibited by the canonical traceability model;
+- tenant isolation and lifecycle fields are explicit;
+- no speculative enterprise entity families without workflow evidence.
 
-Then run one or a few tightly bounded pilot customers with manual evidence intake.
+## M2 — Prove the operator-led service workflow as the primary UX
 
-Exit gate:
+**Mission focus:** SS-SC-01, SS-SC-02.
 
-- data governance independently reviewed;
-- first pilot produces an accepted baseline and recurring plan;
-- measured professional hours support viable pricing.
+Goal: make the full concierge workflow executable from an operator perspective before polishing SaaS surfaces.
 
-## Phase 3 — Productize the proven workflow
+Prototype/workflow capabilities:
 
-Goal: remove operational friction, not recreate a broad enterprise GRC suite.
-
-Candidate capabilities:
-
-- secure tenant workspace;
-- control/evidence register;
-- action/remediation tracker;
+- operator-led intake;
+- structured facts with provenance;
+- evidence inbox;
+- targeted client requests;
+- controls/implementations/assessments;
+- findings and remediation;
+- AI proposal/review flow;
 - professional review queue;
-- document generation/versioning;
-- recurring review scheduler;
-- customer status dashboard;
-- Supplier Security & Compliance Passport;
-- questionnaire ingest/reuse workflow;
-- structured audit-ready export.
+- baseline/recurring report generation.
 
-Decision gate: custom thin app vs Probo/hybrid.
+Exit evidence:
 
-## Phase 4 — Read-only technical evidence
+- one synthetic Care dossier and one Supplier dossier can be executed end to end using the intended product flow;
+- customer work is limited to required facts/evidence/decisions;
+- professional reviewer can reconstruct material conclusions.
 
-Only after service-model validation.
+## M3 — Build the minimum secure runtime
+
+**Mission focus:** SS-SC-04, SS-SC-05.
+
+Goal: implement only the runtime primitives needed by M2.
+
+Minimum runtime:
+
+- shared PostgreSQL;
+- Auth + memberships/roles;
+- RLS/tenant authorization;
+- private object storage;
+- evidence hashes/versioning;
+- audit events;
+- scoped upload/action capabilities where required;
+- nightly encrypted off-site database + object backup;
+- simple monitoring;
+- existing runtime acceptance tests.
+
+Exit evidence:
+
+- synthetic cross-tenant read/write/object tests fail closed;
+- backup and restore work for structured state and evidence objects;
+- no client data has been admitted before the broader real-client gate.
+
+## M4 — Build the SolidSecurity Operator Workspace
+
+**Mission focus:** SS-SC-02.
+
+Goal: turn the service workflow into a coherent professional cockpit.
+
+Primary views:
+
+- client portfolio/status;
+- intake and evidence inbox;
+- control/implementation assessment;
+- requests waiting on customer;
+- actions/remediation;
+- AI proposals;
+- professional review queue;
+- reports/approvals;
+- recurring/expiry queue.
+
+Exit evidence:
+
+- operator can execute the full baseline without using GitHub or ad-hoc spreadsheets as the client dossier;
+- the UI exposes provenance and authority state rather than hiding it.
+
+## M5 — Build the Client Dashboard and Interaction Layer
+
+**Mission focus:** SS-SC-01, SS-SC-03.
+
+Goal: give the customer transparency without transferring the compliance workload to them.
+
+Dashboard minimum:
+
+- overview/current status;
+- what is demonstrably arranged;
+- attention points;
+- actions and decisions required from customer;
+- what SolidSecurity is working on;
+- recently completed work;
+- reports/evidence packs.
+
+Interaction minimum:
+
+- secure upload;
+- short targeted questions;
+- confirmations;
+- approvals/sign-offs;
+- email/link entry into those actions.
+
+Exit evidence:
+
+- a non-GRC customer user can identify current state and next required action without explanation of control IDs;
+- all interaction writes back to the authoritative dossier.
+
+## M6 — Controlled end-to-end pilot readiness
+
+**Mission focus:** SS-SC-01 through SS-SC-07.
+
+Before real client data:
+
+- existing pilot/runtime gates are satisfied;
+- tenancy, object access, AI boundaries, export/deletion and restore are tested;
+- DPA/subprocessor/retention decisions are complete;
+- professional authority roles are operational;
+- repository/public-private/IP boundary is appropriate;
+- explicit principal authorization for first real-client transition exists.
+
+Then run a tightly bounded real pilot with high professional oversight.
+
+Exit evidence:
+
+- accepted baseline and recurring plan;
+- customer can use dashboard/actions;
+- measured delivery effort supports or falsifies the commercial model;
+- no material authority or tenant-isolation failure.
+
+## M7 — Improve unit economics from measured friction
+
+**Mission focus:** SS-SC-08.
+
+Automate only repeated work observed in pilots, for example:
+
+- evidence extraction/classification;
+- reusable approved assertions/questionnaire answers;
+- evidence expiry/reminders;
+- document/report drafting;
+- request drafting;
+- recurring review preparation.
+
+Track professional effort and AI acceptance/modification/rejection so automation is chosen from evidence.
+
+## M8 — Read-only technical evidence and continuous assurance
+
+Only after managed-service workflow and real pilot value are proven.
 
 Candidate connectors:
 
 - Microsoft 365;
-- Azure/AWS/GCP where relevant;
+- Azure/AWS/GCP;
 - GitHub;
 - Cloudflare;
 - Google Workspace;
-- selected SaaS identity/security systems.
+- selected identity/security SaaS;
+- Prowler as an evidence source where useful.
 
-Evaluate Prowler as an evidence provider rather than a full SolidSecurity runtime.
-
-Principle:
+Invariant:
 
 `observed configuration -> evidence -> assessment -> human-reviewed status`
 
 Never:
 
-`scanner pass -> automatic legal/compliance PASS`
+`scanner pass -> automatic legal/compliance PASS`.
 
-## Phase 5 — Continuous assurance
+## M9 — Interoperability and scale
 
-Goal: evolve from periodic managed compliance to event- and evidence-driven maintenance.
+Only when customer/partner demand justifies it:
 
-Capabilities:
-
-- evidence expiry/refresh;
-- configuration drift signals;
-- regulatory/source change monitoring;
-- supplier review cycles;
-- AI-use inventory drift;
-- recurring control effectiveness checks;
-- automated audit-pack preparation;
-- exception-based professional review.
-
-## Phase 6 — Interoperability and scale
-
-Evaluate only when customer/partner demand justifies it:
-
-- OSCAL/compliance-trestle interoperability;
-- richer APIs/MCP;
-- partner/auditor access;
-- sector packs beyond care;
-- benchmark/portfolio analytics;
+- auditor/partner access;
+- APIs/MCP;
+- OSCAL/compliance-as-code interoperability;
+- sector packs beyond Care/Supplier;
+- benchmark analytics using appropriately governed non-identifying data;
 - white-label managed-service delivery.
 
-## Explicitly deferred
+---
 
-- autonomous remediation in customer systems;
-- continuous write access to customer environments;
-- importing 100+ frameworks because they exist;
-- building a generic vulnerability-management platform;
-- replacing external certification bodies;
-- AI-only assurance.
+# Explicitly deferred until mission evidence exists
 
-## Repository-visibility gate
+- separate database/project per customer;
+- active-active multi-cloud database;
+- custom KMS/envelope-encryption platform;
+- autonomous remediation/write access in client environments;
+- broad framework imports because they exist;
+- generic vulnerability-management platform;
+- permanent vector memory for all evidence;
+- multiple competing workflow/orchestration queues;
+- AI-only assurance;
+- replacement of external certification bodies.
 
-Public is acceptable during Foundation/Service-MVP while only public-safe methodology and synthetic material are stored. Before Phase 2 real-client processing or before proprietary mappings/evidence rubrics become material IP, perform a formal visibility/split decision:
+## Repository visibility gate
 
-1. keep public core + create private operations/control repo; or
-2. move this repository private; or
-3. establish an explicit open-core licensing strategy.
+Assume anything committed publicly may remain copied permanently. Public-safe methodology may remain public; real client information, secrets, proprietary evidence-sufficiency logic, private operating prompts and commercially sensitive accumulated intelligence do not belong in the public repo.
 
-Assume anything committed publicly may remain copied or forked even after later privatization.
+Before real-client processing or publication of material proprietary operating IP, perform the explicit public/private/open-core decision.
