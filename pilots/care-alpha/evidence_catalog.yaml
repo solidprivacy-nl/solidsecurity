@@ -1,0 +1,95 @@
+version: 1
+synthetic: true
+evidence:
+  - id: E-001
+    type: role_assignment
+    title: "Synthetic organization chart and director interview note"
+    supports: [SS-GOV-001]
+    freshness: current
+    limitation: "security accountability is informal and periodic review is not evidenced"
+  - id: E-002
+    type: risk_register
+    title: "Synthetic 2024 risk spreadsheet"
+    supports: [SS-RISK-001]
+    freshness: stale
+    limitation: "last material review is more than one year old and treatment owners are incomplete"
+  - id: E-003
+    type: inventory
+    title: "Synthetic systems spreadsheet"
+    supports: [SS-ASSET-001]
+    freshness: current
+    limitation: "mobile devices and data classifications are incomplete"
+  - id: E-004
+    type: configuration_screenshot
+    title: "Synthetic identity screenshots showing MFA for office/admin accounts"
+    supports: [SS-ACCESS-001]
+    freshness: current
+    limitation: "does not cover all care-worker/ECD access paths"
+  - id: E-005
+    type: ticket_sample
+    title: "Synthetic joiner form and two leaver email examples"
+    supports: [SS-ACCESS-002]
+    freshness: current
+    limitation: "no recurring access review evidence"
+  - id: E-006
+    type: patch_report
+    title: "Synthetic MSP monthly endpoint patch report"
+    supports: [SS-OPS-001]
+    freshness: current
+    limitation: "one-month sample only; server/SaaS responsibility and vulnerability SLA not evidenced"
+  - id: E-007
+    type: incident_procedure
+    title: "Synthetic security and data-breach procedure dated 2023"
+    supports: [SS-INC-001]
+    freshness: stale
+    limitation: "no exercise, contact validation or incident log supplied"
+  - id: E-008
+    type: supplier_statement
+    title: "Synthetic ECD supplier statement that backups are performed daily"
+    supports: [SS-RES-001]
+    freshness: current
+    limitation: "no organization-specific restoration test or recovery evidence"
+  - id: E-009
+    type: supplier_register
+    title: "Synthetic supplier inventory with criticality labels"
+    supports: [SS-SUP-001]
+    freshness: current
+    limitation: "ownership and next-review dates incomplete for two suppliers"
+  - id: E-010
+    type: dpa
+    title: "Synthetic ECD data-processing agreement metadata record"
+    supports: [SS-SUP-002, SS-PRIV-001]
+    freshness: current
+    limitation: "contract metadata only; no control effectiveness review"
+  - id: E-011
+    type: dpa
+    title: "Synthetic Microsoft cloud agreement metadata record"
+    supports: [SS-SUP-002, SS-PRIV-001]
+    freshness: current
+    limitation: "no documented supplier risk review"
+  - id: E-012
+    type: processing_register
+    title: "Synthetic processing register last reviewed in 2024"
+    supports: [SS-PRIV-001]
+    freshness: stale
+    limitation: "new AI use and one new SaaS processor are absent"
+  - id: E-013
+    type: interview_record
+    title: "Synthetic staff interview notes identifying unmanaged AI use"
+    supports: [SS-AI-001, SS-AI-002]
+    contradicts: [SS-AI-001, SS-AI-002]
+    freshness: current
+    limitation: "interview identifies uses but there is no approved AI register or governance record"
+  - id: E-014
+    type: training_record
+    title: "Synthetic awareness LMS export showing 72% annual completion"
+    supports: [SS-PEOPLE-001]
+    freshness: current
+    limitation: "completion is incomplete and content has no AI-specific module"
+  - id: E-015
+    type: management_record
+    title: "Synthetic management meeting index"
+    supports: [SS-GOV-001]
+    contradicts: [SS-ASSURE-001]
+    freshness: current
+    limitation: "no structured security management review or control effectiveness review recorded"

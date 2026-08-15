@@ -1,0 +1,45 @@
+version: 1
+synthetic: true
+suppliers:
+  - id: SUP-ECD
+    name: "CareSuite Demo SaaS"
+    category: electronic_client_record
+    criticality: critical
+    data_access: health_data
+    contract_record: present
+    dpa_record: present
+    security_review: missing
+    continuity_dependency: critical
+  - id: SUP-M365
+    name: "Microsoft 365"
+    category: identity_productivity_cloud
+    criticality: high
+    data_access: personal_and_operational_data
+    contract_record: present
+    dpa_record: present
+    security_review: informal
+    continuity_dependency: high
+  - id: SUP-ICT
+    name: "DemoICT Managed Services"
+    category: managed_ict
+    criticality: critical
+    privileged_access: true
+    contract_record: present
+    dpa_record: present
+    security_requirements: partial
+    security_review: missing
+  - id: SUP-PAY
+    name: "Payroll Demo SaaS"
+    category: payroll
+    criticality: medium
+    data_access: employee_data
+    contract_record: present
+    dpa_record: present
+    security_review: missing
+  - id: SUP-MOBILE
+    name: "MobileTel Demo"
+    category: mobile_connectivity
+    criticality: medium
+    data_access: limited_metadata
+    security_review: not_required_yet
+register_assessment: "usable starting point but not yet an active review cycle"

@@ -1,0 +1,53 @@
+version: 1
+synthetic: true
+measurement_status: MODELLED_HYPOTHESIS_NOT_REAL_CUSTOMER_TIMING
+units: minutes
+warning: "These values are planning hypotheses for the synthetic workflow. Real pilot timings must be instrumented rather than inferred."
+workflow_steps:
+  - step: intake_and_fact_structuring
+    ai_assisted_production: 45
+    customer_input: 120
+    professional_review: 30
+  - step: scope_and_applicability
+    ai_assisted_production: 20
+    customer_input: 30
+    professional_review: 60
+  - step: control_claim_evidence_assessment
+    ai_assisted_production: 60
+    customer_input: 90
+    professional_review: 120
+  - step: evidence_request_and_gap_register
+    ai_assisted_production: 20
+    customer_input: 30
+    professional_review: 30
+  - step: remediation_plan
+    ai_assisted_production: 30
+    customer_input: 30
+    professional_review: 45
+  - step: governance_document_drafts
+    ai_assisted_production: 45
+    customer_input: 15
+    professional_review: 90
+  - step: baseline_report
+    ai_assisted_production: 25
+    customer_input: 15
+    professional_review: 60
+totals:
+  ai_assisted_production: 245
+  customer_input: 330
+  professional_review: 435
+interpretation:
+  - "AI leverage is strongest in structuring, cross-document consistency, drafting and first-pass assessment."
+  - "Professional effort remains concentrated in applicability, evidence sufficiency, materiality, risk acceptance and final customer claims."
+  - "A real pilot must record actual elapsed human effort and rework, not modelled values."
+metrics_to_capture_in_real_pilot:
+  - documents_received
+  - controls_assessed
+  - evidence_items
+  - ai_draft_minutes
+  - customer_minutes
+  - professional_review_minutes
+  - rework_cycles
+  - findings_by_priority
+  - evidence_requests_first_pass_completion_rate
+  - percentage_assessments_changed_by_professional_reviewer

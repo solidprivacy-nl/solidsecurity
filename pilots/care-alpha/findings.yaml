@@ -1,0 +1,16 @@
+version: 1
+synthetic: true
+findings:
+  - {id: F-001, priority: medium, controls: [SS-GOV-001], title: "Security accountability is informal", action: "formally assign accountable owner and quarterly management review cadence"}
+  - {id: F-002, priority: high, controls: [SS-RISK-001], title: "Risk assessment is stale", action: "refresh risk assessment, owners, treatment actions and review dates"}
+  - {id: F-003, priority: medium, controls: [SS-ASSET-001], title: "Asset/data inventory is incomplete", action: "complete critical systems, mobile estate, owners, classification and dependencies"}
+  - {id: F-004, priority: critical, controls: [SS-ACCESS-001], title: "MFA coverage is not established for all material access paths", action: "inventory authentication paths and remediate/justify any non-MFA access"}
+  - {id: F-005, priority: high, controls: [SS-ACCESS-002], title: "No periodic access recertification", action: "formalize JML ownership and execute first access review"}
+  - {id: F-006, priority: medium, controls: [SS-OPS-001], title: "Patch/vulnerability responsibility and evidence are incomplete", action: "agree responsibility matrix, reporting set and risk-based remediation expectations with MSP"}
+  - {id: F-007, priority: high, controls: [SS-INC-001], title: "Incident procedure is stale and untested", action: "refresh contacts/escalations, create incident register and run tabletop exercise"}
+  - {id: F-008, priority: critical, controls: [SS-RES-001], title: "Restore capability is not evidenced", action: "define recovery requirements and execute/document restore tests for critical services/data"}
+  - {id: F-009, priority: high, controls: [SS-SUP-001, SS-SUP-002], title: "Supplier governance lacks active review cycle", action: "assign owners/review dates and assess critical suppliers for security/privacy/continuity"}
+  - {id: F-010, priority: high, controls: [SS-PRIV-001], title: "Processing register is outdated", action: "refresh processing inventory including current SaaS and AI processing"}
+  - {id: F-011, priority: critical, controls: [SS-AI-001, SS-AI-002], title: "AI use is unmanaged", action: "create AI register, interim use rules, data restrictions, literacy and professional classification of higher-scrutiny use cases"}
+  - {id: F-012, priority: medium, controls: [SS-PEOPLE-001], title: "Awareness coverage is incomplete", action: "reach defined completion target and add role-specific security/privacy/AI content"}
+  - {id: F-013, priority: high, controls: [SS-ASSURE-001], title: "No recurring effectiveness/management review", action: "establish quarterly control review and annual independent assessment plan"}

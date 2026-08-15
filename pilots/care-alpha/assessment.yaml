@@ -1,0 +1,126 @@
+version: 1
+synthetic: true
+assessment_status: PROPOSED
+actor_type: implementation_ai_assisted
+proof_level_ceiling: 3
+professional_review_performed: false
+controls:
+  - control_id: SS-GOV-001
+    claim: "Managing director informally owns security; no scheduled management review exists."
+    evidence: [E-001, E-015]
+    result: PARTIAL
+    proposed_proof_level: 1
+    rationale: "ownership is described but the control objective includes periodic review that is not implemented/evidenced"
+    finding: F-001
+  - control_id: SS-RISK-001
+    claim: "A risk spreadsheet exists but was last materially reviewed in 2024."
+    evidence: [E-002]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "objective has documentary evidence, but freshness and treatment ownership are deficient"
+    finding: F-002
+  - control_id: SS-ASSET-001
+    claim: "Core systems are listed, but mobile assets, information classification and ownership are incomplete."
+    evidence: [E-003]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "inventory evidence exists with material coverage gaps"
+    finding: F-003
+  - control_id: SS-ACCESS-001
+    claim: "MFA is evidenced for office/admin identity accounts; full ECD/care-worker coverage is not established."
+    evidence: [E-004]
+    result: GAP
+    proposed_proof_level: 3
+    rationale: "evidence proves only a subset; a critical access path remains unverified"
+    finding: F-004
+  - control_id: SS-ACCESS-002
+    claim: "Joiners/leavers are handled operationally by forms/email; periodic access recertification is absent."
+    evidence: [E-005]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "sample evidence supports operational lifecycle but not complete governance"
+    finding: F-005
+  - control_id: SS-OPS-001
+    claim: "Outsourced ICT performs endpoint patching; responsibility/SLA evidence is incomplete."
+    evidence: [E-006]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "one operational report exists but control coverage and remediation expectations are unclear"
+    finding: F-006
+  - control_id: SS-INC-001
+    claim: "A written incident/data-breach procedure exists but has not been exercised recently."
+    evidence: [E-007]
+    result: GAP
+    proposed_proof_level: 1
+    rationale: "design artifact exists; operational capability/effectiveness is not evidenced"
+    finding: F-007
+  - control_id: SS-RES-001
+    claim: "ECD supplier states daily backups; organization has no recent restore test evidence and M365 recovery assumptions are undocumented."
+    evidence: [E-008]
+    result: GAP
+    proposed_proof_level: 2
+    rationale: "implementation is declared but restoration effectiveness has not been evidenced"
+    finding: F-008
+  - control_id: SS-SUP-001
+    claim: "Material suppliers are inventoried and broadly classified."
+    evidence: [E-009]
+    result: SATISFACTORY_WITH_MINOR_ACTION
+    proposed_proof_level: 3
+    rationale: "register exists and covers material suppliers; owner/review-date hygiene remains"
+    finding: F-009
+  - control_id: SS-SUP-002
+    claim: "Contracts/DPAs exist for major processors, but no structured security/continuity review cycle exists."
+    evidence: [E-010, E-011]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "contract evidence is not equivalent to ongoing supplier assurance"
+    finding: F-009
+  - control_id: SS-PRIV-001
+    claim: "A processing register exists but is stale and misses new SaaS/AI processing."
+    evidence: [E-010, E-011, E-012]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "evidence exists but is incomplete/outdated"
+    finding: F-010
+  - control_id: SS-AI-001
+    claim: "No approved AI inventory exists; interviews reveal at least three AI uses."
+    evidence: [E-013]
+    result: GAP
+    proposed_proof_level: 0
+    rationale: "interview evidence identifies the absence of the required managed artifact rather than proving implementation"
+    finding: F-011
+  - control_id: SS-AI-002
+    claim: "No approved AI-use policy or AI-specific literacy programme exists."
+    evidence: [E-013, E-014]
+    result: GAP
+    proposed_proof_level: 0
+    rationale: "general awareness does not establish responsible-AI rules/literacy"
+    finding: F-011
+  - control_id: SS-PEOPLE-001
+    claim: "Annual awareness exists with 72% completion."
+    evidence: [E-014]
+    result: PARTIAL
+    proposed_proof_level: 3
+    rationale: "training evidence exists but population coverage is insufficient"
+    finding: F-012
+  - control_id: SS-ASSURE-001
+    claim: "No structured internal security review, management review or corrective-action cycle exists."
+    evidence: [E-015]
+    result: GAP
+    proposed_proof_level: 0
+    rationale: "evidence supports absence of the control process"
+    finding: F-013
+summary:
+  controls_assessed: 15
+  result_counts:
+    satisfactory_with_minor_action: 1
+    partial: 8
+    gap: 6
+  proposed_proof_levels:
+    level_0: 3
+    level_1: 2
+    level_2: 1
+    level_3: 9
+    level_4: 0
+    level_5: 0
+professional_review_required: true

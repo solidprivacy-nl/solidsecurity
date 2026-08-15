@@ -1,0 +1,66 @@
+version: 1
+synthetic: true
+organization_id: SYN-CARE-ALPHA
+legal_name: "Fictieve Thuiszorgorganisatie Aurora"
+real_entity: false
+jurisdiction: NL
+sector: home_care
+services:
+  - district_nursing
+  - personal_care
+fte: 38
+workers_total: 52
+clients_approx: 310
+locations:
+  - "one small office; care is primarily delivered at client homes"
+management:
+  managing_director: "Synthetic Director"
+  information_security_owner: "informally assigned to managing director"
+  privacy_contact: "office manager with external privacy support as needed"
+  internal_ciso: false
+  internal_security_team: false
+information_classes:
+  - health_data
+  - identity_and_contact_data
+  - employee_data
+  - financial_and_billing_data
+critical_processes:
+  - care_planning_and_documentation
+  - medication_and_clinical_observations_where_applicable
+  - workforce_scheduling
+  - client_communication
+  - payroll_and_finance
+systems:
+  - id: SYS-ECD
+    name: "CareSuite Demo SaaS"
+    type: electronic_client_record
+    criticality: critical
+    hosting: supplier_saas
+  - id: SYS-M365
+    name: "Microsoft 365 Business Premium"
+    type: productivity_identity
+    criticality: high
+    hosting: cloud
+  - id: SYS-MOBILE
+    name: "Managed Android care devices"
+    type: endpoint_fleet
+    criticality: high
+    managed_coverage_declared_percent: 72
+  - id: SYS-PAY
+    name: "Payroll Demo SaaS"
+    type: payroll
+    criticality: medium
+    hosting: supplier_saas
+outsourced_ict: true
+primary_ict_supplier: SUP-ICT
+regulatory_scope_assumptions:
+  nen7510_alignment: "included as sector security baseline; no certification claim"
+  cbw_nis2: "UNDETERMINED; direct applicability requires professional scope review; supply-chain readiness remains relevant"
+  gdpr: "health/personal-data governance interface included; legal compliance verdict out of scope"
+  ai_act: "AI governance baseline included; use-case classification requires professional review"
+  iso27001: "readiness view only; no certification claim"
+known_context:
+  - "security work is fragmented across director, office manager and outsourced ICT"
+  - "no dedicated GRC or ISMS application exists"
+  - "documents are mostly Word/PDF files in SharePoint"
+  - "management wants a practical 90-day stabilization plan rather than a certification project at day one"

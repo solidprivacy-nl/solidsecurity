@@ -1,0 +1,21 @@
+version: 1
+baseline_id: CARE-BASELINE-V1-SYNTHETIC
+source_controls: model/sample_controls.yaml
+applicability_status: PROPOSED
+controls:
+  - {id: SS-GOV-001, applicable: true, priority: high, rationale: "small organization still needs explicit accountable ownership"}
+  - {id: SS-RISK-001, applicable: true, priority: high, rationale: "health information and care continuity create material security risk"}
+  - {id: SS-ASSET-001, applicable: true, priority: high, rationale: "critical ECD, identity, mobile and supplier dependencies must be known"}
+  - {id: SS-ACCESS-001, applicable: true, priority: critical, rationale: "remote/mobile access to sensitive information"}
+  - {id: SS-ACCESS-002, applicable: true, priority: high, rationale: "workforce churn and role changes affect access risk"}
+  - {id: SS-OPS-001, applicable: true, priority: high, rationale: "outsourced ICT does not remove accountability for patch/vulnerability performance"}
+  - {id: SS-INC-001, applicable: true, priority: critical, rationale: "security/privacy/care disruption incidents require coordinated response"}
+  - {id: SS-RES-001, applicable: true, priority: critical, rationale: "availability of care records and identity services matters to continuity"}
+  - {id: SS-SUP-001, applicable: true, priority: high, rationale: "multiple SaaS/ICT suppliers process or support sensitive operations"}
+  - {id: SS-SUP-002, applicable: true, priority: high, rationale: "supplier security/privacy/continuity requirements need active governance"}
+  - {id: SS-PRIV-001, applicable: true, priority: high, rationale: "organization processes health and workforce personal data"}
+  - {id: SS-AI-001, applicable: true, priority: high, rationale: "staff have begun using generative AI tools"}
+  - {id: SS-AI-002, applicable: true, priority: high, rationale: "unmanaged AI use requires rules and literacy"}
+  - {id: SS-PEOPLE-001, applicable: true, priority: high, rationale: "distributed mobile workforce requires practical awareness"}
+  - {id: SS-ASSURE-001, applicable: true, priority: high, rationale: "controls need periodic effectiveness review rather than paper-only existence"}
+professional_applicability_review_required: true

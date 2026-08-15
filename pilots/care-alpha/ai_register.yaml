@@ -1,0 +1,39 @@
+version: 1
+synthetic: true
+status: PROPOSED_FROM_INTERVIEWS
+ai_use_cases:
+  - id: AI-UC-001
+    tool: "ChatGPT consumer accounts"
+    provider: OpenAI
+    organizational_account: false
+    users_declared: 4
+    purpose: "drafting generic emails and internal text"
+    approved: false
+    health_data_allowed: false
+    evidence_of_actual_data_entered: unknown
+    preliminary_ai_act_class: UNDETERMINED
+    human_oversight: informal
+    finding: F-011
+  - id: AI-UC-002
+    tool: "Microsoft Copilot Chat via work accounts"
+    provider: Microsoft
+    organizational_account: true
+    users_declared: 8
+    purpose: "summarization and drafting of non-clinical office material"
+    approved: not_formally
+    health_data_allowed: UNDETERMINED_BY_POLICY
+    preliminary_ai_act_class: UNDETERMINED
+    human_oversight: informal
+    finding: F-011
+  - id: AI-UC-003
+    tool: "ECD vendor text-suggestion feature"
+    provider: "CareSuite Demo SaaS"
+    organizational_account: true
+    users_declared: pilot_3
+    purpose: "suggest wording for care-note text"
+    data_class: health_data
+    approved: vendor_feature_enabled_without_local_ai_assessment
+    preliminary_ai_act_class: UNDETERMINED_HIGHER_SCRUTINY_REQUIRED
+    human_oversight: "care professional must confirm text, but process not documented"
+    finding: F-011
+professional_classification_required: true
