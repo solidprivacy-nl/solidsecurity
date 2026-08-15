@@ -158,3 +158,43 @@ scenarios:
       - audit_evidence_is_preserved
       - professional_notification_decision_handoff_is_exercised
       - corrective_actions_are_recorded
+  - id: RTA-018
+    severity: critical
+    mandatory: true
+    family: independent_recovery
+    title: Independent database backup restores without primary provider dependency
+    expected:
+      - encrypted_logical_backup_exists_in_separate_failure_domain
+      - restore_can_start_without_original_primary_project_remaining_available
+      - restored_schema_and_relational_invariants_match_expected_state
+      - production_credentials_are_not_restored_as_usable_secrets
+  - id: RTA-019
+    severity: critical
+    mandatory: true
+    family: independent_recovery
+    title: Evidence secondary copy is complete and hash verified
+    expected:
+      - persisted_evidence_version_reaches_SECONDARY_VERIFIED
+      - secondary_copy_is_in_separate_failure_domain
+      - restored_content_hash_matches_authoritative_evidence_version_hash
+      - prior_review_reference_remains_bound_to_original_version
+  - id: RTA-020
+    severity: critical
+    mandatory: true
+    family: cryptographic_separation
+    title: High-sensitivity encryption and key separation work as designed
+    expected:
+      - CLIENT_HIGH_SENSITIVITY_persistent_object_uses_approved_application_encryption_or_governed_equivalent
+      - plaintext_master_key_is_not_stored_with_object_or_backup
+      - unauthorized_actor_cannot_invoke_decryption_path
+      - encryption_or_key_failure_does_not_log_plaintext_content_or_key_material
+  - id: RTA-021
+    severity: high
+    mandatory: true
+    family: recovery_objectives
+    title: Recovery objectives are measured rather than inferred
+    expected:
+      - synthetic_restore_records_achieved_recovery_point
+      - synthetic_restore_records_achieved_recovery_time
+      - claimed_profile_is_not_marked_proven_when_measured_result_exceeds_target
+      - corrective_action_is_recorded_for_failed_recovery_target
