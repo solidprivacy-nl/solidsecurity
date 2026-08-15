@@ -2,56 +2,92 @@
 
 ## Status
 
-`FOUNDATION_IMPLEMENTATION / CANDIDATE`
+`MISSION_SYSTEM_V1 / CANDIDATE`
 
 Control-managed: **yes**
 
-Concept/onboarding contract: issue #1
+Mission/governance work: **issue #25**
 
-Active foundation work contract: **issue #2**
+Current mission branch: `agent/mission-system-v1`
 
-Working branch: `agent/foundation-v1`
+Canonical project mission doctrine: `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`
 
-## Authority transition
+Canonical orchestration target: `market-predictions/control-plane` Mission System V1.
 
-On 2026-08-15 the principal explicitly accepted the discussion-ready strategy and authorized autonomous realization of the agreed strategy, architecture, model, workflows and roadmap.
+## Authority
 
-This lifts the concept-stage hold on **foundation implementation only**.
+On 2026-08-15 the principal authorized autonomous realization of the agreed SolidSecurity strategy, architecture, model, workflows and roadmap, and subsequently directed that development become mission-driven under the central Control Mission System.
 
-It does not authorize:
+This does not authorize:
 
 - production deployment;
-- real client data;
-- customer-environment scanning;
+- real client data before the explicit real-client gate;
+- customer-environment scanning/write access by default;
 - autonomous final legal/compliance/certification decisions;
 - certification claims;
 - bypass of independent assurance for consequential work.
 
-## Current objective
+## Mission
 
-Produce SolidSecurity Foundation V1 as a coherent source-of-truth backbone for an AI-native managed security & compliance service for small healthcare organizations and compliance-exposed SMEs.
+Deliver an AI-enabled managed security/compliance service that makes small and mid-sized organizations demonstrably in control without requiring their own compliance department.
 
-## Current architecture stance
+Software and AI are leverage for the managed service, not the end product.
 
-1. Model/service first; platform later.
-2. Common controls are separate from external requirements.
-3. Client implementation claims and evidence are separate from generic controls.
-4. AI works through attributable suggestions/analysis and cannot self-authorize professional assurance.
-5. GitHub is the product/control plane, not the client data plane.
-6. Technical environment connectors are deferred until after workflow validation.
-7. External open-source projects are selectively adopted by capability/pattern, never wholesale by feature count.
+## Product stance
+
+1. **Operator Workspace** is the primary working product for SolidSecurity professionals.
+2. **Client Dashboard** gives the customer a simple plain-language status, actions, decisions, SolidSecurity work and reports.
+3. **Interaction Layer** supports email, secure upload, targeted questions and approvals without forcing constant portal navigation.
+4. SolidSecurity owns and executes the compliance process; the customer supplies facts, evidence and decisions that genuinely require them.
+5. AI prepares repetitive work; professionals remain authoritative for material assessment/assurance/legal decisions.
+
+## Canonical traceability
+
+`Source -> Requirement -> Control -> Customer Implementation -> Evidence -> Assessment -> Professional Review -> Decision / Assurance State`
+
+These states/entities must not be collapsed.
+
+## Data architecture stance
+
+The accepted V1 direction is deliberately lean:
+
+- one shared multi-tenant PostgreSQL database;
+- tenant-owned records carry `tenant_id`;
+- server authorization plus RLS/equivalent defense in depth;
+- one private primary evidence/object store;
+- immutable reviewed evidence versions with hashes;
+- TLS + provider-managed encryption at rest;
+- simple nightly logical DB + evidence backup;
+- encrypted off-site transfer to an inexpensive independent storage target using commodity tooling;
+- periodic restore proof;
+- no database-per-client or custom KMS subsystem by default.
+
+## Mission-driven development
+
+The intended control loop is:
+
+`Mission Contract -> authoritative repo state -> highest-priority eligible gap -> PROJECT_INTAKE_V1 -> canonical Control queue -> Worker A -> Worker B assurance -> governed integration -> mission-state update -> next gap`
+
+No SolidSecurity-specific competing autonomous queue is authorized.
+
+## Current next product objective
+
+Freeze the minimum relational/domain data model required by the accepted managed-service workflow before database migrations or UI implementation create avoidable lock-in.
+
+See `ROADMAP.md` and `docs/MISSION_DRIVEN_WORKFLOW.md`.
 
 ## Repository visibility
 
-Repository remains public by principal choice during the early foundation phase.
+The repository remains public by principal choice during the early phase. Only public-safe project material belongs here.
 
-Only `PUBLIC_SAFE` project material is authorized here. Secrets, real client data, sensitive implementation details, proprietary evidence-sufficiency rubrics, private prompts and commercially sensitive accumulated operating intelligence are prohibited from the public repo.
+Secrets, real client data, sensitive implementation details, proprietary evidence-sufficiency rubrics, private prompts and commercially sensitive accumulated operating intelligence are prohibited from the public repo.
 
 See `docs/PUBLIC_REPO_POLICY.md`.
 
-## Next gates
+## Current gates
 
-1. Complete Foundation V1 candidate on `agent/foundation-v1`.
-2. Submit PR against `main`.
-3. Obtain independent assurance under `control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md`.
-4. After acceptance/merge, execute Phase 1 synthetic Service MVP work packages.
+1. Reconcile/assure the stacked foundation/runtime candidates according to existing governance.
+2. Independently assure the mission-system candidate.
+3. Integrate the machine-readable `SOLIDSECURITY.mission.json` into the canonical Control mission registry.
+4. Let Control derive the next eligible SolidSecurity mission gap rather than relying on chat memory/manual prioritization.
+5. Keep real client data prohibited until the existing pilot/runtime/data-governance gate is explicitly satisfied and authorized.
