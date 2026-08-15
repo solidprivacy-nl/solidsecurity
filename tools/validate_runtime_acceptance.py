@@ -25,10 +25,27 @@ scenarios = doc.get("scenarios", [])
 ids = [item.get("id") for item in scenarios if isinstance(item, dict)]
 if len(ids) != len(set(ids)):
     errors.append("runtime acceptance scenario IDs must be unique")
-required_ids = {f"RTA-{i:03d}" for i in range(1, 18)}
+required_ids = {f"RTA-{i:03d}" for i in range(1, 22)}
 missing = required_ids - set(ids)
 if missing:
     errors.append(f"mandatory scenario set weakened: missing {sorted(missing)}")
+
+required_families = {
+    "tenant_isolation",
+    "evidence_integrity",
+    "ai_data_boundary",
+    "lifecycle",
+    "resilience",
+    "independent_recovery",
+    "cryptographic_separation",
+    "recovery_objectives",
+}
+actual_families = {
+    item.get("family") for item in scenarios if isinstance(item, dict)
+}
+missing_families = required_families - actual_families
+if missing_families:
+    errors.append(f"mandatory security family set weakened: missing {sorted(missing_families)}")
 
 for item in scenarios:
     if not isinstance(item, dict):
