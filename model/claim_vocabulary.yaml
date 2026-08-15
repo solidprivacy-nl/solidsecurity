@@ -1,0 +1,73 @@
+version: 1
+status: DRAFT_FOR_PROFESSIONAL_REVIEW
+claim_classes:
+  C0_DESCRIPTIVE_FACT:
+    ai_may_produce: true
+    professional_review_required_by_default: false
+    prerequisites: [provenance, scope]
+  C1_PROPOSED_ASSESSMENT:
+    ai_may_produce: true
+    professional_review_required_by_default: false
+    mandatory_label: PROPOSED
+  C2_EVIDENCE_LINKED:
+    ai_may_produce: true
+    professional_review_required_by_default: false
+    prerequisites: [evidence_ids, coverage, validity, limitations]
+  C3_PROFESSIONALLY_REVIEWED:
+    ai_may_produce: false
+    human_authority_required: professional_reviewer
+    prerequisites: [review_record, exact_scope, evidence_state]
+  C4_INDEPENDENTLY_ASSURED:
+    ai_may_produce: false
+    human_authority_required: independent_assurance_role
+    prerequisites: [independence, assurance_result, exact_scope, exact_evidence_state]
+  C5_CERTIFIED:
+    ai_may_produce: false
+    authority_required: authorized_certification_process
+    prerequisites: [certificate_or_formal_decision, exact_scope, validity]
+assurance_labels:
+  - self_declared
+  - evidence_linked
+  - professionally_reviewed
+  - independently_audited
+  - certified
+restricted_claims:
+  compliant:
+    default_allowed: false
+    reason: requires_defined_scope_framework_applicability_evidence_and_authority
+  fully_compliant:
+    default_allowed: false
+    reason: absolute_overclaim_risk
+  nis2_cbw_compliant:
+    default_allowed: false
+    reason: legal_applicability_and_professional_review_required
+  nen7510_compliant:
+    default_allowed: false
+    reason: mapping_or_policy_presence_is_not_sufficient
+  iso27001_certified:
+    default_allowed: false
+    reason: authorized_certification_decision_required
+  ai_act_compliant:
+    default_allowed: false
+    reason: use_case_role_risk_and_applicability_review_required
+  independently_assured:
+    default_allowed: false
+    reason: independence_and_exact_assurance_result_required
+  guaranteed_secure:
+    default_allowed: false
+    reason: absolute_security_guarantee_prohibited
+artifact_rules:
+  generated_policy:
+    initial_state: DRAFT
+    max_proof_effect_without_operational_evidence: DESIGNED
+  semantic_questionnaire_match:
+    initial_state: REUSE_PROPOSED
+    customer_send_authority: false
+expiry_rule: earliest_material_support_expiry
+human_only_decisions:
+  - professional_reviewed_claim
+  - independently_assured_claim
+  - certification_claim
+  - material_risk_acceptance
+  - incident_notification_decision
+  - final_legal_or_regulatory_applicability
