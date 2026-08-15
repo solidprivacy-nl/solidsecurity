@@ -1,0 +1,106 @@
+version: 1
+status: DESIGN_ONLY
+real_client_data_allowed: false
+
+principles:
+  - backups_are_not_recovery_until_restored
+  - independent_copy_requires_separate_failure_domain
+  - evidence_versions_are_immutable
+  - encryption_is_layered_not_a_single_claim
+  - retention_and_deletion_include_backup_copies
+  - recovery_targets_are_unproven_until_tested
+
+planes:
+  control:
+    authoritative_for: [methodology, schemas, migrations, software, release_definitions]
+    client_data_prohibited: true
+  structured_state:
+    candidate: supabase_postgres
+    early_isolation: project_per_client
+    tenant_id_required: true
+  primary_evidence:
+    candidate: supabase_private_storage
+    overwrite_reviewed_version: false
+  secondary_recovery:
+    candidate: cloudflare_r2
+    same_provider_as_primary: false
+    live_application_store: false
+
+object_identity:
+  pattern: tenants/{tenant_uuid}/evidence/{evidence_uuid}/versions/{version_uuid}.bin
+  sensitive_names_in_key: prohibited
+  hash: sha256
+  immutable_versions: true
+
+resilience_states:
+  - RECEIVED
+  - HASH_VERIFIED
+  - PRIMARY_STORED
+  - SECONDARY_VERIFIED
+  - AVAILABLE_FOR_REVIEW
+
+encryption:
+  transit: tls_required
+  provider_at_rest: required
+  independent_db_backup_package_encryption: required
+  high_sensitivity_application_encryption: required_or_equivalent_governed_decision
+  custom_crypto: prohibited
+  key_material_in_git: prohibited
+  plaintext_master_key_with_backup: prohibited
+  kms_provider: undecided
+
+recovery_profiles:
+  baseline:
+    structured_state_rpo_hours: 24
+    evidence_copy_rpo_hours: 24
+    rto_hours: 8
+    customer_commitment: false
+  enhanced:
+    structured_state_rpo_hours: 4
+    evidence_copy_rpo_hours: 1
+    rto_hours: 4
+    customer_commitment: false
+  critical:
+    structured_state_rpo: minutes
+    evidence_copy_rpo: minutes
+    rto_hours: 2
+    customer_commitment: false
+    requires: [commercial_approval, runtime_proof, continuous_or_pitr_mechanism]
+
+backup_classes:
+  managed_database:
+    independent_failure_domain: false
+    restore_test_required: true
+  independent_logical_database:
+    independent_failure_domain: true
+    encrypted_before_secondary_storage: true
+    checksum_manifest_required: true
+  evidence_replica:
+    independent_failure_domain: true
+    content_hash_verification_required: true
+  audit_export:
+    append_or_tamper_evident: true
+    plaintext_evidence_content_prohibited: true
+
+restore_tests:
+  - id: object_sample_restore
+    verifies: [secondary_retrieval, decryption_if_applicable, content_hash]
+  - id: synthetic_database_restore
+    verifies: [schema_load, relational_integrity, no_live_secret_restore]
+  - id: synthetic_full_dossier_reconstruction
+    verifies: [structured_state, evidence_versions, review_references, release_compatibility]
+
+retention:
+  universal_duration_hardcoded: false
+  policy_driven_by: [data_category, contract, applicable_obligation]
+  undisclosed_indefinite_backup: prohibited
+  legal_hold_must_be_explicit: true
+
+provider_notes:
+  supabase:
+    conditional_preference_only: true
+    database_backup_does_not_include_storage_object_bytes: true
+  cloudflare_r2:
+    recovery_store_candidate_only: true
+    bucket_lock_may_be_used: true
+    lock_duration_must_align_with_retention: true
