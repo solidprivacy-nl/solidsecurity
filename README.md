@@ -2,9 +2,29 @@
 
 **Aantoonbaar in control. Zonder eigen complianceafdeling.**
 
-SolidSecurity is an AI-native managed security & compliance operating model for small healthcare organizations and compliance-exposed SMEs. It combines a reusable control backbone, structured evidence, AI-assisted operations and explicit professional review.
+SolidSecurity is an AI-enabled managed security & compliance service model for small healthcare organizations and compliance-exposed SMEs. It combines a reusable control backbone, structured evidence, AI-assisted operations and explicit professional review.
 
 > **Automation lowers the work, not the standard.**
+
+## Mission status
+
+`MISSION_SYSTEM_V1 / CANDIDATE`
+
+Project mission/governance work: [issue #25](https://github.com/solidprivacy-nl/solidsecurity/issues/25)
+
+The governing project doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md). The intended machine-readable mission is registered through the canonical `market-predictions/control-plane` Mission System V1.
+
+Development is deliberately **mission-first, service-first, evidence-first and simplest-safe-architecture-first**. Software is built only where it advances a measurable customer/service/assurance outcome.
+
+## Product model
+
+SolidSecurity is not primarily a self-service GRC portal.
+
+1. **Operator Workspace** — the professional cockpit where SolidSecurity performs the compliance work.
+2. **Client Dashboard** — a simple customer view of current status, what is arranged, attention points, actions/decisions, SolidSecurity work and reports.
+3. **Interaction Layer** — email, secure uploads, targeted questions and approvals for low-friction customer participation.
+
+The customer supplies knowledge, evidence and decisions that genuinely require them; SolidSecurity owns and executes the process.
 
 ## Target market
 
@@ -17,14 +37,6 @@ SolidSecurity is designed primarily for organizations that are too small for a f
 - responsible AI / EU AI Act governance;
 - customer questionnaires, tenders and assurance requests.
 
-## Foundation status
-
-`FOUNDATION_IMPLEMENTATION / CANDIDATE`
-
-Authoritative work contract: [issue #2](https://github.com/solidprivacy-nl/solidsecurity/issues/2)
-
-The project is deliberately **model-first, service-first and evidence-first**. We are not building or importing a full GRC platform before the managed-service workflow has been validated.
-
 ## Core doctrine
 
 1. **One control, multiple obligations.** Common controls are mapped to multiple external frameworks instead of maintaining isolated checklists.
@@ -32,28 +44,52 @@ The project is deliberately **model-first, service-first and evidence-first**. W
 3. **AI proposes; humans remain accountable.** AI may extract, map, draft, compare and recommend. Material assurance, legal interpretation and risk acceptance require qualified human judgment.
 4. **No paper compliance.** A generated policy is only a designed artifact, never proof that a control operates effectively.
 5. **Traceability over confidence theater.** Material conclusions must be reconstructable from source to requirement to control to implementation to evidence to review.
-6. **Start lean.** No automatic customer-environment scanning in the initial service model.
-7. **Client data is not project data.** This repository is the product/control-plane source of truth, never a client dossier store.
+6. **Managed service before self-service.** Do not transfer long compliance workflows to the customer when SolidSecurity can perform them.
+7. **Simplest safe architecture first.** Additional providers, databases, cryptographic subsystems or abstractions require a concrete risk/workflow/customer need.
+8. **Client data is not project data.** This repository is the product/control-plane source of truth, never a client dossier store.
+
+## Data-plane direction
+
+The V1 target is deliberately conventional:
+
+- one shared multi-tenant PostgreSQL database;
+- `tenant_id` plus server-side authorization/RLS defense in depth;
+- one private evidence/object store;
+- immutable reviewed evidence versions with hashes;
+- TLS and provider encryption at rest;
+- simple nightly encrypted off-site database + object backup using commodity tooling;
+- periodic restore proof.
+
+Database-per-client, custom KMS/envelope encryption and active-active multi-cloud are not V1 defaults.
+
+## Mission-driven development
+
+The intended development loop is:
+
+`Mission Contract -> authoritative state -> highest-priority eligible gap -> PROJECT_INTAKE_V1 -> canonical Control queue -> Worker A -> Worker B assurance -> governed integration -> mission-state update -> next gap`
+
+The Control dispatch queue remains the single autonomous work queue.
 
 ## Repository map
 
+- [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md) — governing project mission, success criteria and authority boundaries
+- [`ROADMAP.md`](ROADMAP.md) — mission-driven product roadmap and exit evidence
+- [`docs/MISSION_DRIVEN_WORKFLOW.md`](docs/MISSION_DRIVEN_WORKFLOW.md) — customer, runtime and Control development workflows
 - [`STRATEGY.md`](STRATEGY.md) — market, product and differentiation doctrine
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — target architecture and trust boundaries
-- [`ROADMAP.md`](ROADMAP.md) — staged realization plan and decision gates
-- [`docs/POSITIONING.md`](docs/POSITIONING.md) — messaging and credibility rules
 - [`docs/OPERATING_MODEL.md`](docs/OPERATING_MODEL.md) — managed-service operating system
 - [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — canonical conceptual entities
 - [`docs/COMMON_CONTROL_MODEL.md`](docs/COMMON_CONTROL_MODEL.md) — cross-framework control backbone
 - [`docs/AI_AUTHORITY_MODEL.md`](docs/AI_AUTHORITY_MODEL.md) — AI/human authority boundaries
-- [`docs/OPEN_SOURCE_ADOPTION.md`](docs/OPEN_SOURCE_ADOPTION.md) — selective reuse decisions
+- [`docs/DATA_RESILIENCE_ARCHITECTURE.md`](docs/DATA_RESILIENCE_ARCHITECTURE.md) — lean shared data-plane and resilience doctrine
 - [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md) — what may and may not live in this public repo
-- [`docs/workflows/`](docs/workflows/) — client lifecycle, care and supplier workflows
-- [`model/`](model/) — machine-readable foundation seeds
+- [`docs/workflows/`](docs/workflows/) — detailed care/supplier workflow material
+- [`model/`](model/) — machine-readable project models
 - [`adr/`](adr/) — architectural decisions
-- [`control/`](control/) — project governance and assurance contract
+- [`control/`](control/) — project governance and assurance state
 
 ## Public repository notice
 
-This repository is currently public for collaboration and GitHub Actions economics. Public visibility does **not** mean that client data, secrets, proprietary evidence rubrics, private prompts or confidential operating material belong here. See [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md).
+This repository is currently public during the early phase. Public visibility does **not** mean that client data, secrets, proprietary evidence rubrics, private prompts or confidential operating material belong here. See [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md).
 
 No open-source license is granted by this repository unless a file or component explicitly says otherwise.
