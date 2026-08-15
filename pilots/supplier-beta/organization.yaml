@@ -1,0 +1,32 @@
+version: 1
+synthetic: true
+organization_id: SYN-SUPPLIER-BETA
+legal_name: "Fictieve Softwareleverancier Nimbus B.V."
+real_entity: false
+jurisdiction: NL
+sector: b2b_saas_healthcare_supplier
+fte: 18
+customers_approx: 34
+regulated_customer_exposure: "healthcare customers increasingly request security evidence and NIS2/Cbw supply-chain assurance"
+service:
+  name: "Nimbus Planning Demo"
+  purpose: "SaaS workforce-planning integration for care organizations"
+  data_classes:
+    - workforce_identity_data
+    - work_schedule_data
+    - limited_customer_tenant_metadata
+  explicit_exclusion: "synthetic design does not require storage of clinical health records"
+critical_systems:
+  - {id: SYS-AZ, name: "Azure-hosted SaaS stack", criticality: critical}
+  - {id: SYS-GH, name: "GitHub source-code organization", criticality: high}
+  - {id: SYS-M365, name: "Microsoft 365 / Entra ID", criticality: high}
+  - {id: SYS-ENDPOINT, name: "managed laptop fleet", criticality: high}
+security_roles:
+  accountable_owner: "Synthetic CTO"
+  operational_security: "platform lead plus external specialist support"
+  internal_ciso: false
+certifications:
+  iso27001: false
+  nen7510: false
+  soc2: false
+commercial_goal: "answer healthcare security questionnaires faster and become ISO 27001 audit-ready later"

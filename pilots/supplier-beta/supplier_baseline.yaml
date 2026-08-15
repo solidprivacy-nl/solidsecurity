@@ -1,0 +1,26 @@
+version: 1
+synthetic: true
+baseline_id: SUPPLIER-BASELINE-V1-SYNTHETIC
+source_controls: model/sample_controls.yaml
+controls:
+  - SS-GOV-001
+  - SS-RISK-001
+  - SS-ASSET-001
+  - SS-ACCESS-001
+  - SS-ACCESS-002
+  - SS-OPS-001
+  - SS-INC-001
+  - SS-RES-001
+  - SS-SUP-001
+  - SS-SUP-002
+  - SS-PRIV-001
+  - SS-AI-001
+  - SS-AI-002
+  - SS-PEOPLE-001
+  - SS-ASSURE-001
+known_control_library_gaps_for_tech_supplier:
+  - secure_software_development
+  - cryptography_and_key_management
+  - security_logging_and_monitoring
+  - penetration_testing_and_application_assurance
+note: "These gaps were intentionally not papered over by forcing every questionnaire item into an ill-fitting control."

@@ -1,0 +1,22 @@
+version: 1
+synthetic: true
+evidence:
+  - {id: E-001, type: management_record, title: "Synthetic board decision assigning CTO security accountability", supports: [SS-GOV-001], freshness: current}
+  - {id: E-002, type: risk_register, title: "Synthetic quarterly security risk register", supports: [SS-RISK-001], freshness: current}
+  - {id: E-003, type: asset_inventory, title: "Synthetic system/data owner inventory", supports: [SS-ASSET-001], freshness: current}
+  - {id: E-004, type: identity_export, title: "Synthetic Entra MFA/Conditional Access coverage export", supports: [SS-ACCESS-001], freshness: current, limitation: "two legacy service accounts use non-interactive credentials and require separate review"}
+  - {id: E-005, type: access_review, title: "Synthetic quarterly employee access review", supports: [SS-ACCESS-002], freshness: current, limitation: "service-account recertification is not included"}
+  - {id: E-006, type: vulnerability_report, title: "Synthetic monthly dependency/vulnerability remediation report", supports: [SS-OPS-001], freshness: current}
+  - {id: E-007, type: incident_runbook, title: "Synthetic incident response runbook plus tabletop record", supports: [SS-INC-001], freshness: current}
+  - {id: E-008, type: restore_test, title: "Synthetic quarterly database restore test record", supports: [SS-RES-001], freshness: current}
+  - {id: E-009, type: supplier_register, title: "Synthetic subprocessors and critical supplier inventory", supports: [SS-SUP-001], freshness: current}
+  - {id: E-010, type: supplier_reviews, title: "Synthetic reviews for Azure/Microsoft/GitHub", supports: [SS-SUP-002], freshness: mixed, limitation: "one analytics subprocessor review is overdue"}
+  - {id: E-011, type: processing_register, title: "Synthetic processing register and DPA index", supports: [SS-PRIV-001], freshness: current}
+  - {id: E-012, type: ai_register, title: "Synthetic AI register for coding/support tools", supports: [SS-AI-001], freshness: current}
+  - {id: E-013, type: ai_policy_training, title: "Synthetic AI use policy plus short training record", supports: [SS-AI-002], freshness: current, limitation: "vendor-risk review for one support summarizer is pending"}
+  - {id: E-014, type: training_record, title: "Synthetic security/privacy awareness completion 100%", supports: [SS-PEOPLE-001], freshness: current}
+  - {id: E-015, type: internal_review, title: "Synthetic quarterly security management review", supports: [SS-ASSURE-001], freshness: current}
+  - {id: E-016, type: architecture_record, title: "Synthetic TLS-at-edge and encrypted-storage architecture statement", supports: [], freshness: current, limitation: "no dedicated SolidSecurity cryptography control exists yet"}
+  - {id: E-017, type: logging_record, title: "Synthetic cloud/application logging and alerting description", supports: [], freshness: current, limitation: "no dedicated SolidSecurity logging control exists yet"}
+  - {id: E-018, type: secure_development_record, title: "Synthetic pull-request review and CI security-check procedure", supports: [SS-OPS-001], freshness: current, limitation: "secure-development objective deserves a dedicated control"}
+  - {id: E-019, type: penetration_test, title: "Synthetic independent application penetration test dated 18 months ago", supports: [SS-ASSURE-001], freshness: stale}

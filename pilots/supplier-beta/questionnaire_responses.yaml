@@ -1,0 +1,34 @@
+version: 1
+synthetic: true
+response_status: PROPOSED
+professional_review_performed: false
+answers:
+  - {question: Q01, answer: YES, controls: [SS-GOV-001], evidence: [E-001], confidence: high, reusable: true, review_required: false}
+  - {question: Q02, answer: YES, controls: [SS-RISK-001], evidence: [E-002], confidence: high, reusable: true, review_required: false}
+  - {question: Q03, answer: YES, controls: [SS-ASSET-001], evidence: [E-003], confidence: high, reusable: true, review_required: false}
+  - {question: Q04, answer: PARTIAL, controls: [SS-ACCESS-001], evidence: [E-004], confidence: high, reusable: true, review_required: true, qualifier: "workforce/privileged MFA evidenced; legacy service-account authentication needs separate assessment"}
+  - {question: Q05, answer: PARTIAL, controls: [SS-ACCESS-002], evidence: [E-005], confidence: high, reusable: true, review_required: true, qualifier: "employee access reviews exist; service-account review missing"}
+  - {question: Q06, answer: YES, controls: [SS-OPS-001], evidence: [E-006], confidence: high, reusable: true, review_required: false}
+  - {question: Q07, answer: YES_WITH_MAPPING_LIMITATION, controls: [SS-OPS-001], evidence: [E-018], confidence: medium, reusable: true, review_required: true, qualifier: "evidence supports practice but common-control library lacks a dedicated secure-development control"}
+  - {question: Q08, answer: YES, controls: [SS-INC-001], evidence: [E-007], confidence: high, reusable: true, review_required: false}
+  - {question: Q09, answer: NEEDS_CONTRACT_REVIEW, controls: [SS-INC-001], evidence: [E-007], confidence: medium, reusable: false, review_required: true, qualifier: "operational capability exists; exact notification commitment depends on customer contract and applicable obligations"}
+  - {question: Q10, answer: YES, controls: [SS-RES-001], evidence: [E-008], confidence: high, reusable: true, review_required: false}
+  - {question: Q11, answer: PARTIAL, controls: [SS-RES-001], evidence: [E-008], confidence: high, reusable: true, review_required: true, qualifier: "data restore is tested; wider service-continuity exercise is not evidenced"}
+  - {question: Q12, answer: YES, controls: [SS-SUP-001], evidence: [E-009], confidence: high, reusable: true, review_required: false}
+  - {question: Q13, answer: PARTIAL, controls: [SS-SUP-002], evidence: [E-010], confidence: high, reusable: true, review_required: true, qualifier: "core providers reviewed; one subprocessor review overdue"}
+  - {question: Q14, answer: YES, controls: [SS-PRIV-001], evidence: [E-011], confidence: high, reusable: true, review_required: true, qualifier: "customer-specific controller/processor terms still require contract-level review"}
+  - {question: Q15, answer: YES_WITH_CONTROL_GAP, controls: [], evidence: [E-016], confidence: medium, reusable: true, review_required: true, qualifier: "synthetic evidence exists, but SolidSecurity needs a dedicated cryptography/data-protection control before this can be normalized"}
+  - {question: Q16, answer: YES_WITH_CONTROL_GAP, controls: [], evidence: [E-017], confidence: medium, reusable: true, review_required: true, qualifier: "synthetic evidence exists, but a dedicated logging/monitoring control is missing"}
+  - {question: Q17, answer: YES, controls: [SS-PEOPLE-001], evidence: [E-014], confidence: high, reusable: true, review_required: false}
+  - {question: Q18, answer: NO_CURRENT_EVIDENCE, controls: [SS-ASSURE-001], evidence: [E-019], confidence: high, reusable: true, review_required: true, qualifier: "last synthetic independent test is 18 months old; customer recency expectation is unknown"}
+  - {question: Q19, answer: YES, controls: [SS-AI-001], evidence: [E-012], confidence: high, reusable: true, review_required: false}
+  - {question: Q20, answer: PARTIAL, controls: [SS-AI-002], evidence: [E-013], confidence: high, reusable: true, review_required: true, qualifier: "policy/training exist; one AI vendor review is pending"}
+summary:
+  questions: 20
+  reusable_from_existing_backbone: 18
+  direct_yes: 10
+  partial_or_qualified: 8
+  no_current_evidence: 1
+  contract_specific: 1
+  missing_common_control_mappings: 2
+  professional_review_flags: 11

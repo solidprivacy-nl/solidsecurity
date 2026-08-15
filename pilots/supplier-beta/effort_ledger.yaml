@@ -1,0 +1,29 @@
+version: 1
+synthetic: true
+measurement_status: MODELLED_HYPOTHESIS_NOT_REAL_CUSTOMER_TIMING
+units: minutes
+workflow:
+  - {step: maintain_baseline_claims_and_evidence, ai_assisted_production: 30, supplier_input: 60, professional_review: 45}
+  - {step: questionnaire_ingest_and_semantic_mapping, ai_assisted_production: 20, supplier_input: 10, professional_review: 20}
+  - {step: draft_20_answers_with_provenance, ai_assisted_production: 30, supplier_input: 20, professional_review: 60}
+  - {step: exception_and_contract_specific_review, ai_assisted_production: 10, supplier_input: 15, professional_review: 45}
+  - {step: passport_and_remediation_update, ai_assisted_production: 20, supplier_input: 15, professional_review: 30}
+totals:
+  ai_assisted_production: 110
+  supplier_input: 120
+  professional_review: 200
+reuse_hypothesis:
+  questionnaire_questions: 20
+  questions_reusing_existing_backbone: 18
+  reuse_rate_percent: 90
+warning: "Reuse rate and effort are synthetic model results. Real customer questionnaires must be timed and professional answer-change rates measured."
+real_pilot_metrics:
+  - questions_total
+  - semantic_matches_proposed
+  - exact_reusable_answers
+  - evidence_still_valid
+  - answers_changed_by_professional
+  - contract_specific_answers
+  - missing_control_categories
+  - elapsed_supplier_minutes
+  - elapsed_professional_minutes

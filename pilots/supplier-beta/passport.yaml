@@ -1,0 +1,48 @@
+version: 1
+synthetic: true
+passport_id: SYN-SUPPLIER-BETA-PASSPORT
+status: PROPOSED_EVIDENCE_BACKED_NOT_INDEPENDENTLY_ASSURED
+organization: SYN-SUPPLIER-BETA
+as_of: 2026-08-15
+sections:
+  governance:
+    status: evidence_available
+    references: [SS-GOV-001, SS-RISK-001, SS-ASSURE-001]
+  identity_access:
+    status: partial_exception
+    references: [SS-ACCESS-001, SS-ACCESS-002]
+    exception: "legacy/service-account review"
+  vulnerability_operations:
+    status: evidence_available
+    references: [SS-OPS-001]
+  incident_response:
+    status: evidence_available
+    references: [SS-INC-001]
+  backup_recovery:
+    status: evidence_available_with_continuity_gap
+    references: [SS-RES-001]
+  supplier_privacy:
+    status: partial_exception
+    references: [SS-SUP-001, SS-SUP-002, SS-PRIV-001]
+  people:
+    status: evidence_available
+    references: [SS-PEOPLE-001]
+  ai_governance:
+    status: partial_exception
+    references: [SS-AI-001, SS-AI-002]
+  cryptography:
+    status: evidence_available_control_model_gap
+    references: [E-016]
+  logging_monitoring:
+    status: evidence_available_control_model_gap
+    references: [E-017]
+  independent_application_assurance:
+    status: stale
+    references: [E-019]
+assurance_labels:
+  self_declared: true
+  evidence_linked: true
+  professional_reviewed: false
+  independently_audited: false
+  certified: false
+expiry_policy: "passport claims should inherit the shortest relevant evidence validity and be regenerated after material change"

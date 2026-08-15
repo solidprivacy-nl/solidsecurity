@@ -1,0 +1,11 @@
+version: 1
+synthetic: true
+findings:
+  - {id: SF-001, priority: high, title: "Service-account authentication/access review not fully governed", controls: [SS-ACCESS-001, SS-ACCESS-002]}
+  - {id: SF-002, priority: medium, title: "Wider service-continuity exercise not evidenced", controls: [SS-RES-001]}
+  - {id: SF-003, priority: medium, title: "One subprocessor review overdue", controls: [SS-SUP-002]}
+  - {id: SF-004, priority: high, title: "Independent application penetration-test evidence is stale", controls: [SS-ASSURE-001]}
+  - {id: SF-005, priority: medium, title: "AI support-summarizer vendor review pending", controls: [SS-AI-002]}
+  - {id: SF-006, priority: architecture, title: "Common-control library lacks dedicated secure-development control", controls: []}
+  - {id: SF-007, priority: architecture, title: "Common-control library lacks dedicated cryptography/key-management control", controls: []}
+  - {id: SF-008, priority: architecture, title: "Common-control library lacks dedicated logging/monitoring control", controls: []}

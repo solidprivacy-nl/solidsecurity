@@ -1,0 +1,24 @@
+version: 1
+synthetic: true
+questionnaire_id: SYN-HEALTH-CUSTOMER-SECQ-20
+questions:
+  - {id: Q01, text: "Is accountable ownership for information security formally assigned?"}
+  - {id: Q02, text: "Do you maintain and periodically review an information-security risk assessment?"}
+  - {id: Q03, text: "Do you maintain an inventory of critical systems, information and owners?"}
+  - {id: Q04, text: "Is multi-factor authentication enforced for relevant workforce and privileged access?"}
+  - {id: Q05, text: "Are user access rights periodically reviewed and removed when no longer needed?"}
+  - {id: Q06, text: "Do you operate a vulnerability and security-update process with defined remediation expectations?"}
+  - {id: Q07, text: "Do software changes undergo peer review and automated security/quality checks?"}
+  - {id: Q08, text: "Is there a documented and exercised security incident response process?"}
+  - {id: Q09, text: "Can you support contractual customer incident-notification obligations?"}
+  - {id: Q10, text: "Are backups/recovery mechanisms for critical customer services periodically tested?"}
+  - {id: Q11, text: "Is business/service continuity periodically exercised beyond data restoration?"}
+  - {id: Q12, text: "Do you maintain a current inventory of subprocessors and critical suppliers?"}
+  - {id: Q13, text: "Are critical suppliers assessed for security/privacy/continuity risk?"}
+  - {id: Q14, text: "Do you maintain privacy-processing records and relevant DPAs?"}
+  - {id: Q15, text: "Is customer data protected with appropriate encryption in transit and at rest?"}
+  - {id: Q16, text: "Are material security/application events logged and monitored?"}
+  - {id: Q17, text: "Do personnel complete recurring security/privacy awareness?"}
+  - {id: Q18, text: "Has the customer-facing application undergone a recent independent penetration test?"}
+  - {id: Q19, text: "Do you maintain an inventory of organizational AI tools/use cases?"}
+  - {id: Q20, text: "Are AI users governed by approved rules, literacy and human-oversight expectations?"}
