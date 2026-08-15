@@ -1,0 +1,41 @@
+version: 1
+applicability_status:
+  - APPLICABLE
+  - NOT_APPLICABLE
+  - UNDETERMINED
+  - PENDING_PROFESSIONAL_REVIEW
+assessment_status:
+  - PROPOSED
+  - REVIEW_PENDING
+  - REVIEWED
+  - SUPERSEDED
+assessment_result:
+  - SATISFACTORY
+  - SATISFACTORY_WITH_MINOR_ACTION
+  - PARTIAL
+  - GAP
+  - NOT_ASSESSED
+  - NOT_APPLICABLE
+review_queue_reason:
+  - materiality
+  - legal_or_regulatory_applicability
+  - conflicting_evidence
+  - insufficient_evidence_coverage
+  - risk_acceptance
+  - exception_approval
+  - customer_facing_assurance
+  - certification_or_audit_claim
+  - ai_risk_classification
+  - contract_specific_commitment
+assurance_label_fields:
+  self_declared: boolean
+  evidence_linked: boolean
+  professionally_reviewed: boolean
+  independently_audited: boolean
+  certified: boolean
+approved_assertion_status:
+  - DRAFT
+  - REVIEW_PENDING
+  - APPROVED
+  - EXPIRED
+  - REVOKED
