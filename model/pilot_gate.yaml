@@ -1,0 +1,24 @@
+version: 1
+state: DESIGN_ONLY
+real_client_data_allowed: false
+gates:
+  foundation_assurance: required
+  public_private_boundary: required
+  client_contract_and_dpa: required
+  subprocessor_review: required
+  retention_schedule: required
+  tenant_isolation_test: required
+  rbac_mfa_test: required
+  encryption_secrets_test: required
+  evidence_integrity_test: required
+  audit_logging_test: required
+  backup_restore_test: required
+  export_delete_test: required
+  llm_processing_policy_test: required
+  agent_permission_test: required
+  incident_tabletop: required
+  independent_security_data_governance_assurance: required
+  principal_real_pilot_authorization: required
+transition_rule: >-
+  real_client_data_allowed may become true only after all required gates have recorded PASS
+  and explicit principal authorization is recorded in governed project state.

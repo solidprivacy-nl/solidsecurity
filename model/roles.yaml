@@ -1,0 +1,36 @@
+version: 1
+roles:
+  platform_admin:
+    human: true
+    routine_client_evidence_access: false
+  professional_reviewer:
+    human: true
+    may_issue_professional_review: true
+    tenant_scoped: true
+  operations_contributor:
+    human: true
+    may_issue_professional_review: false
+    tenant_scoped: true
+  client_admin:
+    human: true
+    tenant_scoped: true
+  client_contributor:
+    human: true
+    tenant_scoped: true
+  client_reader:
+    human: true
+    tenant_scoped: true
+  agent_service:
+    human: false
+    tenant_scoped: true
+    task_scoped: true
+    human_only_decisions: prohibited
+human_only_actions:
+  - professional_verification
+  - independent_assurance
+  - risk_acceptance
+  - exception_approval
+  - final_legal_or_regulatory_applicability
+  - certification_claim
+  - customer_contract_commitment
+  - material_incident_notification_decision

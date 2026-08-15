@@ -1,0 +1,27 @@
+version: 1
+classes:
+  PUBLIC:
+    description: intended_for_public_disclosure
+    public_github: allowed
+    external_llm: approved_route_allowed
+  INTERNAL:
+    description: solidsecurity_nonpublic_business_information
+    public_github: prohibited
+    external_llm: approved_route_allowed
+  CLIENT_CONFIDENTIAL:
+    description: client_business_security_privacy_or_operational_information
+    public_github: prohibited
+    external_llm: approved_enterprise_api_route_only
+  CLIENT_HIGH_SENSITIVITY:
+    description: health_special_category_high_impact_security_or_similarly_sensitive_client_content
+    public_github: prohibited
+    external_llm: deny_by_default
+  SECRET:
+    description: credentials_keys_tokens_passwords_or_equivalent_authentication_material
+    public_github: prohibited
+    ordinary_database: prohibited_where_secret_manager_is_available
+    external_llm: prohibited
+principles:
+  - collect_minimum_necessary
+  - prefer_compliance_evidence_over_raw_business_or_patient_data
+  - classification_inherits_to_derivatives_unless_explicitly_reduced_by_safe_redaction
