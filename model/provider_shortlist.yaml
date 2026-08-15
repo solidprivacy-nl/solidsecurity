@@ -1,0 +1,44 @@
+version: 1
+status: CONDITIONAL_EVALUATION
+real_client_data_authorized: false
+source_verified_at: 2026-08-15
+candidates:
+  - id: SUPABASE_FIRST
+    status: CONDITIONALLY_PREFERRED
+    initial_tenancy: project_per_client
+    data_region_requirement: explicit_EU_region
+    primitives:
+      structured_state: postgres
+      authorization: rls_plus_application
+      identity: supabase_auth_mfa
+      evidence_storage: private_supabase_storage
+      audit: application_audit_plus_provider_plan_capabilities
+    blocking_gates:
+      - synthetic_cross_tenant_negative_tests
+      - private_storage_and_signed_link_tests
+      - mfa_aal_authorization_test
+      - evidence_object_recovery_test
+      - dpa_subprocessor_region_review
+      - pro_vs_team_auditability_decision
+      - independent_security_data_governance_pass
+      - principal_real_pilot_authorization
+  - id: CLOUDFLARE_PARTITIONED
+    status: ALTERNATIVE
+    data_region_requirement: d1_and_r2_eu_jurisdiction
+    primitives:
+      compute: workers
+      structured_state: d1
+      evidence_storage: r2
+      internal_identity: cloudflare_access
+      external_client_identity: unresolved_for_broad_portal
+    blocking_gates:
+      - tenant_partition_routing_negative_tests
+      - least_privileged_resource_credential_design
+      - client_ingress_auth_design
+      - regional_services_and_log_boundary_review
+      - dpa_subprocessor_review
+      - independent_security_data_governance_pass
+      - principal_real_pilot_authorization
+selection_rule: >-
+  No candidate may transition to SELECTED until its blocking synthetic proof tests pass,
+  upstream Pilot Readiness has independent acceptance, and real client data remains separately authorized.
