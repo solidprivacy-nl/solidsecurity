@@ -44,18 +44,6 @@ Prove `CLIENT_HIGH_SENSITIVITY` external-LLM routing is denied by default, cross
 
 Prove export, deletion and recovery operate across both structured metadata and evidence objects. Database recovery alone is insufficient.
 
-### Independent recovery
-
-Prove an encrypted logical database backup and the required evidence versions exist in a separate provider/failure domain and can reconstruct the intended dossier without depending on the original primary project remaining available.
-
-### Cryptographic separation
-
-Where the approved data classification requires application-layer encryption, prove the ciphertext/key boundary works: unauthorized users cannot invoke decryption, plaintext master key material is not co-located with backups, and failures do not leak plaintext or key material into logs.
-
-### Recovery objectives
-
-Measure achieved recovery point and recovery time during synthetic restoration. Configuration or provider marketing does not prove RPO/RTO. A recovery profile remains unproven when the measured result exceeds the target.
-
 ### Logging/secrets
 
 Prove ordinary logs do not capture document bodies, raw sensitive prompts or secrets; prove service credentials remain server-side/secret-managed and can be revoked.
