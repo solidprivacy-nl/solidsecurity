@@ -4,193 +4,155 @@ Status: `DESIGN / NO REAL CLIENT DATA AUTHORITY`
 
 ## Purpose
 
-Define the minimum durable architecture for SolidSecurity client dossiers before implementation. The design separates confidentiality, integrity, availability and disaster recovery so that a single provider feature is never treated as solving all four.
+Define the simplest architecture that is demonstrably secure, tenant-isolated, backed up and recoverable for the SolidSecurity managed service.
+
+The design principle is explicit:
+
+> Use the least complex architecture that satisfies a concrete risk or service requirement. Add isolation, redundancy or cryptography only when evidence shows the simpler design is insufficient.
 
 ## Architecture in one view
 
 ```text
-                      GitHub Control Plane
-                 method / schema / software
-                           | releases
-                           v
-                SolidSecurity Application Layer
-             operator workspace + client dashboard
-                           |
-               server-side tenant routing
-                           |
-          +----------------+----------------+
-          |                                 |
-          v                                 v
-  Client Project / Tenant A          Client Project / Tenant B
-  Supabase EU candidate              Supabase EU candidate
-  +----------------------+           +----------------------+
-  | Postgres structured  |           | Postgres structured  |
-  | state                |           | state                |
-  | Auth / RLS           |           | Auth / RLS           |
-  | Private evidence     |           | Private evidence     |
-  | storage              |           | storage              |
-  +----------+-----------+           +----------+-----------+
-             |                                  |
-             | independent encrypted backup    |
-             +------------------+---------------+
-                                v
-                    Secondary Recovery Store
-                    separate provider/failure domain
-                    Cloudflare R2 candidate
-                    - DB logical backups
-                    - evidence replicas
-                    - audit manifests
-                    - retention/bucket locks
-
-                 Keys / secrets are separate from
-                 evidence objects and backup objects.
+GitHub Control Plane
+method / schemas / software / mission
+          |
+          v
+SolidSecurity Application
+operator workspace + client dashboard
+          |
+          v
+ONE shared client data plane
++-----------------------------------+
+| PostgreSQL                        |
+| - all tenants                     |
+| - tenant_id on client data        |
+| - server authorization + RLS      |
+|                                   |
+| Private object storage            |
+| - evidence / attachments          |
+| - tenant-scoped object keys       |
++----------------+------------------+
+                 |
+                 | nightly backup job
+                 v
+Encrypted off-site backup
+cheap independent storage target
+(SFTP/S3-compatible/commodity storage)
+                 |
+                 +--> optional third copy later
 ```
 
-## Design decisions
+## 1. One shared database
 
-### 1. Three authoritative stores
+SolidSecurity uses one PostgreSQL database for the normal multi-client service unless a concrete customer or regulatory requirement later justifies dedicated infrastructure.
 
-**GitHub control plane** is authoritative for SolidSecurity methodology, schemas, migrations, release definitions and non-client-specific product logic.
+Every tenant-owned domain record contains a `tenant_id`. Tenant context is derived from authenticated authorization context and must not be trusted solely from request parameters.
 
-**Structured client state** is authoritative for the current governed state of a client dossier: scope, implementations, assessments, findings, actions, requests, reviews, approvals and evidence metadata.
+Row Level Security or an equivalent database-enforced mechanism is defense in depth. Automated negative tests must prove that a tenant cannot read or mutate another tenant's records.
 
-**Evidence object storage** is authoritative for the immutable bytes of evidence versions. Large files are not stored as Postgres blobs.
+Benefits of the shared model:
 
-A backup is never an authoritative working store.
+- one schema and migration path;
+- one operational database to monitor and back up;
+- lower infrastructure cost;
+- simpler development and support;
+- no per-customer project, secret or configuration sprawl.
 
-### 2. Early tenancy: project-per-client
+## 2. One primary private object store
 
-For the first regulated clients, retain the conditional project-per-client Supabase design. Each client receives a separate database/Auth/Storage boundary. `tenant_id` remains present in client-plane entities for portability and defense in depth.
-
-The private operations registry may contain routing metadata such as opaque tenant id, runtime project reference, region, service status and schema version. It must not become a duplicate evidence repository.
-
-A future shared multi-tenant Postgres model requires a new ADR, proven RLS/isolation tests and an explicit blast-radius/economics justification.
-
-### 3. Evidence versions are immutable
-
-No reviewed evidence object is overwritten in place.
+Large evidence files and attachments are stored in private object storage, not as Postgres blobs.
 
 Recommended opaque object identity:
 
 `tenants/{tenant_uuid}/evidence/{evidence_uuid}/versions/{version_uuid}.bin`
 
-Object keys must not contain client names, personal names, filenames, system names or other meaningful sensitive identifiers.
+Object keys do not contain client names, personal names or descriptive sensitive filenames. Human-readable filenames and metadata live in Postgres.
 
-The controlled database stores the client-visible filename and metadata.
+Reviewed evidence is never silently overwritten. Changed content creates a new version and content hash so a prior professional conclusion remains bound to the exact evidence version it used.
 
-Each `evidence_version` records at minimum:
+## 3. Baseline encryption
 
-- tenant id;
-- evidence id and version id;
-- primary object key;
-- content SHA-256 hash;
-- byte size;
-- media type;
-- classification;
-- source/provenance;
-- actor and ingestion timestamp;
-- encryption profile/reference;
-- backup state;
-- retention state;
-- validity/expiry where applicable.
+V1 deliberately avoids a custom application cryptography subsystem.
 
-A changed file creates a new evidence version and new content hash. Historical reviews keep their original version reference.
+Required baseline:
 
-### 4. Independent secondary recovery store
+- TLS in transit;
+- provider-managed encryption at rest for database and primary storage;
+- private object access;
+- encrypted backup archives before or during transfer to the off-site target;
+- secrets outside GitHub and normal logs;
+- least-privilege backup credentials.
 
-A copy inside the same primary service is useful redundancy but does not satisfy the independent recovery-copy requirement.
+Application-level envelope encryption, customer-managed keys or dedicated KMS architecture are later options only when a threat model, customer contract or regulation materially requires them.
 
-SolidSecurity maintains a secondary recovery store in a separate provider/failure domain. Cloudflare R2 is the current candidate because it provides inexpensive S3-compatible object storage, strong durability, encryption at rest and bucket retention locks.
+## 4. Simple off-site backup
 
-The secondary store contains only recovery artifacts:
+A single scheduled backup job is the default resilience mechanism.
 
-- encrypted logical database exports;
-- evidence-object replicas or encrypted recovery packages;
-- backup manifests and integrity results;
-- exported/tamper-evident audit batches.
+Nightly flow:
 
-It is not used as a second live application database.
+1. create a consistent PostgreSQL logical backup;
+2. capture new/changed evidence objects or a storage snapshot/export;
+3. produce checksums/manifest metadata;
+4. encrypt the backup set;
+5. transfer it to an independent low-cost storage environment using a standard mechanism such as SFTP, S3-compatible sync, `rclone`, `restic` or an equivalent commodity tool;
+6. record success/failure and alert when the job is late or fails.
 
-### 5. Resilience state is visible
+The architecture does not require Cloudflare R2, a dedicated backup SaaS or any specific transport. Provider choice is replaceable.
 
-Evidence ingestion and resilience are separate states. A document can be successfully received but not yet independently backed up.
+An optional third copy may later be added cheaply, for example weekly or monthly, if the incremental benefit justifies the small operational cost.
 
-Suggested operational states:
+## 5. Backup must be recoverable
 
-`RECEIVED -> HASH_VERIFIED -> PRIMARY_STORED -> SECONDARY_VERIFIED -> AVAILABLE_FOR_REVIEW`
+A successful copy command is not sufficient evidence of resilience.
 
-Failure to reach `SECONDARY_VERIFIED` creates an operational alert. Material professional review can proceed only according to the approved service profile; client-facing assurance must never imply a recovery copy exists when it does not.
+At minimum SolidSecurity periodically proves:
 
-### 6. Backup without restore is not a control
+- a database backup can be restored;
+- evidence objects can be restored;
+- restored file hashes match the source manifest;
+- a synthetic client dossier can be reconstructed;
+- restoration does not expose another tenant's data.
 
-Every backup class has a restore acceptance test. Backup monitoring checks creation; restore tests prove usability.
+These tests can be simple and infrequent initially. The purpose is to prove usability, not build a disaster-recovery platform.
 
-At minimum:
+## 6. Retention and deletion
 
-- automated manifest/hash verification after backup;
-- periodic sample object restore and hash comparison;
-- periodic synthetic tenant database restore;
-- periodic full synthetic dossier reconstruction including structured state plus evidence;
-- restore-test result stored as governed operational evidence.
+Retention is policy/configuration driven by contract, data category and applicable obligations. No universal duration is hard-coded.
 
-### 7. Retention and deletion are one lifecycle
+Deletion must account for both primary data and the normal backup-expiry window. A client must not be told that all recoverable copies are gone while ordinary retained backups still exist.
 
-Primary and backup retention are driven by data category, contract and applicable obligations. No universal legal period is hard-coded here.
+## 7. Provider position
 
-Deletion state distinguishes:
+Supabase/Postgres remains a reasonable candidate for the primary shared data plane because it combines PostgreSQL, Auth and private Storage with RLS-capable authorization.
 
-- active;
-- scheduled for deletion;
-- removed from primary;
-- retained temporarily in protected backup window;
-- legal/contractual hold;
-- fully expired/purged.
+The independent backup target should be selected primarily on:
 
-Client deletion confirmation must accurately describe any remaining protected backup window. Bucket locks must never create an undisclosed indefinite copy.
+- low cost;
+- independent credentials/failure domain;
+- EU/data-location suitability where required;
+- standard automated transfer support;
+- reliable retention and retrieval.
 
-### 8. Recovery targets are profiles, not untested promises
+No second live database is required.
 
-V1 defines engineering target classes. They become customer commitments only after runtime proof and explicit service-contract approval.
+## Non-goals for V1
 
-| Profile | Structured-state RPO target | Evidence-copy RPO target | RTO target | Typical mechanism |
-|---|---:|---:|---:|---|
-| Baseline | <= 24h | <= 24h | <= 8h | managed daily backup + daily offsite export |
-| Enhanced | <= 4h | <= 1h | <= 4h | more frequent logical export/replication |
-| Critical | minutes | minutes | <= 2h | PITR/continuous mechanisms after commercial approval |
-
-The default early service should use the least expensive profile that satisfies the contracted risk requirement. Expensive PITR is not enabled merely because it exists.
-
-## Provider-specific current candidate
-
-The current conditional pilot architecture remains:
-
-- Supabase EU project per early client for Postgres/Auth/private Storage;
-- provider-managed encryption at rest and TLS as baseline;
-- Cloudflare R2 as candidate independent recovery store;
-- provider-neutral application interfaces for evidence storage, backup and key management;
-- no provider selection becomes production authority without the existing real-client gate.
-
-## Required implementation abstractions
-
-Keep these interfaces explicit so storage/provider choices remain replaceable:
-
-- `StructuredStateRepository`
-- `EvidenceObjectStore`
-- `EvidenceCryptoService`
-- `KeyManagementService`
-- `BackupService`
-- `RecoveryStore`
-- `AuditEventStore`
-- `TenantRuntimeRouter`
-
-Business/domain code must not embed provider bucket names, project references or secret material.
-
-## Non-goals
-
-- active-active multi-cloud database replication;
+- database per client;
+- active-active or multi-cloud database replication;
+- custom KMS/envelope-encryption infrastructure;
+- real-time cross-provider object replication;
+- multiple RPO/RTO service tiers before customer demand exists;
 - zero-data-loss claims;
-- bespoke cryptography;
-- permanent duplicate live databases per client;
 - unlimited retention;
-- storing client evidence in GitHub;
-- treating provider certification as SolidSecurity assurance.
+- storing client evidence in GitHub.
+
+## Review triggers
+
+Reconsider the simple architecture only when there is concrete evidence such as:
+
+- tenant scale makes the shared database unsafe or operationally impractical;
+- a customer contract requires dedicated infrastructure or stronger encryption;
+- measured recovery requirements exceed nightly backup capability;
+- a regulatory or professional requirement demands a stronger control;
+- restore testing demonstrates the baseline design is inadequate.
