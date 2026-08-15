@@ -1,0 +1,44 @@
+version: 1
+authority_classes:
+  GREEN:
+    mode: autonomous_preparation
+    examples:
+      - extract_candidate_facts
+      - draft_policy
+      - propose_mapping
+      - organize_evidence
+      - prefill_questionnaire_from_approved_facts
+      - compare_versions
+  AMBER:
+    mode: ai_recommends_human_decides
+    examples:
+      - applicability
+      - regulatory_scope
+      - ai_act_classification
+      - dpia_trigger
+      - evidence_sufficiency
+      - proof_level_promotion
+      - material_finding_severity
+      - risk_treatment
+  RED:
+    mode: human_or_external_authority_required
+    examples:
+      - final_compliance_verdict
+      - material_risk_acceptance
+      - security_exception_approval
+      - final_incident_reporting_decision
+      - management_signoff
+      - certification_claim
+      - independent_assurance
+review_classes:
+  R0: mechanical_no_human_review_required
+  R1: operational_or_sample_review
+  R2: mandatory_qualified_professional_review
+  R3: independent_reviewer_required
+  R4: external_authority_or_certification_dependent
+prohibited_ai_state_transitions:
+  - VERIFIED
+  - INDEPENDENTLY_ASSURED
+  - RISK_ACCEPTED
+  - EXCEPTION_APPROVED
+  - CERTIFIED
