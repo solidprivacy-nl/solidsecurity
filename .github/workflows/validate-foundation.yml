@@ -7,8 +7,10 @@ on:
   pull_request:
     paths:
       - 'model/**'
+      - 'spec/**'
       - 'tools/validate_foundation.py'
       - 'tools/validate_claims.py'
+      - 'tools/validate_runtime_acceptance.py'
       - 'requirements-validation.txt'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
@@ -30,7 +32,10 @@ jobs:
         run: |
           python -m py_compile tools/validate_foundation.py
           python -m py_compile tools/validate_claims.py
+          python -m py_compile tools/validate_runtime_acceptance.py
       - name: Validate machine-readable foundation
         run: python tools/validate_foundation.py
       - name: Validate customer claim authority
         run: python tools/validate_claims.py
+      - name: Validate runtime acceptance contract
+        run: python tools/validate_runtime_acceptance.py
