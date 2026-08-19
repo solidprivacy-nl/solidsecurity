@@ -1,8 +1,14 @@
 version: 1
 status: SYNTHETIC_MODEL_FIT
+source_status: CANDIDATE_EVIDENCE_NOT_INTEGRATED
 cases:
   care_alpha:
-    source: pilots/care-alpha
+    source:
+      kind: pull_request_candidate
+      pr: 8
+      head_sha: a032c22a9b9a0e264d8be88e6671c8a09c8d19c2
+      locator: https://github.com/solidprivacy-nl/solidsecurity/pull/8
+      integration_status: not_in_authoritative_main
     required_entities:
       - Tenant
       - Organization
@@ -30,11 +36,16 @@ cases:
       - AuditEvent
       - RecurringReview
     fit_notes:
-      - Vendor and AIUseCase remain distinct because the synthetic care workflow already contains supplier and AI registers.
-      - EvidenceVersion carries population, sample, coverage and expiry metadata exposed by the Care pilot.
+      - Vendor and AIUseCase remain distinct because the exact Care Alpha candidate contains supplier and AI registers.
+      - EvidenceVersion carries population, sample, coverage and expiry metadata exposed by that candidate.
       - ReviewQueueItem preserves material human-review routing.
   supplier_beta:
-    source: pilots/supplier-beta
+    source:
+      kind: pull_request_candidate
+      pr: 10
+      head_sha: 763ead05ebd4b21eeb152f6ddcb2d652d1ce7562
+      locator: https://github.com/solidprivacy-nl/solidsecurity/pull/10
+      integration_status: not_in_authoritative_main
     required_entities:
       - Tenant
       - Organization
@@ -66,6 +77,8 @@ cases:
       - No separate questionnaire truth table is needed; ClientRequest/Response plus ApprovedAssertion cover the observed lifecycle.
       - Questionnaire similarity may propose reuse but cannot authorize the customer-facing answer.
 
+provenance_rule: Model-fit conclusions may use exact frozen synthetic candidate evidence, but must not describe those pilot artifacts as authoritative main until they are separately integrated.
+
 explicitly_deferred_entity_families:
   - asset_inventory_platform
   - generic_risk_engine
@@ -74,4 +87,4 @@ explicitly_deferred_entity_families:
   - framework_specific_client_checklists
   - database_per_customer_registry
 
-exit_assertion: Both synthetic service variants fit the same tenant dossier model without framework-specific duplicate truth or speculative enterprise modules.
+exit_assertion: Both exact synthetic service candidates fit the same tenant dossier model without framework-specific duplicate truth or speculative enterprise modules; their non-integrated source status remains explicit.
