@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Fail-closed structural checks for the SolidSecurity M1 domain-model contract."""
+from pathlib import Path
+import re
+import sys
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+MODEL = yaml.safe_load((ROOT / "model/domain_model_v1.yaml").read_text(encoding="utf-8"))
+COVERAGE = yaml.safe_load((ROOT / "spec/m1_workflow_coverage.yaml").read_text(encoding="utf-8"))
+SQL = (ROOT / "spec/postgres_schema_contract_v1.sql").read_text(encoding="utf-8")
+errors = []
+
+def require(condition, message):
+    if not condition:
+        errors.append(message)
+
+require(MODEL.get("version") == 1, "domain model version must be 1")
+require(MODEL.get("status") == "M1_CANDIDATE", "domain model must remain M1_CANDIDATE before integration")
+rt = MODEL.get("runtime_topology", {})
+require(rt.get("relational_store") == "shared_postgresql", "V1 topology must be shared_postgresql")
+require(rt.get("tenant_boundary") == "tenant_id", "tenant boundary must be tenant_id")
+require(rt.get("database_per_client_default") is False, "database-per-client must not become the V1 default")
+require(rt.get("file_bytes_in_postgresql") is False, "file bytes must remain outside PostgreSQL")
+
+catalog = MODEL.get("catalog_entities", {})
+identity = MODEL.get("identity_entities", {})
+client = MODEL.get("client_entities", {})
+all_entities = {**catalog, **identity, **client}
+required = {
+    "Tenant", "Organization", "OrganizationalScope", "UserIdentity", "Membership", "Engagement",
+    "Source", "Requirement", "Control", "ControlAssertion", "RequirementControlMap",
+    "ApplicabilityDecision", "ClientImplementation", "Evidence", "EvidenceVersion", "Assessment",
+    "Finding", "Action", "ClientRequest", "ClientResponse", "AIProposal", "ReviewQueueItem",
+    "ProfessionalReview", "Decision", "Approval", "Report", "ApprovedAssertion", "AuditEvent",
+    "RecurringReview", "Vendor", "AIUseCase"
+}
+require(required.issubset(all_entities), f"missing required entities: {sorted(required - set(all_entities))}")
+
+for name, definition in catalog.items():
+    require(definition.get("tenant_owned") is False, f"catalog entity {name} must not be tenant-owned customer truth")
+for name, definition in client.items():
+    if name == "Tenant":
+        require(definition.get("tenant_root") is True, "Tenant must be the tenant root")
+        continue
+    require(definition.get("tenant_owned") is True, f"client entity {name} must be tenant_owned")
+    require("tenant_id" in definition.get("fields", []), f"client entity {name} must carry tenant_id")
+
+separations = {tuple(pair) for pair in MODEL.get("required_separations", [])}
+for pair in [
+    ("Requirement", "Control"),
+    ("Control", "ClientImplementation"),
+    ("ClientImplementation", "Evidence"),
+    ("Evidence", "Assessment"),
+    ("Assessment", "ProfessionalReview"),
+    ("AIProposal", "ProfessionalReview"),
+    ("AIProposal", "Decision"),
+]:
+    require(pair in separations, f"missing required separation {pair}")
+
+version = client.get("EvidenceVersion", {})
+require(version.get("immutable_after_ingest") is True, "EvidenceVersion must be immutable_after_ingest")
+for field in ["object_key", "sha256", "byte_size", "media_type", "coverage_scope", "limitations"]:
+    require(field in version.get("fields", []), f"EvidenceVersion missing {field}")
+require(client.get("AIProposal", {}).get("authoritative") is False, "AIProposal must be non-authoritative")
+require(client.get("ProfessionalReview", {}).get("human_authority_required") is True, "ProfessionalReview must require human authority")
+require(client.get("Decision", {}).get("human_authority_for_material_decisions") is True, "material Decision must require human authority")
+
+prohibited = set(MODEL.get("prohibited_v1_tables", []))
+for value in ["per_framework_client_checklist", "ai_final_compliance_verdict", "evidence_blob_bytes", "customer_database_registry", "autonomous_risk_acceptance"]:
+    require(value in prohibited, f"prohibited V1 table guard missing: {value}")
+
+require("NOT A MIGRATION" in SQL, "SQL contract must state that it is not a migration")
+require("bytea" not in SQL.lower(), "SQL contract must not store evidence bytes")
+require("create table solidsecurity_contract.evidence_version" in SQL, "SQL missing evidence_version")
+require("object_key text not null" in SQL and "sha256 char(64) not null" in SQL, "SQL evidence version must bind object key and SHA-256")
+require("create table solidsecurity_contract.ai_proposal" in SQL, "SQL missing ai_proposal")
+require("create table solidsecurity_contract.professional_review" in SQL, "SQL missing professional_review")
+require("create table solidsecurity_contract.decision" in SQL, "SQL missing decision")
+
+def snake(name):
+    step1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", step1).lower()
+
+for name, definition in client.items():
+    if name == "Tenant":
+        continue
+    table = snake(name)
+    match = re.search(rf"create table solidsecurity_contract\.{re.escape(table)} \((.*?)\n\);", SQL, re.S | re.I)
+    require(match is not None, f"SQL contract missing table {table}")
+    if match:
+        require("tenant_id uuid not null" in match.group(1).lower(), f"SQL table {table} must have non-null tenant_id")
+
+canonical_chain = {"Requirement", "Control", "ClientImplementation", "Evidence", "Assessment", "ProfessionalReview", "Decision"}
+for case_name, case in COVERAGE.get("cases", {}).items():
+    refs = set(case.get("required_entities", []))
+    unknown = refs - set(all_entities)
+    require(not unknown, f"{case_name} references unknown entities: {sorted(unknown)}")
+    tenant_chain = canonical_chain - {"Requirement", "Control"}
+    require(tenant_chain.issubset(refs), f"{case_name} does not cover tenant traceability chain: {sorted(tenant_chain - refs)}")
+
+if errors:
+    print("SOLIDSECURITY_DOMAIN_MODEL_V1=FAIL")
+    for error in errors:
+        print(f"ERROR: {error}")
+    sys.exit(2)
+
+print("SOLIDSECURITY_DOMAIN_MODEL_V1=PASS")
+print(f"entities={len(all_entities)} client_entities={len(client)} cases={len(COVERAGE.get('cases', {}))}")
