@@ -1,6 +1,6 @@
 version: 1
 review: solidsecurity-review_claude
-reviewed_snapshot: 0300142
+reviewed_snapshot: "0300142"
 adoption_status: CURATED_NOT_WHOLESALE
 
 accepted:
@@ -56,7 +56,7 @@ partially_accepted:
     decision: care_is_primary_launch_hypothesis_supplier_remains_secondary_until_market_evidence_outweighs_it
   - id: REV-P04
     finding: compress_document_set
-    decision: avoid_new_duplicate_sources_and_use_machine_readable_models_plus_compact_indexes; broader cleanup_deferred_until_convergence
+    decision: avoid_new_duplicate_sources_and_use_machine_readable_models_plus_compact_indexes; broader_cleanup_deferred_until_convergence
 
 not_adopted:
   - id: REV-N01
@@ -64,7 +64,7 @@ not_adopted:
     reason: consequential_semantic_security_authority_changes_still_benefit_from_independent_exact_head_review
   - id: REV-N02
     finding: infer_no_independent_foundation_assurance_from_single_GitHub_account
-    reason: project_change_assurance_identity_is_evidenced_separately_from_customer_facing_professional_independence; the trust_domains_are_now_explicit
+    reason: project_change_assurance_identity_is_evidenced_separately_from_customer_facing_professional_independence; the_trust_domains_are_now_explicit
   - id: REV-N03
     finding: bypass_data_security_gates_to_reach_a_real_customer_faster
     reason: roadmap_moves_real_validation_earlier_without_lowering_real_client_authority_or_data_gates
