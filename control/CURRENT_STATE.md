@@ -2,51 +2,56 @@
 
 ## Status
 
-`CONCEPT / OPERATING MODEL DESIGN`
+`FOUNDATION_IMPLEMENTATION / CANDIDATE`
 
 Control-managed: **yes**
 
-Authoritative work contract: issue #1
+Concept/onboarding contract: issue #1
+
+Active foundation work contract: **issue #2**
+
+Working branch: `agent/foundation-v1`
+
+## Authority transition
+
+On 2026-08-15 the principal explicitly accepted the discussion-ready strategy and authorized autonomous realization of the agreed strategy, architecture, model, workflows and roadmap.
+
+This lifts the concept-stage hold on **foundation implementation only**.
+
+It does not authorize:
+
+- production deployment;
+- real client data;
+- customer-environment scanning;
+- autonomous final legal/compliance/certification decisions;
+- certification claims;
+- bypass of independent assurance for consequential work.
 
 ## Current objective
 
-Produce and discuss a coherent SolidSecurity concept and operating model before committing to product implementation.
+Produce SolidSecurity Foundation V1 as a coherent source-of-truth backbone for an AI-native managed security & compliance service for small healthcare organizations and compliance-exposed SMEs.
 
-The proposal must integrate:
+## Current architecture stance
 
-- target positioning for small healthcare organizations and SMEs;
-- Cybersecurity Act / NIS2 direct and supply-chain pressure;
-- NEN 7510 / ISO 27001 readiness;
-- GDPR/privacy and AI Act governance where relevant;
-- AI leverage with credible professional review and assurance;
-- a minimal cross-framework control/data backbone;
-- selective reuse of external open-source functions and patterns;
-- a simple initial architecture and staged roadmap;
-- explicit deferral of automatic customer-environment scanning.
+1. Model/service first; platform later.
+2. Common controls are separate from external requirements.
+3. Client implementation claims and evidence are separate from generic controls.
+4. AI works through attributable suggestions/analysis and cannot self-authorize professional assurance.
+5. GitHub is the product/control plane, not the client data plane.
+6. Technical environment connectors are deferred until after workflow validation.
+7. External open-source projects are selectively adopted by capability/pattern, never wholesale by feature count.
 
-## Current hard constraints
+## Repository visibility
 
-1. Do not overengineer the MVP.
-2. Do not import whole external repositories merely because they are feature-rich.
-3. Select reusable functions/patterns only when they form part of a coherent workflow.
-4. Do not connect to or automatically scan customer environments in the initial phase.
-5. Keep later technical evidence connectors on the roadmap if they materially improve the model.
-6. Keep implementation and independent assurance separated for consequential work.
-7. AI output does not equal professional assurance.
-8. No real client data during concept/bootstrap.
-9. No autonomous final legal/certification/compliance decisions.
-10. Discuss the concept proposal before product implementation begins.
+Repository remains public by principal choice during the early foundation phase.
 
-## External projects currently under selective evaluation
+Only `PUBLIC_SAFE` project material is authorized here. Secrets, real client data, sensitive implementation details, proprietary evidence-sufficiency rubrics, private prompts and commercially sensitive accumulated operating intelligence are prohibited from the public repo.
 
-- `getprobo/probo` — MIT; GRC primitives and AI/API patterns.
-- `unidoc/isms` — Apache-2.0; lean management-system, Git document and human/AI review patterns.
-- `intuitem/ciso-assistant-community` — control/framework decoupling and mapping inspiration; AGPL code reuse requires explicit licensing analysis.
-- `prowler-cloud/prowler` — technical evidence/scanning candidate for a later roadmap phase, not MVP.
-- `oscal-compass/compliance-trestle` — machine-readable compliance/interoperability concepts, likely later-stage.
+See `docs/PUBLIC_REPO_POLICY.md`.
 
-## Queue state
+## Next gates
 
-No implementation queue intent is authorized yet.
-
-The concept proposal is the next deliverable for principal discussion. After the concept is accepted, implementation work packages may be created and routed through Control.
+1. Complete Foundation V1 candidate on `agent/foundation-v1`.
+2. Submit PR against `main`.
+3. Obtain independent assurance under `control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md`.
+4. After acceptance/merge, execute Phase 1 synthetic Service MVP work packages.

@@ -1,0 +1,15 @@
+version: 1
+domains:
+  GOV: Governance and accountability
+  RISK: Risk management
+  ASSET: Assets and information
+  ACCESS: Identity and access
+  OPS: Secure operations
+  INC: Incident management
+  RES: Resilience and continuity
+  SUP: Supplier and chain security
+  PRIV: Privacy and data governance
+  AI: AI governance
+  PEOPLE: People and awareness
+  ASSURE: Assurance and improvement
+id_pattern: SS-<DOMAIN>-<NNN>

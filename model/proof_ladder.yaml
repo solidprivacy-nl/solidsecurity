@@ -1,0 +1,33 @@
+version: 1
+name: SolidSecurity Proof Ladder
+states:
+  - level: 0
+    id: UNKNOWN
+    meaning: Not yet established or insufficient facts.
+    ai_can_assign: true
+  - level: 1
+    id: DESIGNED
+    meaning: Control/process is documented or designed, but operation is not established.
+    ai_can_assign: proposed_only
+  - level: 2
+    id: IMPLEMENTED
+    meaning: Organization has an accepted implementation claim that the control operates.
+    ai_can_assign: proposed_only
+  - level: 3
+    id: EVIDENCED
+    meaning: Relevant evidence supports the implementation claim.
+    ai_can_assign: proposed_only
+  - level: 4
+    id: VERIFIED
+    meaning: Authorized qualified human has reviewed sufficient evidence and accepted the state.
+    ai_can_assign: false
+  - level: 5
+    id: INDEPENDENTLY_ASSURED
+    meaning: Independent audit/certification/assurance supports the stated scope and period.
+    ai_can_assign: false
+rules:
+  - Generated policy documents never automatically prove IMPLEMENTED or above.
+  - Missing or contradictory evidence blocks silent promotion.
+  - VERIFIED requires an attributable human review decision.
+  - INDEPENDENTLY_ASSURED requires legitimate independence and scope evidence.
+  - Proof level can be downgraded when evidence expires or new contradictory facts emerge.

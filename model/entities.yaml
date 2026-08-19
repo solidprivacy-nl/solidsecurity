@@ -1,0 +1,71 @@
+version: 1
+status: foundation_candidate
+note: >-
+  Public-safe conceptual schema. Client data instances are prohibited in this repository.
+entities:
+  Source:
+    purpose: authoritative_or_reference_material
+    public_plane: true
+  Framework:
+    purpose: named_external_requirement_set
+    public_plane: true
+  Requirement:
+    purpose: atomic_external_obligation_or_criterion
+    public_plane: true
+  Control:
+    purpose: reusable_solidsecurity_control_objective
+    public_plane: true
+  RequirementControlMapping:
+    purpose: analytical_many_to_many_mapping
+    public_plane: restricted_when_proprietary
+  ClientScope:
+    purpose: client_assessment_perimeter
+    public_plane: schema_only
+  ApplicabilityDecision:
+    purpose: approved_client_specific_applicability
+    public_plane: schema_only
+  ImplementationClaim:
+    purpose: client_specific_description_of_control_operation
+    public_plane: schema_only
+  Evidence:
+    purpose: artifact_or_observation_supporting_or_refuting_claim
+    public_plane: schema_only
+  Assessment:
+    purpose: analysis_of_claim_and_evidence
+    public_plane: schema_only
+  Review:
+    purpose: accountable_review_of_material_assessment_or_mapping
+    public_plane: schema_only
+  Decision:
+    purpose: authorized_state_transition
+    public_plane: schema_only
+  Finding:
+    purpose: gap_contradiction_or_deficiency
+    public_plane: schema_only
+  Action:
+    purpose: remediation_work_item
+    public_plane: schema_only
+  Risk:
+    purpose: risk_record
+    public_plane: schema_only
+  Exception:
+    purpose: time_bounded_authorized_deviation
+    public_plane: schema_only
+  Vendor:
+    purpose: supplier_or_service_provider_record
+    public_plane: schema_only
+  AIUseCase:
+    purpose: ai_system_or_use_governance_record
+    public_plane: schema_only
+  Artifact:
+    purpose: generated_or_approved_document_report_or_policy
+    public_plane: schema_only
+traceability_chain:
+  - Source
+  - Requirement
+  - Control
+  - ImplementationClaim
+  - Evidence
+  - Assessment
+  - Review
+  - Decision
