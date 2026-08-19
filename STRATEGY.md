@@ -1,45 +1,56 @@
-# SolidSecurity Strategy V1
+# SolidSecurity Strategy R2
 
 ## 1. Strategic thesis
 
-The target customer does not need another GRC tool. The target customer needs to be able to demonstrate that security, privacy and AI use are governed without building an internal CISO/compliance department.
+The target customer does not need another GRC tool. The target customer needs to demonstrate that security, privacy and responsible AI use are governed without building a proportionate internal CISO/compliance department.
 
-SolidSecurity therefore sells a **managed compliance capability**, not software seats and not consultant hours.
+SolidSecurity therefore sells a **managed security & compliance capability**, not software seats and not unbounded consultant hours.
 
-The economic model is:
+Economic model:
 
-`shared control model + repeatable workflow + AI leverage + professional exception handling`
+`common control model + repeatable workflow + evidence reuse + AI/software leverage + qualified professional review`
 
-The trust model is:
+Trust model:
 
-`traceable evidence + explicit uncertainty + qualified human review`
+`traceable evidence + explicit uncertainty + scoped applicability + qualified human review + honest assurance labels`
 
-## 2. Primary segments
+The project must apply its own Proof Ladder logic to itself: design and synthetic artifacts prove design/model fit; they do not prove market demand, customer usability or achieved economics.
 
-### A. SolidSecurity Care
+## 2. Primary launch segment
 
-Small healthcare organizations that process health information and need demonstrable information-security governance, typically around NEN 7510, GDPR, AI use and customer/regulator expectations. Some will also be directly exposed to Cbw/NIS2; others experience the same pressure indirectly through the care chain.
+### SolidSecurity Care — primary learning track
 
-### B. SolidSecurity Supplier
+The first go-to-market learning track is Dutch healthcare.
 
-Small IT, SaaS, care-tech and professional-service suppliers that may not be directly in Cbw scope but must increasingly answer security questionnaires, contractual security requirements and tender conditions imposed by regulated customers.
+The working ICP prioritizes organizations with meaningful security/compliance pressure, operational complexity and budget, but without a proportionate internal CISO/compliance function. Roughly 50–250 FTE is a **commercial hypothesis**, not a legal threshold or automatic applicability rule.
 
-### C. Certification / assurance readiness
+Customer-facing urgency must match actual scope:
 
-SMEs that want ISO 27001, NEN 7510 or another assurance outcome because it improves market access, customer trust or operational maturity.
+- direct Cyberbeveiligingswet/NIS2 positioning is used only after explicit applicability assessment;
+- organizations outside direct Cbw scope are positioned around the obligations and pressures that genuinely apply, including NEN 7510/Wabvpz, privacy, IGJ expectations, customer/chain requirements and responsible AI governance where relevant;
+- SolidSecurity does not imply that all small care organizations are directly in Cbw/NIS2 scope.
+
+### SolidSecurity Supplier — secondary reuse/expansion track
+
+Supplier Assurance / Security & Compliance Passport remains a strong reuse case for the common-control/evidence model. During zero/early-customer learning it is secondary rather than a second parallel GTM program. Market evidence may later promote it if acute questionnaire/tender pain proves the stronger acquisition wedge.
+
+### Audit/certification readiness — extension
+
+Audit Ready remains an extension where an organization wants ISO 27001, NEN 7510 or another independent outcome. SolidSecurity prepares the management/evidence system; external certification/independent assurance remains separate.
 
 ## 3. Customer problem
 
 Typical target organizations have a combination of:
 
 - fragmented policies and spreadsheets;
-- unclear ownership of controls;
-- insufficient evidence that procedures actually operate;
-- repeated questionnaires asking the same underlying questions;
-- consultants recreating similar documents for each framework;
-- little capacity to follow regulatory change;
+- unclear control ownership;
+- insufficient objective evidence that procedures actually operate;
+- repeated customer/audit questions about the same underlying controls;
+- consultants recreating similar work per framework;
+- weak evidence freshness and follow-up discipline;
+- little capacity for regulatory/standards change;
 - no dedicated security/compliance function;
-- increasing AI use without a controlled inventory or governance baseline.
+- increasing AI use without a controlled inventory/governance baseline.
 
 ## 4. Positioning
 
@@ -59,80 +70,98 @@ Typical target organizations have a combination of:
 
 **Automatisering verlaagt het werk, niet de norm. Professionals controleren wat ertoe doet.**
 
-AI is intentionally not the lead claim. AI explains the cost and speed advantage after trust has been established.
+AI is not the lead trust claim. It is the operating leverage behind a service whose customer-facing claims remain evidence- and authority-bounded.
 
 ## 5. Differentiation
 
-SolidSecurity should win through five reinforcing advantages:
+SolidSecurity should win through a reinforcing delivery system:
 
-1. **Control reuse** — one implemented measure supports multiple frameworks.
-2. **Evidence reuse** — the same verified evidence can answer multiple assurance requests.
-3. **Workflow standardization** — every customer follows the same governed lifecycle.
-4. **AI production leverage** — repetitive extraction, drafting, mapping, comparison and reporting are automated.
-5. **Professional assurance discipline** — material conclusions retain human accountability and provenance.
+1. **Control reuse** — one organizational measure can support multiple obligations.
+2. **Evidence reuse** — governed evidence can support multiple assessments/requests where scope and validity permit it.
+3. **Managed workflow** — SolidSecurity performs the compliance work instead of transferring a GRC workload to the customer.
+4. **AI/software leverage** — repetitive extraction, mapping, drafting, comparison, request preparation and reporting are accelerated.
+5. **Professional assurance discipline** — material conclusions retain qualified human accountability, scope and provenance.
+6. **Longitudinal operating history** — recurring evidence, approved assertions, remediation history and review decisions accumulate into switching cost and better service quality.
 
-## 6. What we are not
+## 6. Defensibility
+
+Crosswalks, control taxonomies, prompts and base-model access are **capabilities, not assumed durable moats**.
+
+Expected defensibility compounds through:
+
+- trusted professional reputation;
+- customer and channel relationships;
+- accumulated governed client history and evidence;
+- reusable approved assertions and longitudinal evidence;
+- switching costs from maintained dossiers and recurring decisions;
+- measured remediation/evidence patterns;
+- operational learning about what creates real review burden and risk;
+- software/AI leverage applied to those accumulated assets.
+
+## 7. What we are not
 
 SolidSecurity is not:
 
 - an autonomous AI compliance officer;
 - a certification body;
-- a legal opinion generator;
+- a guarantee that reviewed clients will not suffer incidents;
+- a legal opinion service by default;
 - a generic 150-framework GRC suite;
-- a vulnerability scanner in phase 1;
-- a repository for customer dossiers;
+- a scanner-first compliance product;
+- a repository for client dossiers in GitHub;
 - a promise of absolute compliance.
 
-## 7. Initial offers
+## 8. Initial offers — hypotheses
 
 ### Care Baseline
 
-A structured current-state assessment and 90-day improvement plan against the relevant SolidSecurity control baseline with healthcare mappings.
+A bounded current-state/evidence assessment and prioritized improvement plan against an applicable healthcare-oriented SolidSecurity baseline.
 
 ### Care Managed
 
-Recurring managed control/evidence cycle with periodic professional review, policy maintenance, supplier governance and AI-governance baseline.
+Recurring managed control/evidence cycle, targeted remediation follow-up, policy/register maintenance and qualified professional review according to materiality.
 
 ### Supplier Assurance
 
-A maintained security/compliance dossier plus assisted response to customer questionnaires and tenders.
+A maintained security/compliance dossier plus governed reuse of evidence/approved assertions for questionnaires and tenders. Secondary launch track until market evidence says otherwise.
 
 ### Audit Ready
 
-A bounded project that prepares the organization for an independent ISO 27001/NEN 7510 audit without pretending SolidSecurity itself grants certification.
+Preparation for an external audit/certification outcome without SolidSecurity claiming the certification role.
 
-## 8. Commercial hypotheses
+## 9. Commercial validation doctrine
 
-Pricing is outcome- and complexity-led rather than purely FTE-led. Initial hypotheses:
+Existing price ranges are historical **hypotheses**, not validated package economics.
 
-- baseline/onboarding: EUR 1,500–3,000;
-- small managed care/supplier service: EUR 495–695/month;
-- professionally assured recurring tier: EUR 895–1,295/month;
-- higher-regulation/complexity: from roughly EUR 1,500/month;
-- audit-readiness project/add-on: roughly EUR 3,500–7,500.
+Before a price/package is treated as validated, model and then measure:
 
-These are test hypotheses, not final price commitments. The goal is not to transfer the full automation saving to price. Automation should fund lower customer price, stronger margins and more professional review simultaneously.
+- professional minutes by workflow step;
+- review class and loaded professional rate;
+- customer minutes and response latency;
+- cadence/frequency;
+- AI proposal acceptance/edit/rejection;
+- evidence reuse and assertion reuse;
+- onboarding payback period;
+- recurring gross-margin sensitivity;
+- external specialist/reviewer cost where required.
 
-## 9. Strategic moat
+Commercial learning must distinguish E0/E1 assumptions from E2/E3 measured customer/market evidence.
 
-The durable moat is expected to become:
+## 10. Professional trust
 
-- the Netherlands-focused common-control mapping graph;
-- evidence sufficiency and verification rules;
-- accumulated remediation patterns for small organizations;
-- structured professional-assurance workflow;
-- supplier-questionnaire answer reuse;
-- operational data showing which controls and remediation patterns actually work.
+`product/change B1 assurance != customer professional review != external independent assurance/certification`.
 
-Prompts and base LLM access are not considered a moat.
+Customer-facing review classes require explicit competence, independence, capacity, cost and escalation rules. Professional liability, contractual scope, report language and breach/incident posture must be resolved before customer-facing `VERIFIED` claims are used.
 
-## 10. Strategic success criteria
+## 11. Strategic success criteria
 
-Before building a broad platform, prove that:
+Before broad productization, prove that:
 
-1. a small care organization can complete the service lifecycle with limited professional hours;
-2. a shared control set materially reduces duplicate work across NEN/Cbw/ISO/GDPR/AI governance;
-3. AI-generated work can be reviewed quickly and safely;
-4. evidence reuse reduces questionnaire/audit preparation time;
-5. customers value continuous managed status more than a one-off report;
-6. unit economics improve as the customer base grows without linear consultant-hour growth.
+1. the common-control/evidence model is executable, including partial mappings and coverage gaps;
+2. a bounded real Care design partner can complete the workflow under safe authority/data gates;
+3. the service discovers and handles real evidence absence, conflict, expiry and tailoring disputes;
+4. qualified professional review is operationally and economically viable;
+5. the primary ICP/positioning survives real objections, including the incumbent MSP/IT-provider alternative;
+6. willingness-to-pay and customer burden are measured rather than inferred;
+7. product/runtime/UI priorities come from observed real friction;
+8. recurring economics improve without weakening assurance quality or creating linear professional-hour growth.
