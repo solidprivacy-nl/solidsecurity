@@ -91,6 +91,12 @@ for name, definition in client.items():
     if match:
         require("tenant_id uuid not null" in match.group(1).lower(), f"SQL table {table} must have non-null tenant_id")
 
+require(COVERAGE.get("source_status") == "CANDIDATE_EVIDENCE_NOT_INTEGRATED",
+        "synthetic pilot evidence must remain explicitly non-authoritative until separately integrated")
+expected_sources = {
+    "care_alpha": (8, "a032c22a9b9a0e264d8be88e6671c8a09c8d19c2"),
+    "supplier_beta": (10, "763ead05ebd4b21eeb152f6ddcb2d652d1ce7562"),
+}
 canonical_chain = {"Requirement", "Control", "ClientImplementation", "Evidence", "Assessment", "ProfessionalReview", "Decision"}
 for case_name, case in COVERAGE.get("cases", {}).items():
     refs = set(case.get("required_entities", []))
@@ -98,6 +104,14 @@ for case_name, case in COVERAGE.get("cases", {}).items():
     require(not unknown, f"{case_name} references unknown entities: {sorted(unknown)}")
     tenant_chain = canonical_chain - {"Requirement", "Control"}
     require(tenant_chain.issubset(refs), f"{case_name} does not cover tenant traceability chain: {sorted(tenant_chain - refs)}")
+    source = case.get("source", {})
+    require(source.get("kind") == "pull_request_candidate", f"{case_name} source must be an exact PR candidate")
+    require(source.get("integration_status") == "not_in_authoritative_main", f"{case_name} must not imply integrated pilot evidence")
+    expected = expected_sources.get(case_name)
+    require(expected is not None, f"unexpected synthetic coverage case: {case_name}")
+    if expected:
+        require(source.get("pr") == expected[0], f"{case_name} must bind PR #{expected[0]}")
+        require(source.get("head_sha") == expected[1], f"{case_name} candidate SHA drift")
 
 if errors:
     print("SOLIDSECURITY_DOMAIN_MODEL_V1=FAIL")
