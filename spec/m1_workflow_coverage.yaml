@@ -69,11 +69,12 @@ cases:
       - Decision
       - Report
       - ApprovedAssertion
+      - ApprovedAssertionControlLink
       - ApprovedAssertionEvidenceLink
       - AuditEvent
       - RecurringReview
     fit_notes:
-      - ApprovedAssertion supports reusable questionnaire/passport statements with evidence and expiry.
+      - ApprovedAssertion plus its control/evidence links supports reusable questionnaire/passport statements with reconstructable provenance and expiry.
       - No separate questionnaire truth table is needed; ClientRequest/Response plus ApprovedAssertion cover the observed lifecycle.
       - Questionnaire similarity may propose reuse but cannot authorize the customer-facing answer.
 
