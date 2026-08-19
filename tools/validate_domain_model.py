@@ -32,10 +32,16 @@ required = {
     "Source", "Requirement", "Control", "ControlAssertion", "RequirementControlMap",
     "ApplicabilityDecision", "ClientImplementation", "Evidence", "EvidenceVersion", "Assessment",
     "Finding", "Action", "ClientRequest", "ClientResponse", "AIProposal", "ReviewQueueItem",
-    "ProfessionalReview", "Decision", "Approval", "Report", "ApprovedAssertion", "AuditEvent",
-    "RecurringReview", "Vendor", "AIUseCase"
+    "ProfessionalReview", "Decision", "Approval", "Report", "ApprovedAssertion",
+    "ApprovedAssertionControlLink", "ApprovedAssertionEvidenceLink", "AuditEvent", "RecurringReview",
+    "Vendor", "AIUseCase"
 }
 require(required.issubset(all_entities), f"missing required entities: {sorted(required - set(all_entities))}")
+
+user_identity = identity.get("UserIdentity", {})
+require(user_identity.get("supports_nonhuman_service_identity") is True,
+        "UserIdentity must support governed non-human service identities")
+require("identity_type" in user_identity.get("fields", []), "UserIdentity must carry identity_type")
 
 for name, definition in catalog.items():
     require(definition.get("tenant_owned") is False, f"catalog entity {name} must not be tenant-owned customer truth")
@@ -65,6 +71,11 @@ for field in ["object_key", "sha256", "byte_size", "media_type", "coverage_scope
 require(client.get("AIProposal", {}).get("authoritative") is False, "AIProposal must be non-authoritative")
 require(client.get("ProfessionalReview", {}).get("human_authority_required") is True, "ProfessionalReview must require human authority")
 require(client.get("Decision", {}).get("human_authority_for_material_decisions") is True, "material Decision must require human authority")
+require("review_id" in client.get("ApprovedAssertion", {}).get("fields", []),
+        "ApprovedAssertion must retain exact professional review provenance")
+link_fields = set(client.get("ApprovedAssertionControlLink", {}).get("fields", []))
+require({"approved_assertion_id", "control_id", "assertion_id"}.issubset(link_fields),
+        "ApprovedAssertionControlLink must bind statement to control and optional assertion")
 
 prohibited = set(MODEL.get("prohibited_v1_tables", []))
 for value in ["per_framework_client_checklist", "ai_final_compliance_verdict", "evidence_blob_bytes", "customer_database_registry", "autonomous_risk_acceptance"]:
@@ -72,11 +83,17 @@ for value in ["per_framework_client_checklist", "ai_final_compliance_verdict", "
 
 require("NOT A MIGRATION" in SQL, "SQL contract must state that it is not a migration")
 require("bytea" not in SQL.lower(), "SQL contract must not store evidence bytes")
+require("identity_type text not null" in SQL and "('human','service')" in SQL,
+        "SQL identity root must distinguish human and service identities")
 require("create table solidsecurity_contract.evidence_version" in SQL, "SQL missing evidence_version")
 require("object_key text not null" in SQL and "sha256 char(64) not null" in SQL, "SQL evidence version must bind object key and SHA-256")
 require("create table solidsecurity_contract.ai_proposal" in SQL, "SQL missing ai_proposal")
 require("create table solidsecurity_contract.professional_review" in SQL, "SQL missing professional_review")
 require("create table solidsecurity_contract.decision" in SQL, "SQL missing decision")
+require("create table solidsecurity_contract.approved_assertion_control_link" in SQL,
+        "SQL missing approved_assertion_control_link")
+require("review_id uuid references solidsecurity_contract.professional_review(review_id)" in SQL,
+        "SQL ApprovedAssertion must bind professional review")
 
 def snake(name):
     step1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
@@ -112,6 +129,10 @@ for case_name, case in COVERAGE.get("cases", {}).items():
     if expected:
         require(source.get("pr") == expected[0], f"{case_name} must bind PR #{expected[0]}")
         require(source.get("head_sha") == expected[1], f"{case_name} candidate SHA drift")
+
+supplier_refs = set(COVERAGE.get("cases", {}).get("supplier_beta", {}).get("required_entities", []))
+require("ApprovedAssertionControlLink" in supplier_refs and "ApprovedAssertionEvidenceLink" in supplier_refs,
+        "Supplier coverage must retain both control/assertion and evidence provenance links")
 
 if errors:
     print("SOLIDSECURITY_DOMAIN_MODEL_V1=FAIL")
