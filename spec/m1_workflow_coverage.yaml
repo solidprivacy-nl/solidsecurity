@@ -1,0 +1,77 @@
+version: 1
+status: SYNTHETIC_MODEL_FIT
+cases:
+  care_alpha:
+    source: pilots/care-alpha
+    required_entities:
+      - Tenant
+      - Organization
+      - OrganizationalScope
+      - Membership
+      - Engagement
+      - ApplicabilityDecision
+      - ClientImplementation
+      - Vendor
+      - AIUseCase
+      - Evidence
+      - EvidenceVersion
+      - ImplementationEvidenceLink
+      - Assessment
+      - AssessmentEvidenceLink
+      - Finding
+      - Action
+      - ClientRequest
+      - ClientResponse
+      - AIProposal
+      - ReviewQueueItem
+      - ProfessionalReview
+      - Decision
+      - Report
+      - AuditEvent
+      - RecurringReview
+    fit_notes:
+      - Vendor and AIUseCase remain distinct because the synthetic care workflow already contains supplier and AI registers.
+      - EvidenceVersion carries population, sample, coverage and expiry metadata exposed by the Care pilot.
+      - ReviewQueueItem preserves material human-review routing.
+  supplier_beta:
+    source: pilots/supplier-beta
+    required_entities:
+      - Tenant
+      - Organization
+      - OrganizationalScope
+      - Membership
+      - Engagement
+      - ClientImplementation
+      - Vendor
+      - Evidence
+      - EvidenceVersion
+      - ImplementationEvidenceLink
+      - Assessment
+      - AssessmentEvidenceLink
+      - Finding
+      - Action
+      - ClientRequest
+      - ClientResponse
+      - AIProposal
+      - ReviewQueueItem
+      - ProfessionalReview
+      - Decision
+      - Report
+      - ApprovedAssertion
+      - ApprovedAssertionEvidenceLink
+      - AuditEvent
+      - RecurringReview
+    fit_notes:
+      - ApprovedAssertion supports reusable questionnaire/passport statements with evidence and expiry.
+      - No separate questionnaire truth table is needed; ClientRequest/Response plus ApprovedAssertion cover the observed lifecycle.
+      - Questionnaire similarity may propose reuse but cannot authorize the customer-facing answer.
+
+explicitly_deferred_entity_families:
+  - asset_inventory_platform
+  - generic_risk_engine
+  - exception_management_suite
+  - vulnerability_management_platform
+  - framework_specific_client_checklists
+  - database_per_customer_registry
+
+exit_assertion: Both synthetic service variants fit the same tenant dossier model without framework-specific duplicate truth or speculative enterprise modules.
