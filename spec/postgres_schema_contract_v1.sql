@@ -4,6 +4,7 @@
 
 create schema if not exists solidsecurity_contract;
 
+-- Global catalog -------------------------------------------------------------
 create table solidsecurity_contract.source (
   source_id uuid primary key,
   title text not null,
@@ -61,8 +62,10 @@ create table solidsecurity_contract.requirement_control_map (
   unique(requirement_id, control_id)
 );
 
+-- Identity / tenant roots ----------------------------------------------------
 create table solidsecurity_contract.user_identity (
   user_id uuid primary key,
+  identity_type text not null check (identity_type in ('human','service')),
   auth_provider text not null,
   auth_subject text not null,
   display_name text,
@@ -133,6 +136,7 @@ create table solidsecurity_contract.engagement_scope (
   unique(engagement_id, scope_id)
 );
 
+-- Dossier state --------------------------------------------------------------
 create table solidsecurity_contract.applicability_decision (
   applicability_id uuid primary key,
   tenant_id uuid not null references solidsecurity_contract.tenant(tenant_id),
@@ -417,12 +421,23 @@ create table solidsecurity_contract.approved_assertion (
   valid_from timestamptz,
   expires_at timestamptz,
   review_status text not null,
+  review_id uuid references solidsecurity_contract.professional_review(review_id),
   reviewer_membership_id uuid references solidsecurity_contract.membership(membership_id),
   allowed_uses jsonb not null default '[]'::jsonb,
   customer_specific_exclusions text,
   assurance_labels jsonb not null default '{}'::jsonb,
   created_at timestamptz not null,
   updated_at timestamptz not null
+);
+
+create table solidsecurity_contract.approved_assertion_control_link (
+  approved_assertion_control_link_id uuid primary key,
+  tenant_id uuid not null references solidsecurity_contract.tenant(tenant_id),
+  approved_assertion_id uuid not null references solidsecurity_contract.approved_assertion(approved_assertion_id),
+  control_id text not null references solidsecurity_contract.control(control_id),
+  assertion_id text references solidsecurity_contract.control_assertion(assertion_id),
+  created_at timestamptz not null,
+  unique(approved_assertion_id, control_id, assertion_id)
 );
 
 create table solidsecurity_contract.approved_assertion_evidence_link (
@@ -467,4 +482,5 @@ create table solidsecurity_contract.recurring_review (
 -- 3. Evidence/report object keys resolve only through private, tenant-authorized object access.
 -- 4. evidence_version is append-only after ingestion; updates that alter object/hash are forbidden.
 -- 5. audit_event metadata excludes raw evidence bodies, secrets and unnecessary prompt content.
--- 6. AI service identities cannot create human-only authoritative review/decision/approval states.
+-- 6. service/agent identities cannot exercise human-only authoritative review/decision/approval states.
+-- 7. approved_assertion links and review_id must resolve within the same tenant as the approved assertion.
