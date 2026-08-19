@@ -36,10 +36,9 @@ These records have no customer truth and therefore no `tenant_id`.
 
 ### Identity root
 
-- `user_identity` represents a human identity from the selected authentication provider.
-- `membership` joins that identity to one tenant and role.
+`user_identity` is the authentication/principal root for either a human or a governed non-human service identity. `identity_type` distinguishes those cases. A `membership` joins that identity to one tenant and role.
 
-One person may legitimately belong to more than one tenant. Authorization is derived from the authenticated identity plus the active membership, never from a client-supplied `tenant_id` alone.
+One human may legitimately belong to more than one tenant. A service/agent identity may also receive a narrowly scoped `agent_service` membership. Authorization is derived from the authenticated identity plus the active membership, never from a client-supplied `tenant_id` alone. Non-human identities remain unable to exercise human-only review, approval or material-decision authority.
 
 ### Tenant dossier
 
@@ -58,6 +57,7 @@ Every customer-owned state record carries `tenant_id`, including:
 - AI proposals;
 - review queue, professional review, decision and approval;
 - reports and approved assertions;
+- approved-assertion links to controls/assertions and evidence versions;
 - audit events;
 - recurring/expiry review state.
 
@@ -71,9 +71,9 @@ Security boundary and customer dossier root. A tenant can contain one or more le
 
 `organization` represents a legal/operating entity. `organizational_scope` represents the bounded service/system/process perimeter being assessed. An engagement can cover one or more scopes.
 
-### Membership
+### UserIdentity / Membership
 
-Joins `user_identity` to `tenant` with a bounded role. V1 roles are data, not separate schema families: `platform_admin`, `professional_reviewer`, `operations_contributor`, `client_admin`, `client_contributor`, `client_reader`, `agent_service`.
+`user_identity` stores an authenticated principal with `identity_type` (`human` or governed `service`). `membership` binds that principal to a tenant and bounded role. V1 roles are data, not separate schema families: `platform_admin`, `professional_reviewer`, `operations_contributor`, `client_admin`, `client_contributor`, `client_reader`, `agent_service`.
 
 ### Engagement
 
@@ -131,7 +131,15 @@ The separation prevents an AI assessment from becoming a professional decision m
 
 ### Report / ApprovedAssertion
 
-Reports are generated/approved output artifacts. Approved assertions are reusable customer-facing statements with scope, evidence/review provenance and expiry. Neither changes a control implementation simply by existing.
+Reports are generated/approved output artifacts. Approved assertions are reusable customer-facing statements with scope, expiry, exact professional-review provenance, linked control/assertion provenance and exact evidence-version provenance.
+
+`approved_assertion_control_link` binds a reusable statement to one control and optionally one subordinate assertion. `approved_assertion_evidence_link` binds it to exact evidence versions. This allows a Supplier Passport statement to be reconstructed as:
+
+```text
+ApprovedAssertion -> Control[/ControlAssertion] -> EvidenceVersion -> ProfessionalReview
+```
+
+Semantic similarity can propose a reusable assertion but cannot create either link or authorize customer-facing use by itself. The existence of a report or approved assertion never changes a client control implementation state.
 
 ### AuditEvent
 
@@ -148,6 +156,8 @@ Two entities are included beyond the literal M1 minimum because synthetic Care/S
 - `vendor`
 - `ai_use_case`
 
+The approved-assertion control/evidence links are likewise retained because the Supplier candidate explicitly demonstrated questionnaire/passport reuse with provenance.
+
 Risk/exception/asset enterprise families are **not frozen as separate V1 tables** here. They may be added only when the operator workflow proves a distinct persistent lifecycle that cannot be represented by findings/actions/decisions without loss.
 
 ## Tenant-isolation invariant
@@ -162,7 +172,7 @@ The schema contract intentionally does not encode a database-per-customer topolo
 
 ## AI authority invariant
 
-AI may create `ai_proposal` and proposed `assessment` records. It cannot create an authoritative `professional_review`, risk/legal/compliance/certification decision, or independently assured state. Human/service authority is enforced outside prompt text and is represented explicitly in membership/review/decision records.
+AI may create `ai_proposal` and proposed `assessment` records. It cannot create an authoritative `professional_review`, risk/legal/compliance/certification decision, or independently assured state. Human/service authority is enforced outside prompt text and is represented explicitly in identity/membership/review/decision records.
 
 ## Deletion and retention
 
@@ -178,6 +188,6 @@ M1 is complete only when:
 
 1. `model/domain_model_v1.yaml` validates;
 2. `spec/postgres_schema_contract_v1.sql` remains a non-migration contract consistent with this model;
-3. both synthetic Care and Supplier coverage maps resolve against declared entities;
+3. both synthetic Care and Supplier coverage maps resolve against declared entities and exact candidate provenance;
 4. B0 exact-head checks pass;
 5. required independent B1 accepts the exact candidate before it is integrated/canonicalized.
