@@ -7,6 +7,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 MODEL = yaml.safe_load((ROOT / "model/mission_operating_model_r2.yaml").read_text(encoding="utf-8"))
 WPS = yaml.safe_load((ROOT / "model/workpackages_r2.yaml").read_text(encoding="utf-8"))
+REVIEW = yaml.safe_load((ROOT / "model/review_source_r2.yaml").read_text(encoding="utf-8"))
 ROADMAP = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
 MISSION = (ROOT / "control/SOLIDSECURITY_MISSION_CONTRACT_R2.md").read_text(encoding="utf-8")
 errors = []
@@ -88,6 +89,10 @@ for cid in ["SS-SC-09", "SS-SC-10", "SS-SC-11", "SS-SC-12"]:
 wps = WPS.get("workpackages", {})
 expected = ["R2-WP01", "R2-WP02", "R2-WP03", "R2-WP04", "R2-WP05"]
 require(list(wps.keys()) == expected, "R2 workpackages must remain the bounded five-package sequence")
+expected_issues = {"R2-WP01": 32, "R2-WP02": 33, "R2-WP03": 34, "R2-WP04": 35, "R2-WP05": 36}
+for wp_id, issue_no in expected_issues.items():
+    require(wps.get(wp_id, {}).get("github_issue") == issue_no,
+            f"{wp_id} must remain bound to GitHub issue #{issue_no}")
 require(wps.get("R2-WP04", {}).get("authority", {}).get("real_client_data") == "PRINCIPAL_EXPLICIT_GATE_REQUIRED",
         "real design partner must retain explicit principal real-data gate")
 require(set(wps.get("R2-WP04", {}).get("depends_on", [])) >= {"R2-WP01", "R2-WP02", "R2-WP03"},
@@ -95,8 +100,18 @@ require(set(wps.get("R2-WP04", {}).get("depends_on", [])) >= {"R2-WP01", "R2-WP0
 require(wps.get("R2-WP05", {}).get("depends_on") == ["R2-WP04"],
         "productization must follow real design-partner evidence")
 
-for forbidden in ["scanner pass -> compliance PASS", "database/project per customer as default"]:
-    require(forbidden in ROADMAP, f"roadmap must retain explicit deferred/invariant phrase: {forbidden}")
+require(REVIEW.get("adoption_status") == "CURATED_NOT_WHOLESALE", "review adoption must remain curated, not wholesale")
+require(REVIEW.get("reviewed_snapshot") == "0300142", "review snapshot provenance must remain explicit")
+require(len(REVIEW.get("accepted", [])) >= 10, "review decision register must preserve material accepted findings")
+require(len(REVIEW.get("not_adopted", [])) >= 1, "review decision register must preserve explicit non-adoptions")
+
+for required_phrase in [
+    "scanner pass -> compliance PASS",
+    "database/project per customer as default",
+    "bounded real design partner",
+    "bottom-up unit-economics",
+]:
+    require(required_phrase.lower() in ROADMAP.lower(), f"roadmap missing R2 invariant: {required_phrase}")
 
 for phrase in [
     "design output is not market evidence",
@@ -114,4 +129,4 @@ if errors:
     sys.exit(2)
 
 print("SOLIDSECURITY_MISSION_R2=PASS")
-print(f"evidence_classes={len(classes)} workpackages={len(wps)} criteria_additions={len(criteria)}")
+print(f"evidence_classes={len(classes)} workpackages={len(wps)} criteria_additions={len(criteria)} accepted_review_findings={len(REVIEW.get('accepted', []))}")
