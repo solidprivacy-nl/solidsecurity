@@ -41,7 +41,8 @@ identity_entities:
   UserIdentity:
     tenant_owned: false
     key: user_id
-    fields: [auth_provider, auth_subject, display_name, status, created_at]
+    supports_nonhuman_service_identity: true
+    fields: [identity_type, auth_provider, auth_subject, display_name, status, created_at]
 
 client_entities:
   Tenant:
@@ -153,7 +154,11 @@ client_entities:
   ApprovedAssertion:
     tenant_owned: true
     key: approved_assertion_id
-    fields: [tenant_id, canonical_wording, scope_id, valid_from, expires_at, review_status, reviewer_membership_id, allowed_uses, customer_specific_exclusions, assurance_labels, created_at, updated_at]
+    fields: [tenant_id, canonical_wording, scope_id, valid_from, expires_at, review_status, review_id, reviewer_membership_id, allowed_uses, customer_specific_exclusions, assurance_labels, created_at, updated_at]
+  ApprovedAssertionControlLink:
+    tenant_owned: true
+    key: approved_assertion_control_link_id
+    fields: [tenant_id, approved_assertion_id, control_id, assertion_id, created_at]
   ApprovedAssertionEvidenceLink:
     tenant_owned: true
     key: approved_assertion_evidence_link_id
@@ -198,6 +203,9 @@ relationships:
   - [ClientRequest, receives, ClientResponse]
   - [ReviewQueueItem, routes_to, ProfessionalReview]
   - [ProfessionalReview, may_authorize, Decision]
+  - [ApprovedAssertionControlLink, links, ApprovedAssertion]
+  - [ApprovedAssertionControlLink, links, Control]
+  - [ApprovedAssertionControlLink, optionally_links, ControlAssertion]
   - [ApprovedAssertionEvidenceLink, links, ApprovedAssertion]
   - [ApprovedAssertionEvidenceLink, links, EvidenceVersion]
 
