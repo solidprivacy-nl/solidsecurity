@@ -2,7 +2,7 @@
 
 Status: `MISSION CANDIDATE / CONTROL-MANAGED`
 Governance work: issue #25
-Canonical orchestration: `market-predictions/control-plane` Mission System V1
+Canonical lifecycle: `market-predictions/control-plane` + Control Minimal Core V1
 
 ## Mission
 
@@ -106,7 +106,7 @@ One common-control backbone supports multiple external obligations/frameworks wi
 
 ### SS-SC-07 — Mission-driven autonomous development
 
-The canonical Control Mission System can reconstruct current authoritative project state, select the highest-priority eligible unsatisfied SolidSecurity mission gap, create a governed implementation intake, route it through Worker A / independent Worker B assurance and update mission state without relying on chat memory or principal relay.
+Control can reconstruct authoritative SolidSecurity state, select or materialize the highest-priority eligible mission work as one Minimal Core task, prove execution through a bounded worker claim, persist an immutable exact-task/exact-run result and create at most one predefined successor. Consequential candidates require exact-head independent B1 assurance before governed integration. No chat memory, principal relay, second queue or parallel lifecycle authority is required.
 
 ### SS-SC-08 — Commercially viable quality
 
@@ -182,11 +182,17 @@ No database-per-client, custom KMS, active-active multi-cloud or real-time backu
 
 ## Mission-driven development loop
 
-The project-development loop is:
+The canonical development lifecycle is deliberately small:
 
-`Mission Contract -> current authoritative state -> highest-priority eligible mission gap -> PROJECT_INTAKE_V1 -> canonical DISPATCH_QUEUE -> Worker A implementation -> frozen candidate -> Worker B independent assurance -> governed integration -> authoritative mission-state update -> next gap`
+`Mission Contract -> authoritative state -> eligible mission work -> one Minimal Core task -> bounded claim / START_PROVEN -> implementation or assurance result -> immutable result -> at most one predefined successor -> governed integration -> authoritative mission-state update`
 
-The Control queue remains the only runtime work queue. SolidSecurity must not create a competing autonomous project scheduler.
+For consequential changes the normal path is:
+
+`implementation -> exact candidate -> independent B1 assurance -> PASS -> project integration`
+
+A FAIL routes only to the predefined repair successor. `INDETERMINATE` and infrastructure failures create no semantic PASS and no substitute lifecycle tree.
+
+`control/DISPATCH_QUEUE.json` remains the single execution authority. Scheduler activity only wakes workers; a claim proves execution. SolidSecurity must not create a competing project scheduler, intake state plane, retry lineage or queue.
 
 ## Gap-selection rule
 
@@ -200,7 +206,7 @@ Select work by the following order:
 6. improves scalability/automation;
 7. infrastructure elegance only after one of the above requires it.
 
-Among otherwise eligible gaps, use the canonical Control numeric priority and deterministic tie-breaking.
+Among otherwise eligible tasks, use canonical Control priority and deterministic tie-breaking.
 
 ## Definition of done for mission gaps
 
