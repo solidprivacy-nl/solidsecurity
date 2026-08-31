@@ -1,0 +1,14 @@
+version: 1
+status: illustrative_seed
+note: "Internally authored example assertions. These are subordinate test points, not external standard text."
+assertions:
+  - {id: SS-ACCESS-002-A1, control_id: SS-ACCESS-002, statement: "new user access is explicitly approved before activation", materiality: high}
+  - {id: SS-ACCESS-002-A2, control_id: SS-ACCESS-002, statement: "access changes when role/responsibility changes", materiality: high}
+  - {id: SS-ACCESS-002-A3, control_id: SS-ACCESS-002, statement: "access is removed promptly when no longer required", materiality: critical}
+  - {id: SS-ACCESS-002-A4, control_id: SS-ACCESS-002, statement: "relevant access is periodically recertified", materiality: high}
+  - {id: SS-RES-001-A1, control_id: SS-RES-001, statement: "backup/recovery arrangements cover identified critical information/services", materiality: critical}
+  - {id: SS-RES-001-A2, control_id: SS-RES-001, statement: "restoration is periodically tested and results recorded", materiality: critical}
+  - {id: SS-RES-001-A3, control_id: SS-RES-001, statement: "recovery objectives and dependencies are understood", materiality: high}
+  - {id: SS-SUP-002-A1, control_id: SS-SUP-002, statement: "material suppliers have defined security/privacy/continuity requirements", materiality: high}
+  - {id: SS-SUP-002-A2, control_id: SS-SUP-002, statement: "critical suppliers are periodically reviewed against relevant requirements", materiality: high}
+  - {id: SS-SUP-002-A3, control_id: SS-SUP-002, statement: "supplier findings are tracked to closure or accepted through governed exception", materiality: high}

@@ -1,4 +1,4 @@
-version: 1
+version: 1.1
 status: illustrative_seed
 copyright_note: Internally authored generic control objectives; no protected standard text copied.
 controls:
@@ -6,89 +6,151 @@ controls:
     domain: GOV
     title: Security accountability
     objective: Management assigns and periodically reviews accountable ownership for information security and compliance responsibilities.
-    evidence_classes: [role_assignment, management_record, policy]
+    control_type: governance
+    default_evidence_classes: [role_assignment, management_record, policy]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-RISK-001
     domain: RISK
     title: Information security risk assessment
     objective: The organization identifies, assesses, treats and periodically reviews material information-security risks.
-    evidence_classes: [risk_register, assessment_record, treatment_plan]
+    control_type: governance
+    default_evidence_classes: [risk_register, assessment_record, treatment_plan]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-ASSET-001
     domain: ASSET
     title: Critical information and system inventory
     objective: Relevant information assets, systems and critical dependencies are identified with ownership and classification appropriate to risk.
-    evidence_classes: [inventory, ownership_record]
+    control_type: governance
+    default_evidence_classes: [inventory, ownership_record]
     minimum_review_class: R1
+    lifecycle_state: active
   - id: SS-ACCESS-001
     domain: ACCESS
     title: Strong authentication
     objective: Access to relevant systems is protected with authentication measures proportionate to risk, including multi-factor authentication where required.
-    evidence_classes: [configuration_export, screenshot, identity_policy, test_result]
+    control_type: preventive
+    default_evidence_classes: [configuration_export, screenshot, identity_policy, test_result]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-ACCESS-002
     domain: ACCESS
     title: Access lifecycle
     objective: User access is approved, changed and removed through a controlled joiner-mover-leaver process and periodically reviewed.
-    evidence_classes: [procedure, access_review, ticket_sample, identity_export]
+    control_type: preventive
+    default_evidence_classes: [procedure, access_review, ticket_sample, identity_export]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-OPS-001
     domain: OPS
     title: Vulnerability and patch management
     objective: Security vulnerabilities and updates are identified, prioritized and remediated within risk-based timeframes.
-    evidence_classes: [procedure, patch_report, vulnerability_report, ticket_sample]
+    control_type: preventive
+    default_evidence_classes: [procedure, patch_report, vulnerability_report, ticket_sample]
     minimum_review_class: R2
+    lifecycle_state: active
+  - id: SS-DEV-001
+    domain: DEV
+    title: Secure software development
+    objective: Software and material technical changes are designed, reviewed, tested and released using security practices proportionate to product and customer risk.
+    control_type: preventive
+    default_evidence_classes: [development_policy, change_record, code_review_record, ci_test_result, security_test]
+    minimum_review_class: R2
+    lifecycle_state: active
+  - id: SS-CRYPTO-001
+    domain: CRYPTO
+    title: Cryptographic protection
+    objective: Sensitive information and critical communications use risk-appropriate cryptographic protection with controlled key or credential practices.
+    control_type: preventive
+    default_evidence_classes: [architecture_record, configuration_export, key_management_record, test_result]
+    minimum_review_class: R2
+    lifecycle_state: active
+  - id: SS-MON-001
+    domain: MON
+    title: Security logging and monitoring
+    objective: Material security and operational events are recorded, retained and monitored sufficiently to support detection, investigation and accountability.
+    control_type: detective
+    default_evidence_classes: [logging_policy, configuration_export, alert_record, monitoring_report, test_result]
+    minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-INC-001
     domain: INC
     title: Incident response
     objective: The organization can identify, escalate, respond to, record and learn from security incidents using defined responsibilities and communication paths.
-    evidence_classes: [incident_procedure, exercise_record, incident_log, lessons_learned]
+    control_type: responsive
+    default_evidence_classes: [incident_procedure, exercise_record, incident_log, lessons_learned]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-RES-001
     domain: RES
     title: Backup and restore assurance
     objective: Critical data and systems have risk-appropriate backup and recovery arrangements whose restoration is periodically tested.
-    evidence_classes: [backup_report, restore_test, continuity_plan]
+    control_type: resilience
+    default_evidence_classes: [backup_report, restore_test, continuity_plan]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-SUP-001
     domain: SUP
     title: Supplier inventory and criticality
     objective: Relevant suppliers and service providers are inventoried, assigned ownership and classified by security/privacy/continuity criticality.
-    evidence_classes: [supplier_register, classification_record]
+    control_type: governance
+    default_evidence_classes: [supplier_register, classification_record]
     minimum_review_class: R1
+    lifecycle_state: active
   - id: SS-SUP-002
     domain: SUP
     title: Supplier security requirements
     objective: Security, privacy and continuity requirements proportionate to supplier risk are established, reviewed and followed up.
-    evidence_classes: [contract, dpa, assessment, review_record]
+    control_type: preventive
+    default_evidence_classes: [contract, dpa, assessment, review_record]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-PRIV-001
     domain: PRIV
     title: Personal data processing accountability
     objective: Relevant personal-data processing is inventoried with purpose, responsibility, data categories, recipients and applicable safeguards at a level proportionate to obligations.
-    evidence_classes: [processing_register, privacy_assessment, contract]
+    control_type: governance
+    default_evidence_classes: [processing_register, privacy_assessment, contract]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-AI-001
     domain: AI
     title: AI use inventory
     objective: Material organizational AI systems and uses are inventoried with owner, purpose, provider, data use and review status.
-    evidence_classes: [ai_register, approved_tool_list]
+    control_type: governance
+    default_evidence_classes: [ai_register, approved_tool_list]
     minimum_review_class: R1
+    lifecycle_state: active
   - id: SS-AI-002
     domain: AI
     title: Responsible AI use and literacy
     objective: People using or overseeing AI receive appropriate rules, awareness and competency support, with escalation for higher-risk uses.
-    evidence_classes: [ai_policy, training_record, communication, role_record]
+    control_type: governance
+    default_evidence_classes: [ai_policy, training_record, communication, role_record]
     minimum_review_class: R2
+    lifecycle_state: active
   - id: SS-PEOPLE-001
     domain: PEOPLE
     title: Security awareness and competence
     objective: Personnel receive role-appropriate security and privacy awareness, with additional competence requirements for accountable roles.
-    evidence_classes: [training_record, competence_record, awareness_material]
+    control_type: preventive
+    default_evidence_classes: [training_record, competence_record, awareness_material]
     minimum_review_class: R1
+    lifecycle_state: active
   - id: SS-ASSURE-001
     domain: ASSURE
     title: Control effectiveness review
     objective: Material controls and the management system are periodically reviewed for effectiveness, with findings and corrective actions tracked to closure.
-    evidence_classes: [internal_review, audit_record, management_review, corrective_action]
+    control_type: assurance
+    default_evidence_classes: [internal_review, audit_record, management_review, corrective_action]
     minimum_review_class: R3
+    lifecycle_state: active
+  - id: SS-ASSURE-002
+    domain: ASSURE
+    title: Independent technical testing
+    objective: Relevant high-risk systems or services receive periodic independent or suitably segregated technical security testing, with findings governed to closure.
+    control_type: assurance
+    default_evidence_classes: [penetration_test, independent_assessment, remediation_record, closure_verification]
+    minimum_review_class: R3
+    lifecycle_state: active

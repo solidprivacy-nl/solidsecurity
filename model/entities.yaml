@@ -1,5 +1,5 @@
-version: 1
-status: foundation_candidate
+version: 1.1
+status: pilot_refinement_candidate
 note: >-
   Public-safe conceptual schema. Client data instances are prohibited in this repository.
 entities:
@@ -15,6 +15,9 @@ entities:
   Control:
     purpose: reusable_solidsecurity_control_objective
     public_plane: true
+  ControlAssertion:
+    purpose: testable_subordinate_aspect_of_a_control
+    public_plane: true
   RequirementControlMapping:
     purpose: analytical_many_to_many_mapping
     public_plane: restricted_when_proprietary
@@ -22,19 +25,22 @@ entities:
     purpose: client_assessment_perimeter
     public_plane: schema_only
   ApplicabilityDecision:
-    purpose: approved_client_specific_applicability
+    purpose: client_specific_applicability_state_and_rationale
     public_plane: schema_only
   ImplementationClaim:
-    purpose: client_specific_description_of_control_operation
+    purpose: client_specific_description_of_control_or_assertion_operation
     public_plane: schema_only
   Evidence:
-    purpose: artifact_or_observation_supporting_or_refuting_claim
+    purpose: artifact_or_observation_supporting_or_refuting_claim_with_coverage_and_validity
     public_plane: schema_only
   Assessment:
-    purpose: analysis_of_claim_and_evidence
+    purpose: analysis_of_claim_and_evidence_with_independent_result_and_proof_strength
+    public_plane: schema_only
+  ReviewQueueItem:
+    purpose: materiality_uncertainty_or_policy_trigger_for_human_review
     public_plane: schema_only
   Review:
-    purpose: accountable_review_of_material_assessment_or_mapping
+    purpose: accountable_review_of_material_assessment_mapping_assertion_or_exception
     public_plane: schema_only
   Decision:
     purpose: authorized_state_transition
@@ -60,12 +66,20 @@ entities:
   Artifact:
     purpose: generated_or_approved_document_report_or_policy
     public_plane: schema_only
+  ApprovedAssertion:
+    purpose: reusable_customer_facing_statement_or_questionnaire_answer_with_provenance_and_expiry
+    public_plane: schema_only
+  AssuranceLabels:
+    purpose: independent_dimensions_of_statement_assurance_state
+    public_plane: schema_only
 traceability_chain:
   - Source
   - Requirement
   - Control
+  - ControlAssertion
   - ImplementationClaim
   - Evidence
   - Assessment
+  - ReviewQueueItem
   - Review
   - Decision

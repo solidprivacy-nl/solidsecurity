@@ -1,10 +1,13 @@
-version: 1
+version: 1.1
 domains:
   GOV: Governance and accountability
   RISK: Risk management
   ASSET: Assets and information
   ACCESS: Identity and access
   OPS: Secure operations
+  DEV: Secure development
+  CRYPTO: Cryptographic protection
+  MON: Security logging and monitoring
   INC: Incident management
   RES: Resilience and continuity
   SUP: Supplier and chain security
@@ -13,3 +16,6 @@ domains:
   PEOPLE: People and awareness
   ASSURE: Assurance and improvement
 id_pattern: SS-<DOMAIN>-<NNN>
+addition_rule: >-
+  Add a domain/control only when a target workflow demonstrates a distinct operational objective
+  that cannot be cleanly represented by an existing control or assertion.

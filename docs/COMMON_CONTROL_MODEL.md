@@ -4,23 +4,29 @@
 
 Create one reusable set of control objectives that can support multiple laws, standards, customer requirements and assurance contexts.
 
-The Common Control Model (CCM) is the central normalization layer between external requirements and client implementations.
+The Common Control Model (CCM) is the normalization layer between external requirements and client implementations.
 
 ## Why
 
 Separate checklists create duplicate work:
 
-`NEN control -> evidence A`
+`NEN requirement -> evidence A`
 
-`ISO control -> evidence A again`
+`ISO requirement -> evidence A again`
 
 `Cbw requirement -> evidence A again`
 
 SolidSecurity instead models:
 
-`external requirements -> SS control -> one client implementation -> reusable evidence`
+`external requirements -> SS control -> client implementation -> reusable evidence`
 
-## Control domains V1
+The synthetic Care and Supplier executions added an important refinement:
+
+`SS control -> testable assertions -> client claims/evidence`
+
+The control remains stable and reusable; assertions let us assess distinct aspects without inventing a new top-level control for every questionnaire wording.
+
+## Control domains V1.1
 
 | Code | Domain | Intent |
 |---|---|---|
@@ -28,14 +34,17 @@ SolidSecurity instead models:
 | RISK | Risk management | identify, assess, treat and review risk |
 | ASSET | Assets & information | know systems, information and critical dependencies |
 | ACCESS | Identity & access | authenticated, least-privilege and reviewed access |
-| OPS | Secure operations | configuration, vulnerability, change and operational hygiene |
+| OPS | Secure operations | vulnerability, update and operational hygiene |
+| DEV | Secure development | security in software/change lifecycle |
+| CRYPTO | Cryptographic protection | risk-appropriate protection and key practices |
+| MON | Security logging & monitoring | record and detect material security events |
 | INC | Incident management | detect, respond, report and learn |
 | RES | Resilience & continuity | backup, restore, continuity and recovery |
 | SUP | Supplier & chain security | identify and manage third-party risk |
-| PRIV | Privacy & data governance | lawful/controlled personal-data processing and security |
+| PRIV | Privacy & data governance | controlled personal-data processing and safeguards |
 | AI | AI governance | inventory, classify, govern and oversee AI use |
 | PEOPLE | People & awareness | competence, training and responsibilities |
-| ASSURE | Assurance & improvement | evidence, review, audit, effectiveness and corrective action |
+| ASSURE | Assurance & improvement | evidence, review, testing, audit and corrective action |
 
 ## Control identifier
 
@@ -52,7 +61,6 @@ Required public-safe fields:
 - `title`
 - `objective`
 - `control_type`
-- `implementation_guidance_public`
 - `default_evidence_classes`
 - `minimum_review_class`
 - `lifecycle_state`
@@ -64,6 +72,19 @@ Private/controlled fields later may include:
 - accumulated remediation recipes;
 - customer benchmarking;
 - commercially sensitive crosswalk weighting.
+
+## Control assertions
+
+Assertions are subordinate test points, not new framework obligations. They are useful when a control has multiple independently testable aspects.
+
+Example `SS-ACCESS-002 Access lifecycle` assertions:
+
+- joiner access is approved;
+- mover access is adjusted;
+- leaver access is removed promptly;
+- access is periodically recertified.
+
+A control result may aggregate assertion results, but unresolved material assertions remain visible.
 
 ## Mapping fields
 
@@ -80,21 +101,14 @@ A requirement-to-control mapping must include:
 
 ## Intellectual-property/copyright rule
 
-Do not copy protected ISO/NEN or third-party framework text into public controls unless redistribution is explicitly permitted. Prefer:
-
-- public legal requirement references;
-- clause/control identifiers;
-- internally authored summaries;
-- internally authored generic control objectives.
-
-Cost-free access to a standard is not assumed to equal redistribution rights.
+Do not copy protected ISO/NEN or third-party framework text into public controls unless redistribution is explicitly permitted. Prefer public legal references, clause/control identifiers, internally authored summaries and internally authored generic control objectives.
 
 ## Proof relationship
 
-Control existence alone proves nothing about a customer.
+Control or policy existence alone proves nothing about a customer. For a client, controls/assertions progress through claims, evidence, assessment and review. A generated policy can at most help show `Designed`; it does not establish operational effectiveness.
 
-For a client, the control must progress through the Proof Ladder using implementation claims, evidence and review. See `model/proof_ladder.yaml`.
+## Scope rule
 
-## V1 scope rule
+Keep the smallest control set that covers distinct operational objectives in the target workflows. Add a control only when a real workflow exposes a materially distinct objective that cannot be cleanly represented by an existing control/assertion.
 
-Start with the smallest control set that can support the Care and Supplier service workflows. Do not import every control from every framework. Add a control only when it represents a distinct operational objective that cannot be cleanly covered by an existing control.
+The Supplier Beta synthetic case justified exactly four additions: secure development, cryptography, logging/monitoring and independent technical testing. No broad framework import follows from that finding.
