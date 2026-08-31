@@ -12,6 +12,11 @@ on:
       - 'tools/validate_claims.py'
       - 'tools/validate_runtime_acceptance.py'
       - 'requirements-validation.txt'
+      - 'README.md'
+      - 'ROADMAP.md'
+      - 'control/CURRENT_STATE.md'
+      - 'control/SOLIDSECURITY_MISSION_CONTRACT_V1.md'
+      - 'docs/MISSION_DRIVEN_WORKFLOW.md'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
 
