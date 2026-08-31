@@ -48,7 +48,8 @@ create table solidsecurity_contract.control_assertion (
   control_id text not null references solidsecurity_contract.control(control_id),
   statement text not null,
   materiality text not null,
-  lifecycle_state text not null
+  lifecycle_state text not null,
+  unique(control_id, assertion_id)
 );
 
 create table solidsecurity_contract.requirement_control_map (
@@ -231,7 +232,7 @@ create table solidsecurity_contract.evidence_version (
   sensitivity text not null,
   created_at timestamptz not null,
   unique(tenant_id, evidence_id, version_no),
-  unique(tenant_id, object_key, sha256)
+  unique(tenant_id, object_key)
 );
 
 create table solidsecurity_contract.implementation_evidence_link (
@@ -422,7 +423,6 @@ create table solidsecurity_contract.approved_assertion (
   expires_at timestamptz,
   review_status text not null,
   review_id uuid references solidsecurity_contract.professional_review(review_id),
-  reviewer_membership_id uuid references solidsecurity_contract.membership(membership_id),
   allowed_uses jsonb not null default '[]'::jsonb,
   customer_specific_exclusions text,
   assurance_labels jsonb not null default '{}'::jsonb,
@@ -435,9 +435,11 @@ create table solidsecurity_contract.approved_assertion_control_link (
   tenant_id uuid not null references solidsecurity_contract.tenant(tenant_id),
   approved_assertion_id uuid not null references solidsecurity_contract.approved_assertion(approved_assertion_id),
   control_id text not null references solidsecurity_contract.control(control_id),
-  assertion_id text references solidsecurity_contract.control_assertion(assertion_id),
+  assertion_id text,
   created_at timestamptz not null,
-  unique(approved_assertion_id, control_id, assertion_id)
+  unique(approved_assertion_id, control_id, assertion_id),
+  foreign key (control_id, assertion_id)
+    references solidsecurity_contract.control_assertion(control_id, assertion_id)
 );
 
 create table solidsecurity_contract.approved_assertion_evidence_link (
@@ -479,7 +481,7 @@ create table solidsecurity_contract.recurring_review (
 -- Runtime implementation requirements (not DDL implemented here):
 -- 1. Enable RLS on every tenant-owned table and enforce membership-derived tenant context.
 -- 2. Add same-tenant FK/trigger/policy guards where ordinary foreign keys cannot express tenant equality.
--- 3. Evidence/report object keys resolve only through private, tenant-authorized object access.
+-- 3. Evidence object keys are immutable/versioned locators; object-store writes may not replace bytes at an existing tenant/key. Report object keys remain private and tenant-authorized.
 -- 4. evidence_version is append-only after ingestion; updates that alter object/hash are forbidden.
 -- 5. audit_event metadata excludes raw evidence bodies, secrets and unnecessary prompt content.
 -- 6. service/agent identities cannot exercise human-only authoritative review/decision/approval states.
