@@ -287,7 +287,7 @@ No database-per-client, custom KMS or active-active multi-cloud is a default.
 
 ## Mission development loop
 
-`Mission Contract -> authoritative state -> highest-priority eligible evidence gap -> governed workpackage -> implementation -> B0 deterministic validation -> B1 independent review where required -> integration -> authoritative mission-state update -> next gap`
+`Mission Contract -> authoritative state -> highest-priority eligible evidence gap -> one Minimal Core task -> bounded claim / START_PROVEN -> immutable exact-run result -> at most one predefined successor -> deterministic validation and exact-head B1 where required -> governed integration -> authoritative mission-state update -> next gap`
 
 The canonical Control queue remains the only autonomous project queue.
 
