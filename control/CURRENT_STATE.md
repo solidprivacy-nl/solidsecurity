@@ -72,7 +72,7 @@ The current Control loop is:
 
 ## Current next product objective
 
-After convergence of the existing foundation/runtime chain, freeze the minimum relational/domain model required by the accepted managed-service workflow before migrations or UI implementation create avoidable lock-in.
+After Mission System V1 becomes authoritative, freeze the minimum relational/domain model required by the accepted managed-service workflow before migrations or UI implementation create avoidable lock-in.
 
 See `ROADMAP.md` and `docs/MISSION_DRIVEN_WORKFLOW.md`.
 
@@ -86,8 +86,8 @@ See `docs/PUBLIC_REPO_POLICY.md`.
 
 ## Current gates
 
-1. Converge the existing cumulative foundation/runtime candidate onto current `main` with fresh exact-head B1 assurance.
-2. Reconcile this Mission System candidate onto that authoritative base and remove obsolete Control-lifecycle concepts.
-3. Independently assure and integrate the Mission System exact head.
-4. Reconcile/assure M1 and later Mission R2 candidates in dependency order.
-5. Keep real client data prohibited until the pilot/runtime/data-governance gate is explicitly satisfied and authorized.
+1. Cumulative foundation/runtime convergence is authoritative on `main` through governed PR #24 integration.
+2. This Mission System V1 candidate is reconciled onto that authoritative base; the current gate is fresh exact-head independent B1 assurance of the repaired candidate, followed by governed integration on PASS.
+3. After Mission System V1 is authoritative, reconcile and independently assure M1 PR #29 against current `main` before integration.
+4. After M1 is authoritative, reconcile and independently assure Mission R2 PR #37 in dependency order before starting its executable assurance-kernel work.
+5. Keep real client data prohibited until the pilot/runtime/data-governance/professional gate is explicitly satisfied and authorized.
