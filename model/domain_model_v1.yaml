@@ -94,6 +94,7 @@ client_entities:
     tenant_owned: true
     key: evidence_version_id
     immutable_after_ingest: true
+    immutable_object_locator: true
     fields: [tenant_id, evidence_id, version_no, object_key, sha256, byte_size, media_type, source, captured_by_actor_type, captured_by_membership_id, captured_at, valid_from, expires_at, coverage_scope, coverage_period, population, sample_basis, limitations, sensitivity, created_at]
   ImplementationEvidenceLink:
     tenant_owned: true
@@ -154,7 +155,7 @@ client_entities:
   ApprovedAssertion:
     tenant_owned: true
     key: approved_assertion_id
-    fields: [tenant_id, canonical_wording, scope_id, valid_from, expires_at, review_status, review_id, reviewer_membership_id, allowed_uses, customer_specific_exclusions, assurance_labels, created_at, updated_at]
+    fields: [tenant_id, canonical_wording, scope_id, valid_from, expires_at, review_status, review_id, allowed_uses, customer_specific_exclusions, assurance_labels, created_at, updated_at]
   ApprovedAssertionControlLink:
     tenant_owned: true
     key: approved_assertion_control_link_id
