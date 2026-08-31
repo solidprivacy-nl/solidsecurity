@@ -1,0 +1,218 @@
+version: 1
+status: M1_CANDIDATE
+mission_gap: SS-GAP-01
+runtime_topology:
+  relational_store: shared_postgresql
+  tenant_boundary: tenant_id
+  object_store: private_shared_object_store
+  database_per_client_default: false
+  file_bytes_in_postgresql: false
+
+roles:
+  - platform_admin
+  - professional_reviewer
+  - operations_contributor
+  - client_admin
+  - client_contributor
+  - client_reader
+  - agent_service
+
+catalog_entities:
+  Source:
+    tenant_owned: false
+    key: source_id
+  Framework:
+    tenant_owned: false
+    key: framework_id
+  Requirement:
+    tenant_owned: false
+    key: requirement_id
+  Control:
+    tenant_owned: false
+    key: control_id
+  ControlAssertion:
+    tenant_owned: false
+    key: assertion_id
+  RequirementControlMap:
+    tenant_owned: false
+    key: mapping_id
+
+identity_entities:
+  UserIdentity:
+    tenant_owned: false
+    key: user_id
+    supports_nonhuman_service_identity: true
+    fields: [identity_type, auth_provider, auth_subject, display_name, status, created_at]
+
+client_entities:
+  Tenant:
+    tenant_root: true
+    tenant_owned: false
+    key: tenant_id
+    fields: [name, status, created_at, updated_at]
+  Organization:
+    tenant_owned: true
+    key: organization_id
+    fields: [tenant_id, legal_name, registration_ref, organization_type, status, created_at, updated_at]
+  OrganizationalScope:
+    tenant_owned: true
+    key: scope_id
+    fields: [tenant_id, organization_id, name, description, scope_type, status, created_at, updated_at]
+  Membership:
+    tenant_owned: true
+    key: membership_id
+    fields: [tenant_id, user_id, role, status, created_at, revoked_at]
+  Engagement:
+    tenant_owned: true
+    key: engagement_id
+    fields: [tenant_id, service_variant, status, starts_at, ends_at, review_cadence, created_at, updated_at]
+  EngagementScope:
+    tenant_owned: true
+    key: engagement_scope_id
+    fields: [tenant_id, engagement_id, scope_id]
+  ApplicabilityDecision:
+    tenant_owned: true
+    key: applicability_id
+    fields: [tenant_id, scope_id, target_type, requirement_id, control_id, assertion_id, status, rationale, proposed_by_actor_type, reviewed_by_membership_id, reviewed_at, created_at, updated_at]
+  ClientImplementation:
+    tenant_owned: true
+    key: implementation_id
+    fields: [tenant_id, scope_id, control_id, description, owner_membership_id, implementation_status, declared_at, source_of_claim, created_at, updated_at]
+  Vendor:
+    tenant_owned: true
+    key: vendor_id
+    fields: [tenant_id, name, service, criticality, status, owner_membership_id, created_at, updated_at]
+  AIUseCase:
+    tenant_owned: true
+    key: ai_use_case_id
+    fields: [tenant_id, name, purpose, provider_vendor_id, data_classes, user_population, preliminary_classification, human_oversight, status, created_at, updated_at]
+  Evidence:
+    tenant_owned: true
+    key: evidence_id
+    fields: [tenant_id, scope_id, title, evidence_type, status, created_at, updated_at]
+  EvidenceVersion:
+    tenant_owned: true
+    key: evidence_version_id
+    immutable_after_ingest: true
+    immutable_object_locator: true
+    fields: [tenant_id, evidence_id, version_no, object_key, sha256, byte_size, media_type, source, captured_by_actor_type, captured_by_membership_id, captured_at, valid_from, expires_at, coverage_scope, coverage_period, population, sample_basis, limitations, sensitivity, created_at]
+  ImplementationEvidenceLink:
+    tenant_owned: true
+    key: implementation_evidence_link_id
+    fields: [tenant_id, implementation_id, evidence_version_id, relationship, created_at]
+  Assessment:
+    tenant_owned: true
+    key: assessment_id
+    fields: [tenant_id, scope_id, target_type, control_id, assertion_id, implementation_id, result, confidence, rationale, uncertainties, proposed_proof_level, state, assessor_actor_type, assessor_membership_id, created_at, updated_at]
+  AssessmentEvidenceLink:
+    tenant_owned: true
+    key: assessment_evidence_link_id
+    fields: [tenant_id, assessment_id, evidence_version_id, relationship, created_at]
+  Finding:
+    tenant_owned: true
+    key: finding_id
+    fields: [tenant_id, assessment_id, category, severity, title, description, status, created_at, updated_at]
+  Action:
+    tenant_owned: true
+    key: action_id
+    fields: [tenant_id, finding_id, owner_membership_id, title, description, priority, due_at, verification_criteria, status, created_at, updated_at]
+  ClientRequest:
+    tenant_owned: true
+    key: request_id
+    fields: [tenant_id, engagement_id, request_type, subject, question, requested_from_membership_id, due_at, status, created_by_membership_id, created_at, updated_at]
+  ClientResponse:
+    tenant_owned: true
+    key: response_id
+    fields: [tenant_id, request_id, responder_membership_id, response_text, evidence_version_id, created_at]
+  AIProposal:
+    tenant_owned: true
+    key: ai_proposal_id
+    authoritative: false
+    fields: [tenant_id, engagement_id, proposal_type, target_type, target_id, model_provider, model_id, policy_version, input_refs, output_ref, state, created_at]
+  ReviewQueueItem:
+    tenant_owned: true
+    key: review_queue_item_id
+    fields: [tenant_id, object_type, object_id, reason, priority, required_review_class, assigned_membership_id, status, created_at, updated_at]
+  ProfessionalReview:
+    tenant_owned: true
+    human_authority_required: true
+    key: review_id
+    fields: [tenant_id, review_queue_item_id, reviewer_membership_id, independence_class, decision, comments, reviewed_at, created_at]
+  Decision:
+    tenant_owned: true
+    human_authority_for_material_decisions: true
+    key: decision_id
+    fields: [tenant_id, object_type, object_id, decision_type, outcome, rationale, authorized_by_membership_id, effective_at, expires_at, created_at]
+  Approval:
+    tenant_owned: true
+    human_authority_required: true
+    key: approval_id
+    fields: [tenant_id, object_type, object_id, approval_type, approved_by_membership_id, outcome, comments, approved_at, created_at]
+  Report:
+    tenant_owned: true
+    key: report_id
+    fields: [tenant_id, engagement_id, report_type, period_start, period_end, status, object_key, sha256, generated_at, approved_by_membership_id, approved_at, created_at]
+  ApprovedAssertion:
+    tenant_owned: true
+    key: approved_assertion_id
+    fields: [tenant_id, canonical_wording, scope_id, valid_from, expires_at, review_status, review_id, allowed_uses, customer_specific_exclusions, assurance_labels, created_at, updated_at]
+  ApprovedAssertionControlLink:
+    tenant_owned: true
+    key: approved_assertion_control_link_id
+    fields: [tenant_id, approved_assertion_id, control_id, assertion_id, created_at]
+  ApprovedAssertionEvidenceLink:
+    tenant_owned: true
+    key: approved_assertion_evidence_link_id
+    fields: [tenant_id, approved_assertion_id, evidence_version_id, created_at]
+  AuditEvent:
+    tenant_owned: true
+    append_oriented: true
+    key: audit_event_id
+    fields: [tenant_id, actor_type, actor_membership_id, action, object_type, object_id, metadata_safe, occurred_at]
+  RecurringReview:
+    tenant_owned: true
+    key: recurring_review_id
+    fields: [tenant_id, object_type, object_id, review_type, due_at, cadence, status, assigned_membership_id, last_completed_at, created_at, updated_at]
+
+required_separations:
+  - [Requirement, Control]
+  - [Control, ClientImplementation]
+  - [ClientImplementation, Evidence]
+  - [Evidence, Assessment]
+  - [Assessment, ProfessionalReview]
+  - [AIProposal, ProfessionalReview]
+  - [AIProposal, Decision]
+
+relationships:
+  - [Framework, contains, Requirement]
+  - [Control, contains, ControlAssertion]
+  - [RequirementControlMap, links, Requirement]
+  - [RequirementControlMap, links, Control]
+  - [Tenant, owns, Organization]
+  - [Tenant, owns, Membership]
+  - [Organization, contains, OrganizationalScope]
+  - [EngagementScope, links, Engagement]
+  - [EngagementScope, links, OrganizationalScope]
+  - [ClientImplementation, implements, Control]
+  - [Evidence, has_version, EvidenceVersion]
+  - [ImplementationEvidenceLink, links, ClientImplementation]
+  - [ImplementationEvidenceLink, links, EvidenceVersion]
+  - [AssessmentEvidenceLink, links, Assessment]
+  - [AssessmentEvidenceLink, links, EvidenceVersion]
+  - [Assessment, produces, Finding]
+  - [Finding, drives, Action]
+  - [ClientRequest, receives, ClientResponse]
+  - [ReviewQueueItem, routes_to, ProfessionalReview]
+  - [ProfessionalReview, may_authorize, Decision]
+  - [ApprovedAssertionControlLink, links, ApprovedAssertion]
+  - [ApprovedAssertionControlLink, links, Control]
+  - [ApprovedAssertionControlLink, optionally_links, ControlAssertion]
+  - [ApprovedAssertionEvidenceLink, links, ApprovedAssertion]
+  - [ApprovedAssertionEvidenceLink, links, EvidenceVersion]
+
+prohibited_v1_tables:
+  - per_framework_client_checklist
+  - ai_final_compliance_verdict
+  - evidence_blob_bytes
+  - customer_database_registry
+  - autonomous_risk_acceptance
