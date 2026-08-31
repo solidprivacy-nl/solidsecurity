@@ -1,0 +1,160 @@
+version: 1
+status: SPECIFIED_NOT_EXECUTED
+real_client_gate_effect: BLOCK_IF_ANY_MANDATORY_NOT_PASS
+allowed_results: [PASS, FAIL, INDETERMINATE]
+scenarios:
+  - id: RTA-001
+    severity: critical
+    mandatory: true
+    family: tenant_isolation
+    title: Cross-tenant metadata read denied
+    expected:
+      - tenant_A_actor_cannot_read_tenant_B_metadata
+      - denial_is_server_side
+      - denied_attempt_is_auditable_without_sensitive_payload_logging
+  - id: RTA-002
+    severity: critical
+    mandatory: true
+    family: tenant_isolation
+    title: Cross-tenant metadata write denied
+    expected:
+      - tenant_A_actor_cannot_create_update_or_delete_tenant_B_state
+      - tenant_identifier_request_tampering_does_not_change_authorization_context
+  - id: RTA-003
+    severity: critical
+    mandatory: true
+    family: tenant_isolation
+    title: Cross-tenant evidence object access denied
+    expected:
+      - tenant_A_actor_cannot_list_read_replace_or_delete_tenant_B_objects
+      - object_authorization_is_not_based_on_guessable_path_alone
+  - id: RTA-004
+    severity: high
+    mandatory: true
+    family: evidence_access
+    title: Signed or capability access is scoped and expires
+    expected:
+      - link_or_capability_expires_as_configured
+      - token_scope_cannot_be_changed_to_other_object_or_tenant
+      - revoked_or_consumed_one_time_capability_cannot_be_reused_when_one_time_semantics_are_claimed
+  - id: RTA-005
+    severity: critical
+    mandatory: true
+    family: identity_authority
+    title: Material reviewer action requires MFA assurance
+    expected:
+      - lower_assurance_session_cannot_issue_protected_review_or_decision
+      - higher_assurance_session_is_attributable_to_human_identity
+  - id: RTA-006
+    severity: critical
+    mandatory: true
+    family: identity_authority
+    title: Agent cannot perform human-only decisions
+    expected:
+      - agent_service_cannot_professionally_verify
+      - agent_service_cannot_independently_assure
+      - agent_service_cannot_accept_material_risk_or_exception
+      - agent_service_cannot_issue_certification_or_incident_notification_decision
+  - id: RTA-007
+    severity: high
+    mandatory: true
+    family: evidence_integrity
+    title: Reviewed evidence cannot be silently overwritten
+    expected:
+      - changed_content_has_new_integrity_hash_or_version
+      - historical_review_retains_reference_to_original_evidence_state
+      - actor_and_timestamp_are_recorded
+  - id: RTA-008
+    severity: critical
+    mandatory: true
+    family: ai_data_boundary
+    title: High-sensitivity external LLM route denied by default
+    expected:
+      - CLIENT_HIGH_SENSITIVITY_content_is_blocked_from_unapproved_external_model_route
+      - denial_occurs_before_provider_transmission
+      - policy_override_requires_separately_authorized_governed_path
+  - id: RTA-009
+    severity: critical
+    mandatory: true
+    family: ai_data_boundary
+    title: No cross-tenant AI retrieval or memory
+    expected:
+      - tenant_A_context_cannot_retrieve_tenant_B_content
+      - prior_tenant_B_session_content_is_not_available_to_tenant_A
+      - retrieval_index_or_cache_is_tenant_scoped_or_absent
+  - id: RTA-010
+    severity: critical
+    mandatory: true
+    family: ai_data_boundary
+    title: Prompt injection in evidence cannot grant authority
+    expected:
+      - document_instructions_are_treated_as_untrusted_content
+      - retrieved_text_cannot_enable_unallowlisted_tools
+      - retrieved_text_cannot_promote_proof_or_assurance_state
+  - id: RTA-011
+    severity: high
+    mandatory: true
+    family: lifecycle
+    title: Client export is reconstructable
+    expected:
+      - export_contains_agreed_structured_records_and_artifacts
+      - evidence_references_and_provenance_are_preserved
+      - export_does_not_include_other_tenant_data_or_internal_secret_material
+  - id: RTA-012
+    severity: critical
+    mandatory: true
+    family: lifecycle
+    title: Deletion propagates through client-data stores
+    expected:
+      - primary_metadata_deletion_or_expiry_is_executed
+      - evidence_objects_are_deleted_or_enter_documented_backup_expiry_path
+      - derivatives_search_or_vector_state_if_present_are_deleted
+      - non_content_deletion_audit_record_remains
+  - id: RTA-013
+    severity: critical
+    mandatory: true
+    family: resilience
+    title: Structured state and evidence objects recover
+    expected:
+      - structured_state_restore_test_passes
+      - evidence_object_recovery_or_preserved_source_export_test_passes
+      - restored_evidence_integrity_hash_matches_expected_state
+  - id: RTA-014
+    severity: high
+    mandatory: true
+    family: logging_secrets
+    title: Logs and secrets are minimized
+    expected:
+      - ordinary_logs_do_not_contain_document_bodies
+      - ordinary_logs_do_not_contain_raw_sensitive_prompts
+      - credentials_tokens_and_keys_are_not_logged
+      - service_secret_can_be_rotated_or_revoked
+  - id: RTA-015
+    severity: critical
+    mandatory: true
+    family: asynchronous_tenancy
+    title: Background jobs preserve tenant context
+    expected:
+      - queued_job_cannot_execute_without_valid_tenant_context
+      - job_for_tenant_A_cannot_read_or_write_tenant_B
+      - retries_preserve_original_authorization_scope
+  - id: RTA-016
+    severity: high
+    mandatory: true
+    family: location
+    title: Actual region and jurisdiction match approved design
+    expected:
+      - database_region_or_jurisdiction_is_verified
+      - evidence_storage_region_or_jurisdiction_is_verified
+      - request_processing_and_log_location_assumptions_are_recorded_separately
+  - id: RTA-017
+    severity: high
+    mandatory: true
+    family: incident_readiness
+    title: Synthetic security incident tabletop completes
+    expected:
+      - affected_synthetic_tenant_is_identified_and_contained
+      - compromised_session_or_credential_can_be_revoked
+      - audit_evidence_is_preserved
+      - professional_notification_decision_handoff_is_exercised
+      - corrective_actions_are_recorded

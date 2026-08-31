@@ -1,0 +1,81 @@
+version: 1
+status: DESIGN_ONLY
+real_client_data_allowed: false
+
+principles:
+  - simplest_safe_architecture_first
+  - one_shared_database_by_default
+  - tenant_isolation_must_be_proven
+  - evidence_versions_are_immutable
+  - backup_is_not_recovery_until_restored
+  - complexity_requires_concrete_justification
+
+planes:
+  control:
+    authoritative_for: [methodology, schemas, migrations, software, mission]
+    client_data_prohibited: true
+  structured_state:
+    candidate: shared_postgres
+    isolation: multi_tenant
+    tenant_id_required: true
+    rls_or_equivalent_required: true
+  primary_evidence:
+    candidate: private_object_storage
+    tenant_scoped: true
+    reviewed_version_overwrite: false
+  offsite_backup:
+    type: independent_commodity_storage
+    protocol_options: [sftp, s3_compatible, rclone, restic, equivalent]
+    live_application_store: false
+    nightly_default: true
+    optional_third_copy: true
+
+object_identity:
+  pattern: tenants/{tenant_uuid}/evidence/{evidence_uuid}/versions/{version_uuid}.bin
+  sensitive_names_in_key: prohibited
+  hash: sha256
+  immutable_versions: true
+
+encryption:
+  transit: tls_required
+  provider_at_rest: required
+  offsite_backup_encryption: required
+  custom_application_crypto_default: false
+  kms_required_by_default: false
+  key_material_in_git: prohibited
+
+backup:
+  cadence: nightly
+  database_method: logical_dump_or_equivalent
+  evidence_method: incremental_sync_or_export
+  checksum_manifest: required
+  failed_or_late_alert: required
+  independent_credentials: required
+  third_copy: optional
+
+restore_tests:
+  - id: database_restore
+    verifies: [backup_readable, schema_load, relational_integrity]
+  - id: evidence_sample_restore
+    verifies: [object_retrieval, content_hash]
+  - id: synthetic_tenant_reconstruction
+    verifies: [structured_state, evidence_versions, tenant_isolation]
+
+retention:
+  universal_duration_hardcoded: false
+  policy_driven_by: [data_category, contract, applicable_obligation]
+  backup_expiry_disclosed: true
+
+escalation_triggers:
+  - customer_requires_dedicated_infrastructure
+  - required_recovery_point_shorter_than_nightly_backup
+  - threat_model_requires_application_level_encryption
+  - scale_makes_shared_database_inappropriate
+  - restore_testing_exposes_material_weakness
+
+explicitly_deferred:
+  - database_per_client
+  - active_active_multi_cloud_database
+  - custom_kms_or_envelope_encryption_stack
+  - realtime_cross_provider_replication
+  - multiple_recovery_service_tiers_without_demand
