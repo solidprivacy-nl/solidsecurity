@@ -193,49 +193,58 @@ PostgreSQL logical backup + evidence object sync/export
 
 # C. Mission-driven development workflow
 
-This flow determines what product/service capability is built next.
+This flow determines what product/service capability is built next. It uses the current Control Minimal Core lifecycle; no SolidSecurity-specific orchestration layer exists.
 
 ## C1. Authoritative mission
 
-The canonical machine-readable SolidSecurity mission resides in `market-predictions/control-plane/control/missions/SOLIDSECURITY.mission.json` once independently assured and integrated there.
+The canonical machine-readable SolidSecurity mission resides in `market-predictions/control-plane/control/missions/SOLIDSECURITY.mission.json` when that revision is independently assured and integrated.
 
 The local human-readable contract is `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`.
 
 ## C2. State reconstruction
 
-Before deriving work, Control reads authoritative repository/project state. Chat memory is context only and cannot establish completion.
+Before deriving work, Control reads authoritative repository/project/runtime state. Chat memory is context only and cannot establish completion, execution or assurance.
 
-## C3. Gap selection
+## C3. Work selection
 
-Control selects the lowest-priority-number eligible OPEN gap whose dependencies are satisfied.
+Choose the highest-priority eligible unsatisfied mission work whose dependencies are satisfied.
 
-A gap should normally correspond to one meaningful mission capability, not a grab bag of unrelated implementation tasks.
+One Minimal Core task should represent one immutable purpose/operation. Do not combine unrelated implementation objectives merely to reduce issue count.
 
-## C4. Existing Control intake and queue
+## C4. Single authoritative queue
 
-The Mission System emits existing `PROJECT_INTAKE_V1`-compatible work with mission lineage. It enters the existing `DISPATCH_QUEUE.json`; no second SolidSecurity queue is created.
+Authorized work is materialized directly as one validated task in the existing `control/DISPATCH_QUEUE.json` authority. There is no separate project intake state plane, handover lifecycle, retry lineage or SolidSecurity scheduler.
 
-## C5. Worker A
+The task reserves only its immediate predefined successor.
 
-Worker A implements the narrowest change that advances the selected mission criterion while preserving project-local authority boundaries.
+## C5. Worker claim / START_PROVEN
 
-Worker A may discover that the requested architecture is unnecessarily complex. In that case it should simplify rather than maximizing delivered artifacts.
+A scheduler or chat wake-up is not execution evidence. A bounded authoritative claim proves execution start.
 
-## C6. Worker B
+- A1/A2 perform implementation, repair or project integration work.
+- B1 performs independent exact-head assurance.
+- role capacity and repository exclusivity remain enforced by Control.
 
-Consequential candidates receive independent exact-head assurance under the existing Control/project assurance rules.
+## C6. Immutable result and successor
 
-Work completion or implementation-side confidence cannot mark a mission criterion satisfied.
+Each execution produces an exact-task/exact-run immutable result.
 
-## C7. Integration and mission-state update
+- implementation `COMPLETED` may materialize exactly one ASSURANCE successor;
+- implementation `BLOCKED` creates no semantic successor;
+- assurance `PASS` may materialize exactly one PROJECT_INTEGRATION successor;
+- assurance `FAIL` may materialize exactly one REPAIR successor;
+- assurance `INDETERMINATE` creates no semantic successor;
+- infrastructure/transport failure is not a semantic verdict and does not create a retry tree.
 
-After authorized integration, authoritative evidence is evaluated against the mission criterion. The gap is marked SATISFIED only when the outcome evidence is sufficient.
+## C7. Governed integration and mission-state update
 
-Control can then derive the next eligible gap.
+After exact-head PASS and governed integration, authoritative outcome evidence is evaluated against the mission criterion. A gap is SATISFIED only when the evidence is sufficient, not merely because a PR merged.
 
-## C8. Repair loop
+Control can then select or materialize the next eligible mission work.
 
-If assurance returns FAIL/INDETERMINATE, the existing repair lifecycle applies. The mission layer does not skip the failed gate or create a substitute queue.
+## C8. Exact-head rule
+
+Consequential candidates are frozen to their exact candidate SHA for B1. If the candidate changes, assurance must be refreshed. B1 is read-only and cannot repair, merge, release or deploy.
 
 ---
 
