@@ -1,0 +1,180 @@
+version: 2
+status: MISSION_R2_CANDIDATE
+mission_revision: 2026-08-20-r2
+governance_issue: 31
+supersedes: 2026-08-15-r1
+
+mission:
+  outcome: "Aantoonbaar in control, zonder eigen complianceafdeling."
+  category: managed_security_and_compliance
+  delivery_model: managed_service_with_software_leverage
+  primary_launch_track: care
+  secondary_reuse_track: supplier
+
+launch_icp:
+  primary:
+    segment: dutch_care
+    commercial_size_hypothesis: "roughly 50-250 FTE; not a legal applicability rule"
+    required_characteristics:
+      - demonstrable_security_compliance_pressure
+      - meaningful_operational_complexity
+      - budget_for_managed_professional_service
+      - no_proportionate_internal_ciso_compliance_function
+    regulatory_positioning:
+      direct_cbw_claim_requires_explicit_applicability_decision: true
+      small_provider_default_levers:
+        - NEN_7510_Wabvpz
+        - IGJ_expectations
+        - GDPR_privacy
+        - contractual_customer_chain_pressure
+        - responsible_AI_governance_where_relevant
+  secondary:
+    segment: compliance_exposed_supplier
+    mode: reuse_and_expansion
+    promote_to_primary_only_if: measured_market_evidence_outranks_care
+
+evidence_classes:
+  E0_DESIGN:
+    proves: [design_existence, internal_consistency, deterministic_constraints]
+    cannot_prove: [customer_usability, willingness_to_pay, real_workload, commercial_viability]
+  E1_SYNTHETIC:
+    proves: [model_fit, structural_traceability, workflow_coverage, machine_invariants]
+    cannot_prove: [real_customer_behavior, evidence_availability, response_latency, acquisition, willingness_to_pay, achieved_unit_economics]
+  E2_CONTROLLED_REAL_CLIENT:
+    proves: [actual_dossier_friction, evidence_availability, customer_burden, professional_review_burden, measured_delivery_effort]
+  E3_MARKET_COMMERCIAL:
+    proves: [icp_hypothesis, positioning_hypothesis, channel_hypothesis, pricing_hypothesis]
+    proof_strength_limited_by_sample: true
+  E4_REPEATED_OPERATIONAL:
+    proves: [recurring_workload_patterns, review_outcomes, evidence_reuse, remediation_patterns, retention, margin, service_reliability]
+
+proof_substitution_rules:
+  synthetic_cannot_satisfy_real_client_criterion: true
+  design_cannot_satisfy_market_criterion: true
+  lower_evidence_class_cannot_replace_required_higher_class: true
+
+professional_trust_domains:
+  product_change_assurance:
+    mechanism: worker_a_worker_b_exact_head
+    customer_assurance_qualification: false
+  customer_professional_review:
+    requires:
+      - review_class
+      - minimum_competence_expectation
+      - credential_expectation_if_applicable
+      - independence_requirement
+      - capacity_assumption
+      - loaded_cost_assumption
+      - escalation_path
+  external_independent_assurance:
+    internal_review_is_equivalent: false
+    certification_body_remains_external: true
+
+materiality:
+  definition: >-
+    An error, omission, conflict or unsupported conclusion is material when it could
+    meaningfully change management risk acceptance or prioritization, a customer-facing
+    assurance statement, regulatory/framework applicability, a statutory notification
+    decision, external audit/certification scope, significant security/privacy/continuity
+    exposure, contractual representation, or a significant financial, operational,
+    patient/client-safety or reputational decision.
+  automation_may_lower_required_review_class: false
+
+applicability_tailoring:
+  material_decision_required_fields:
+    - scope_facts
+    - source_framework_version
+    - rule_or_rationale
+    - uncertainty_or_exclusions
+    - proposer_actor_type
+    - required_review_class
+    - reviewer_or_decision_where_required
+    - effective_date
+    - reevaluation_trigger_or_expiry
+  ai_may_propose: true
+  material_legal_regulatory_applicability_requires_governed_human_decision: true
+
+evidence_semantics:
+  conflict_state: CONFLICT_DETECTED
+  conflict_behavior:
+    material_conflict_blocks_promotion: true
+    preserve_original_evidence: true
+    resolution_requires_rationale_reviewer_and_state_transition: true
+  expiry_behavior:
+    default_validity_must_be_explicit_where_used: true
+    stale_green_status_forbidden: true
+    expiry_reopens_or_downgrades_according_to_policy: true
+
+mapping_kernel:
+  required_demonstrations:
+    - one_requirement_to_multiple_controls
+    - partial_mapping
+    - coverage_gap
+    - orphan_requirement_detection
+    - orphan_control_detection
+  protected_source_text_copy_forbidden: true
+
+commercial_validation:
+  prices_are_hypotheses_until_measured: true
+  bottom_up_inputs:
+    - workflow_step
+    - professional_minutes
+    - reviewer_class
+    - loaded_professional_cost
+    - cadence
+    - customer_minutes
+    - ai_accept_modify_reject_rate
+    - evidence_reuse_ratio
+    - questionnaire_answer_reuse_ratio
+  validated_package_requires_real_measurement: true
+
+defensibility:
+  not_assumed_durable_moats:
+    - base_llm_access
+    - prompts_alone
+    - crosswalks_alone
+    - control_mapping_graph_alone
+  expected_compounding_assets:
+    - trusted_professional_delivery
+    - customer_and_channel_relationships
+    - accumulated_governed_client_history
+    - longitudinal_evidence_reuse
+    - approved_assertions_and_switching_costs
+    - measured_remediation_and_evidence_patterns
+    - operational_learning
+    - software_ai_leverage
+
+repository_ip:
+  public_repo_is_default_safe_for_proprietary_operating_ip: false
+  private_or_restricted_by_default:
+    - proprietary_mapping_detail
+    - evidence_sufficiency_rules
+    - private_prompts
+    - gtm_economics
+    - accumulated_operating_intelligence
+    - client_data
+    - secrets
+  public_safe_material_requires_deliberate_release_decision: true
+
+success_criteria_additions:
+  SS-SC-09: real_world_design_partner_validation
+  SS-SC-10: professional_trust_and_liability_readiness
+  SS-SC-11: launch_market_evidence
+  SS-SC-12: governed_ip_repository_posture
+
+active_sequence:
+  - R2-00_CURRENT_M1_CONVERGENCE
+  - R2-01_EXECUTABLE_ASSURANCE_KERNEL
+  - R2-02_LAUNCH_AND_TRUST_READINESS
+  - R2-03_BOUNDED_REAL_DESIGN_PARTNER
+  - R2-04_PRODUCTIZE_FROM_OBSERVED_FRICTION
+
+explicitly_deferred:
+  - broad_self_service_grc
+  - scanner_first_compliance
+  - database_per_client_default
+  - broad_connector_program
+  - oscal_interoperability
+  - white_label_platform
+  - benchmark_analytics
+  - autonomous_final_assurance
