@@ -12,7 +12,7 @@ SolidSecurity is an AI-enabled managed security & compliance service model for s
 
 Project mission/governance work: [issue #25](https://github.com/solidprivacy-nl/solidsecurity/issues/25)
 
-The governing project doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md). The intended machine-readable mission is registered through the canonical `market-predictions/control-plane` Mission System V1.
+The governing project doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md). Development is controlled through the existing Control Minimal Core lifecycle and its single authoritative dispatch queue.
 
 Development is deliberately **mission-first, service-first, evidence-first and simplest-safe-architecture-first**. Software is built only where it advances a measurable customer/service/assurance outcome.
 
@@ -64,11 +64,11 @@ Database-per-client, custom KMS/envelope encryption and active-active multi-clou
 
 ## Mission-driven development
 
-The intended development loop is:
+The current development lifecycle is intentionally small:
 
-`Mission Contract -> authoritative state -> highest-priority eligible gap -> PROJECT_INTAKE_V1 -> canonical Control queue -> Worker A -> Worker B assurance -> governed integration -> mission-state update -> next gap`
+`Mission Contract -> authoritative state -> eligible work -> one Minimal Core task -> bounded claim / START_PROVEN -> immutable result -> at most one predefined successor -> exact-head B1 where required -> governed integration -> mission-state update`
 
-The Control dispatch queue remains the single autonomous work queue.
+`control/DISPATCH_QUEUE.json` remains the single execution authority. SolidSecurity does not create its own intake state plane, retry lineage, scheduler or competing queue.
 
 ## Repository map
 
