@@ -14,6 +14,12 @@ on:
       - 'tools/validate_runtime_acceptance.py'
       - 'tools/validate_domain_model.py'
       - 'requirements-validation.txt'
+      - 'README.md'
+      - 'ROADMAP.md'
+      - 'control/CURRENT_STATE.md'
+      - 'control/SOLIDSECURITY_MISSION_CONTRACT_V1.md'
+      - 'docs/MISSION_DRIVEN_WORKFLOW.md'
+      - 'docs/DOMAIN_MODEL_V1.md'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
 

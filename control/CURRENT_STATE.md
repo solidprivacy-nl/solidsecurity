@@ -12,11 +12,11 @@ Current mission branch: `agent/mission-system-v1`
 
 Canonical project mission doctrine: `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`
 
-Canonical orchestration target: `market-predictions/control-plane` Mission System V1.
+Canonical execution lifecycle: Control Minimal Core V1 on `market-predictions/control-plane`.
 
 ## Authority
 
-On 2026-08-15 the principal authorized autonomous realization of the agreed SolidSecurity strategy, architecture, model, workflows and roadmap, and subsequently directed that development become mission-driven under the central Control Mission System.
+On 2026-08-15 the principal authorized autonomous realization of the agreed SolidSecurity strategy, architecture, model, workflows and roadmap, and subsequently directed that development become mission-driven under central Control.
 
 This does not authorize:
 
@@ -64,15 +64,15 @@ The accepted V1 direction is deliberately lean:
 
 ## Mission-driven development
 
-The intended control loop is:
+The current Control loop is:
 
-`Mission Contract -> authoritative repo state -> highest-priority eligible gap -> PROJECT_INTAKE_V1 -> canonical Control queue -> Worker A -> Worker B assurance -> governed integration -> mission-state update -> next gap`
+`Mission Contract -> authoritative state -> eligible work -> one Minimal Core task -> bounded claim / START_PROVEN -> immutable result -> at most one predefined successor -> exact-head B1 where required -> governed integration -> mission-state update`
 
-No SolidSecurity-specific competing autonomous queue is authorized.
+`control/DISPATCH_QUEUE.json` is the single execution authority. No SolidSecurity-specific intake state plane, retry tree, handover lifecycle or competing autonomous queue is authorized.
 
 ## Current next product objective
 
-Freeze the minimum relational/domain data model required by the accepted managed-service workflow before database migrations or UI implementation create avoidable lock-in.
+After Mission System V1 becomes authoritative, freeze the minimum relational/domain model required by the accepted managed-service workflow before migrations or UI implementation create avoidable lock-in.
 
 See `ROADMAP.md` and `docs/MISSION_DRIVEN_WORKFLOW.md`.
 
@@ -86,8 +86,8 @@ See `docs/PUBLIC_REPO_POLICY.md`.
 
 ## Current gates
 
-1. Reconcile/assure the stacked foundation/runtime candidates according to existing governance.
-2. Independently assure the mission-system candidate.
-3. Integrate the machine-readable `SOLIDSECURITY.mission.json` into the canonical Control mission registry.
-4. Let Control derive the next eligible SolidSecurity mission gap rather than relying on chat memory/manual prioritization.
-5. Keep real client data prohibited until the existing pilot/runtime/data-governance gate is explicitly satisfied and authorized.
+1. Cumulative foundation/runtime convergence is authoritative on `main` through governed PR #24 integration.
+2. This Mission System V1 candidate is reconciled onto that authoritative base; the current gate is fresh exact-head independent B1 assurance of the repaired candidate, followed by governed integration on PASS.
+3. After Mission System V1 is authoritative, reconcile and independently assure M1 PR #29 against current `main` before integration.
+4. After M1 is authoritative, reconcile and independently assure Mission R2 PR #37 in dependency order before starting its executable assurance-kernel work.
+5. Keep real client data prohibited until the pilot/runtime/data-governance/professional gate is explicitly satisfied and authorized.
