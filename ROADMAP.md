@@ -1,265 +1,313 @@
-# SolidSecurity Mission-Driven Roadmap
+# SolidSecurity Mission-Driven Roadmap R2
 
 ## Doctrine
 
-The roadmap is subordinate to `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md` and the canonical Control Mission Contract.
+This roadmap is subordinate to `control/SOLIDSECURITY_MISSION_CONTRACT_R2.md` once R2 is integrated. Until then, it is a successor candidate stacked after the current Mission V1 / M1 convergence chain.
 
-The roadmap does not exist to maximize delivered features. It exists to close the highest-value unsatisfied mission gaps with the smallest coherent change.
+The roadmap exists to retire the highest-value uncertainty with the smallest coherent, safe change.
 
 Core rules:
 
-- customer outcome over software output;
+- customer reality over internal completion;
 - managed service before self-service;
-- evidence and professional assurance before green status;
-- service workflow before integrations;
+- evidence and qualified professional review before assurance claims;
+- the right evidence class for the claim being made;
+- executable/falsifiable model before broad UI/platform work;
+- controlled real-world learning before broad productization;
 - simplest safe architecture first;
 - one common-control backbone rather than duplicated framework products;
+- mechanical B0 automation where safe, independent B1 where consequence warrants it;
 - mission evidence, not issue closure, determines progress.
 
-## Current completed/advanced foundation
+## What R2 preserves
 
-The existing foundation and synthetic work has already established substantial reusable doctrine:
+The review does **not** invalidate the load-bearing architecture already established:
 
-- positioning for Care and compliance-exposed suppliers;
-- common-control backbone;
+- requirement/control/client-implementation/evidence/assessment/review separation;
 - Proof Ladder;
 - AI Authority Matrix;
-- requirement/control/implementation/evidence/review separation;
-- synthetic Care and Supplier workflow findings;
-- provider-neutral pilot-readiness/security boundaries;
-- runtime acceptance contract;
-- service-claim authority boundaries;
-- lean shared data-resilience decision.
+- common-control architecture;
+- managed-service proposition;
+- Operator Workspace / Client Dashboard / Interaction Layer product model;
+- lean shared PostgreSQL + private object-store direction;
+- synthetic Care and Supplier model findings;
+- runtime/tenant/evidence safety requirements;
+- no scanner-pass-to-compliance shortcut;
+- no autonomous legal/compliance/certification/risk-acceptance authority.
 
-These are inputs to the mission. They are not themselves the finished product.
+## What R2 changes
+
+R2 changes the **order and standard of proof**:
+
+1. one launch ICP rather than two parallel GTM programs;
+2. a small executable assurance kernel before broader product surfaces;
+3. professional trust/liability/commercial/GTM readiness before customer-facing verified claims;
+4. a bounded real design partner earlier;
+5. product/runtime/UI choices after observed real friction rather than only synthetic friction;
+6. connector/interoperability/white-label work becomes non-committed until customer evidence justifies it.
 
 ---
 
-# Mission sequence
+# Active mission sequence
 
-The central machine-readable Control contract determines the exact eligible gap and work order. The sequence below is the human-readable product roadmap.
+## R2-00 — Complete current convergence and M1
 
-## M1 — Freeze the minimum domain/data model
+**Status:** already in flight before R2.  
+**Purpose:** preserve exact-head governance and finish the existing Mission V1/M1 chain rather than invalidating reviewed candidates.
 
-**Mission focus:** SS-SC-02, SS-SC-04, SS-SC-05, SS-SC-06.
+Existing M1 candidate already provides:
 
-Goal: define the smallest relational model that can run the managed-service workflow without later forcing avoidable data migrations.
+- machine-readable domain model;
+- non-migration PostgreSQL schema contract;
+- explicit tenant ownership;
+- evidence-version/hash semantics;
+- AI/human authority separation;
+- Supplier ApprovedAssertion provenance;
+- deterministic validation/CI.
 
-Must define at minimum:
-
-- tenant/organization/legal entity/organizational scope;
-- user/membership/role;
-- engagement/service variant;
-- source/requirement/control/control assertion;
-- client implementation;
-- evidence/evidence version;
-- assessment/finding/action;
-- client request/response;
-- AI proposal/provenance;
-- professional review/decision/approval;
-- report/approved assertion;
-- audit event;
-- recurring review/expiry state.
-
-Design constraint:
-
-`one shared Postgres + tenant_id + private object storage`.
+R2 must not silently edit the frozen M1 head. Any R2 model refinements land as successor changes after M1 governance completes.
 
 Exit evidence:
 
-- ER/domain model is coherent against Care + Supplier synthetic workflows;
-- no entity merges concepts prohibited by the canonical traceability model;
-- tenant isolation and lifecycle fields are explicit;
-- no speculative enterprise entity families without workflow evidence.
+- Mission V1 convergence is authoritative;
+- M1 exact-head candidate has completed required B0/B1/integration;
+- no review artifact has been invalidated by in-place mutation.
 
-## M2 — Prove the operator-led service workflow as the primary UX
+## R2-01 — Executable assurance kernel
 
-**Mission focus:** SS-SC-01, SS-SC-02.
+**Mission focus:** SS-SC-04, SS-SC-06.  
+**Evidence target:** E0/E1, preparing for E2.  
+**Effort envelope:** small, bounded kernel rather than platform expansion.
 
-Goal: make the full concierge workflow executable from an operator perspective before polishing SaaS surfaces.
+Goal: make the central assurance proposition executable and falsifiable before adding broad product UX.
 
-Prototype/workflow capabilities:
+Required capabilities:
 
-- operator-led intake;
-- structured facts with provenance;
-- evidence inbox;
-- targeted client requests;
-- controls/implementations/assessments;
-- findings and remediation;
-- AI proposal/review flow;
-- professional review queue;
-- baseline/recurring report generation.
+- machine-readable requirement → control mappings;
+- at least one requirement mapped to multiple controls;
+- explicit `FULL` / `PARTIAL` / `GAP` coverage semantics;
+- orphan requirement/control and uncovered-gap reporting;
+- applicability/tailoring decision contract;
+- materiality-driven review routing;
+- evidence conflict handling (`CONFLICT_DETECTED`);
+- evidence-class validity/expiry rules and downgrade/reopen behavior;
+- dossier/report renderer from structured data;
+- validator/CI coverage for all above;
+- protected standard text remains reference-only unless redistribution rights are established.
 
-Exit evidence:
+Initial corpus target:
 
-- one synthetic Care dossier and one Supplier dossier can be executed end to end using the intended product flow;
-- customer work is limited to required facts/evidence/decisions;
-- professional reviewer can reconstruct material conclusions.
-
-## M3 — Build the minimum secure runtime
-
-**Mission focus:** SS-SC-04, SS-SC-05.
-
-Goal: implement only the runtime primitives needed by M2.
-
-Minimum runtime:
-
-- shared PostgreSQL;
-- Auth + memberships/roles;
-- RLS/tenant authorization;
-- private object storage;
-- evidence hashes/versioning;
-- audit events;
-- scoped upload/action capabilities where required;
-- nightly encrypted off-site database + object backup;
-- simple monitoring;
-- existing runtime acceptance tests.
+- enough internally authored/public-safe mappings to exercise the hard cases, not a vanity count;
+- minimum test corpus should include multi-control, partial-coverage and explicit coverage-gap examples.
 
 Exit evidence:
 
-- synthetic cross-tenant read/write/object tests fail closed;
-- backup and restore work for structured state and evidence objects;
-- no client data has been admitted before the broader real-client gate.
+- deterministic coverage report identifies mapped, partial, uncovered and orphan cases;
+- applicability decisions retain scope/source/version/rationale/review provenance;
+- material evidence conflicts cannot silently resolve themselves;
+- expired evidence cannot leave unsupported green assurance state;
+- a structured synthetic dossier renders a reproducible management/report artifact;
+- CI fails closed when separation/provenance/coverage invariants are broken.
 
-## M4 — Build the SolidSecurity Operator Workspace
+## R2-02 — Launch and professional-trust readiness
 
-**Mission focus:** SS-SC-02.
+**Mission focus:** SS-SC-08, SS-SC-10, SS-SC-11, SS-SC-12.  
+**Evidence target:** E0 plus first E3 market evidence where available.
 
-Goal: turn the service workflow into a coherent professional cockpit.
+Goal: make the business safe and commercially testable before real-client `VERIFIED` claims.
 
-Primary views:
+### A. Primary Care launch ICP
 
-- client portfolio/status;
-- intake and evidence inbox;
-- control/implementation assessment;
-- requests waiting on customer;
-- actions/remediation;
-- AI proposals;
-- professional review queue;
-- reports/approvals;
-- recurring/expiry queue.
+Define and test:
+
+- operational/commercial ICP characteristics;
+- 50–250 FTE as a commercial hypothesis only, never a legal scope rule;
+- direct Cbw positioning only after explicit applicability;
+- sub-Cbw positioning around actual NEN 7510/Wabvpz, IGJ, privacy, chain/customer and AI-governance pressure;
+- clear disqualifiers/poor-fit profiles.
+
+Supplier remains secondary reuse/expansion until evidence says otherwise.
+
+### B. Professional trust model
+
+Define per customer-facing review class:
+
+- minimum competence/experience;
+- credential expectations where applicable;
+- internal/external independence requirements;
+- permitted claim/decision classes;
+- escalation path;
+- capacity assumption;
+- loaded professional cost.
+
+Explicitly distinguish:
+
+`project Worker-B assurance != customer professional review != external independent assurance/certification`.
+
+### C. Liability and contractual readiness
+
+Before real customer-facing verified assurance:
+
+- professional/business liability and insurance posture;
+- contractual liability/scope limitations;
+- approved report-language boundaries;
+- breach/incident posture when a reviewed client is later compromised;
+- DPA/subprocessor/retention/deletion boundaries;
+- no implication that verification guarantees absence of incidents.
+
+### D. Bottom-up economics
+
+Build a single-source economics model using:
+
+- workflow step;
+- professional minutes;
+- reviewer class;
+- loaded rate;
+- cadence;
+- customer minutes;
+- AI draft acceptance/edit/rejection;
+- evidence reuse;
+- questionnaire/assertion reuse;
+- onboarding payback period;
+- recurring gross-margin sensitivity.
+
+Existing published price ranges remain explicit hypotheses until measured.
+
+### E. Competitive/GTM evidence
+
+Create:
+
+- competitor/alternative landscape;
+- explicit answer to "our MSP/IT supplier already handles this";
+- first-10-design-partner/customer acquisition hypothesis;
+- partner/channel hypotheses;
+- interview/proposal/loss-reason capture format.
+
+### F. Repository/IP decision
+
+Before publishing material proprietary operating intelligence:
+
+- decide public/private/open-core boundary;
+- keep client data/secrets private regardless;
+- proprietary detailed mappings, evidence-sufficiency rules, private prompts, GTM/economics and accumulated operating learning are private/restricted by default unless deliberately released.
 
 Exit evidence:
 
-- operator can execute the full baseline without using GitHub or ad-hoc spreadsheets as the client dossier;
-- the UI exposes provenance and authority state rather than hiding it.
+- one approved launch ICP and positioning matrix;
+- professional review classes have qualification/independence/capacity/cost rules;
+- liability/contract/DPA design is ready for qualified legal/insurance review;
+- bottom-up unit-economics model exists with hypotheses clearly separated from measured values;
+- competitor/GTM/first-10 plan exists;
+- repository/IP posture is explicit before further sensitive publication.
 
-## M5 — Build the Client Dashboard and Interaction Layer
+## R2-03 — Bounded real design partner
 
-**Mission focus:** SS-SC-01, SS-SC-03.
+**Mission focus:** SS-SC-01, SS-SC-04, SS-SC-09, SS-SC-10, SS-SC-11.  
+**Evidence target:** E2 + E3.
 
-Goal: give the customer transparency without transferring the compliance workload to them.
+Goal: contact reality before building the full product from synthetic assumptions.
 
-Dashboard minimum:
+Entry gates:
 
-- overview/current status;
-- what is demonstrably arranged;
-- attention points;
-- actions and decisions required from customer;
-- what SolidSecurity is working on;
-- recently completed work;
-- reports/evidence packs.
+- R2-01 executable kernel sufficiently complete for the bounded scope;
+- R2-02 professional/liability/contractual readiness complete for the pilot class;
+- minimum secure client-data handling envelope is independently reviewed;
+- explicit principal authorization for real design-partner/client data;
+- no production-scale claim is inferred from pilot readiness.
 
-Interaction minimum:
+The design partner does **not** require the complete future Operator Workspace or Client Dashboard. Use the smallest safe operator tooling and interaction surfaces that preserve the authoritative dossier and provenance.
 
-- secure upload;
-- short targeted questions;
-- confirmations;
-- approvals/sign-offs;
-- email/link entry into those actions.
+Measure at minimum:
 
-Exit evidence:
-
-- a non-GRC customer user can identify current state and next required action without explanation of control IDs;
-- all interaction writes back to the authoritative dossier.
-
-## M6 — Controlled end-to-end pilot readiness
-
-**Mission focus:** SS-SC-01 through SS-SC-07.
-
-Before real client data:
-
-- existing pilot/runtime gates are satisfied;
-- tenancy, object access, AI boundaries, export/deletion and restore are tested;
-- DPA/subprocessor/retention decisions are complete;
-- professional authority roles are operational;
-- repository/public-private/IP boundary is appropriate;
-- explicit principal authorization for first real-client transition exists.
-
-Then run a tightly bounded real pilot with high professional oversight.
+- which source documents/evidence actually exist;
+- missing/ambiguous facts;
+- customer response latency and follow-up burden;
+- applicability/tailoring disputes;
+- evidence conflicts and expiry assumptions;
+- professional review minutes by class;
+- AI proposal acceptance/edit/rejection;
+- onboarding and recurring workload;
+- customer comprehension and perceived value;
+- willingness-to-pay / commercial objection evidence;
+- MSP/incumbent objection;
+- incidents or authority boundary failures.
 
 Exit evidence:
 
-- accepted baseline and recurring plan;
-- customer can use dashboard/actions;
-- measured delivery effort supports or falsifies the commercial model;
-- no material authority or tenant-isolation failure.
+- one real bounded lifecycle or clearly bounded baseline engagement completed;
+- actual customer/operator/reviewer effort recorded;
+- model/workflow defects logged from reality;
+- no unresolved material tenant/authority/data-handling failure;
+- commercial/ICP hypotheses updated from E2/E3 evidence, not synthetic inference.
 
-## M7 — Improve unit economics from measured friction
+## R2-04 — Productize from observed friction
 
-**Mission focus:** SS-SC-08.
+**Mission focus:** SS-SC-02, SS-SC-03, SS-SC-05, SS-SC-08.  
+**Evidence target:** E2/E3, progressing toward E4.
 
-Automate only repeated work observed in pilots, for example:
+Goal: implement the minimum persistent runtime and product surfaces justified by real observed workflow friction.
 
-- evidence extraction/classification;
-- reusable approved assertions/questionnaire answers;
-- evidence expiry/reminders;
-- document/report drafting;
-- request drafting;
-- recurring review preparation.
+Priority order:
 
-Track professional effort and AI acceptance/modification/rejection so automation is chosen from evidence.
+1. authoritative dossier/runtime primitives genuinely needed by the design-partner workflow;
+2. Operator Workspace functions that remove repeated professional work;
+3. Interaction Layer functions that remove repeated customer friction;
+4. Client Dashboard only around proven customer visibility needs;
+5. automation targets ranked by measured professional/customer minutes and assurance impact.
 
-## M8 — Read-only technical evidence and continuous assurance
+Minimum runtime still follows:
 
-Only after managed-service workflow and real pilot value are proven.
+`shared PostgreSQL + tenant_id + server-side authorization/RLS + private object store + immutable evidence versions/hashes + audit events + tested backup/restore`.
 
-Candidate connectors:
+Exit evidence:
 
-- Microsoft 365;
-- Azure/AWS/GCP;
-- GitHub;
-- Cloudflare;
-- Google Workspace;
-- selected identity/security SaaS;
-- Prowler as an evidence source where useful.
+- product surfaces replace recurring ad-hoc manual work observed in real delivery;
+- cross-tenant and object-access tests fail closed;
+- operator can execute the proven lifecycle without GitHub/spreadsheets being the client dossier;
+- customer interaction writes to the same authoritative dossier;
+- automation priorities have measured workload evidence.
 
-Invariant:
+---
 
-`observed configuration -> evidence -> assessment -> human-reviewed status`
+# Later evidence-dependent options — not active commitments
+
+These are **not** numbered active milestones until customer/operational evidence makes them eligible:
+
+- read-only Microsoft 365 / cloud / SaaS evidence connectors;
+- Prowler or similar technical evidence sources;
+- continuous-assurance automation;
+- auditor/partner portal access;
+- APIs/MCP;
+- OSCAL/interoperability;
+- additional sector packs;
+- benchmark analytics;
+- white-label managed-service delivery.
+
+Invariant if technical connectors are later added:
+
+`observed configuration -> Evidence -> Assessment -> professional-reviewed status`
 
 Never:
 
-`scanner pass -> automatic legal/compliance PASS`.
+`scanner pass -> compliance PASS`.
 
-## M9 — Interoperability and scale
+# Explicitly deferred
 
-Only when customer/partner demand justifies it:
-
-- auditor/partner access;
-- APIs/MCP;
-- OSCAL/compliance-as-code interoperability;
-- sector packs beyond Care/Supplier;
-- benchmark analytics using appropriately governed non-identifying data;
-- white-label managed-service delivery.
-
----
-
-# Explicitly deferred until mission evidence exists
-
-- separate database/project per customer;
-- active-active multi-cloud database;
-- custom KMS/envelope-encryption platform;
-- autonomous remediation/write access in client environments;
+- database/project per customer as default;
+- active-active multi-cloud;
+- custom KMS/envelope-encryption platform without concrete need;
+- autonomous customer-environment remediation;
 - broad framework imports because they exist;
 - generic vulnerability-management platform;
 - permanent vector memory for all evidence;
-- multiple competing workflow/orchestration queues;
-- AI-only assurance;
+- competing workflow/orchestration queues;
+- AI-only professional assurance;
 - replacement of external certification bodies.
 
-## Repository visibility gate
+## Roadmap capacity rule
 
-Assume anything committed publicly may remain copied permanently. Public-safe methodology may remain public; real client information, secrets, proprietary evidence-sufficiency logic, private operating prompts and commercially sensitive accumulated intelligence do not belong in the public repo.
+The roadmap is a priority system, not a promise that every listed option will be built. Only the highest-priority eligible workpackage should consume the constrained implementation/review capacity unless work is demonstrably independent and Control permits parallelization.
 
-Before real-client processing or publication of material proprietary operating IP, perform the explicit public/private/open-core decision.
+## Repository visibility rule
+
+Anything made public must be treated as permanently disclosed. Public-safe methodology can be deliberately published; real client information, secrets, proprietary evidence-sufficiency logic, private prompts, detailed commercial/GTM economics and accumulated operating intelligence are private/restricted by default until an explicit release decision says otherwise.
