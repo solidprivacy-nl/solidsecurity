@@ -2,10 +2,11 @@ version: 1
 status: CONDITIONAL_EVALUATION
 real_client_data_authorized: false
 source_verified_at: 2026-08-15
+current_tenancy_authority: ADR_0011
 candidates:
   - id: SUPABASE_FIRST
     status: CONDITIONALLY_PREFERRED
-    initial_tenancy: project_per_client
+    initial_tenancy: shared_multi_tenant_postgres
     data_region_requirement: explicit_EU_region
     primitives:
       structured_state: postgres
