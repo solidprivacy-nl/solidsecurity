@@ -9,6 +9,7 @@ CURRENT_FILES = [
     ROOT / "README.md",
     ROOT / "control" / "CURRENT_STATE.md",
     ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md",
+    ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md",
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
     ROOT / "ROADMAP.md",
@@ -33,12 +34,14 @@ readme = (ROOT / "README.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
 mission = (ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md").read_text(encoding="utf-8")
+assurance = (ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md").read_text(encoding="utf-8")
 
 required = {
     "README.md": (readme, ["Mission R2 / canonical", "Control Autonomy V3.1", "no A2"]),
     "docs/MISSION_DRIVEN_WORKFLOW.md": (workflow, ["Control Autonomy V3.1", "Exactly one semantic implementation worker exists", "There is **no semantic `PROJECT_INTEGRATION` task**"]),
     "control/CURRENT_STATE.md": (current, ["Snapshot only", "CONTROL_AUTONOMY_V3_1", "no A2"]),
     "control/SOLIDSECURITY_MISSION_CONTRACT_R2.md": (mission, ["MISSION R2 / CANONICAL", "CONTROL_AUTONOMY_V3_1", "no A2"]),
+    "control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md": (assurance, ["Mission R2", "Control Autonomy V3.1"]),
 }
 
 for name, (text, markers) in required.items():
