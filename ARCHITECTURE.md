@@ -2,171 +2,120 @@
 
 ## 1. Architecture objective
 
-The architecture must support a managed compliance service before it supports a software platform. It optimizes for traceability, controlled AI leverage, cross-framework reuse and professional accountability.
+The architecture supports a managed compliance service before it supports a software platform. It optimizes for traceability, controlled AI leverage, cross-framework reuse, professional accountability and the simplest safe operational design.
 
 ## 2. Logical layers
 
 ```text
-┌──────────────────────────────────────────────┐
-│ 6. Customer experience                      │
-│ status / actions / reports / passport        │
-└──────────────────────────────────────────────┘
-                      ↑
-┌──────────────────────────────────────────────┐
-│ 5. Professional assurance                    │
-│ review / exceptions / approval / sign-off    │
-└──────────────────────────────────────────────┘
-                      ↑
-┌──────────────────────────────────────────────┐
-│ 4. AI operations                             │
-│ extract / map / draft / compare / recommend  │
-└──────────────────────────────────────────────┘
-                      ↑
-┌──────────────────────────────────────────────┐
-│ 3. Client implementation & evidence          │
-│ claims / evidence / findings / actions        │
-└──────────────────────────────────────────────┘
-                      ↑
-┌──────────────────────────────────────────────┐
-│ 2. SolidSecurity Common Control Model        │
-│ controls / evidence expectations / mappings  │
-└──────────────────────────────────────────────┘
-                      ↑
-┌──────────────────────────────────────────────┐
-│ 1. Regulatory / standards source layer       │
-│ Cbw/NIS2 / NEN / ISO / GDPR / EU AI Act      │
-└──────────────────────────────────────────────┘
+Customer experience
+  status / actions / reports
+        ↑
+Professional review and decisions
+        ↑
+AI operations
+  extract / map / draft / compare / recommend
+        ↑
+Client implementation & evidence
+        ↑
+SolidSecurity Common Control Model
+        ↑
+Regulatory / standards sources
 ```
 
 ## 3. Non-negotiable traceability invariant
 
 No material assurance conclusion may exist without a reconstructable chain:
 
-`source -> requirement -> control -> implementation claim -> evidence -> assessment -> review -> decision`
+`Source -> Requirement -> Control -> Customer Implementation -> Evidence -> Assessment -> Professional Review -> Decision / Assurance State`
 
-A link may explicitly be `unknown`, `not applicable`, `not evidenced` or `conflicting`; absence may not be silently converted to compliance.
+A link may explicitly be unknown, not applicable, not evidenced or conflicting; absence may not be silently converted to compliance.
 
 ## 4. Separation of object types
 
-The architecture deliberately separates:
+- **Requirement** — external obligation or assurance criterion.
+- **Control** — reusable internal objective/measure.
+- **Customer Implementation** — how one customer implements the control.
+- **Evidence** — artifact/observation supporting or refuting implementation.
+- **Assessment** — analysis of implementation/evidence.
+- **Professional Review** — accountable review of material assessment.
+- **Decision** — governed transition or professional conclusion.
 
-- **Requirement** — an external obligation or assurance criterion.
-- **Control** — a reusable internal objective/measure.
-- **Implementation claim** — how one customer says the control is implemented.
-- **Evidence** — an artifact or observation supporting/refuting the claim.
-- **Assessment** — an analysis of the implementation/evidence.
-- **Review** — an accountable human review of a material assessment.
-- **Decision** — a governed state transition or professional conclusion.
+See [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) and canonical M1 contract [`docs/DOMAIN_MODEL_V1.md`](docs/DOMAIN_MODEL_V1.md).
 
-See [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md).
-
-## 5. Initial implementation architecture
-
-Foundation and Service MVP require no dedicated GRC platform.
-
-```text
-GitHub product/control plane
-  ├─ methodology
-  ├─ control definitions
-  ├─ mappings metadata
-  ├─ templates
-  ├─ workflows
-  ├─ roadmap / ADR / change control
-  └─ synthetic test fixtures only
-
-Secure client workspace (future, separate)
-  ├─ customer facts
-  ├─ evidence
-  ├─ implementation claims
-  ├─ risks / findings / actions
-  ├─ generated client artifacts
-  └─ review / decision records
-
-AI execution boundary
-  ├─ reads only authorized source/client context
-  ├─ outputs suggestions / drafts / assessments
-  └─ cannot self-promote to verified assurance
-
-Professional review boundary
-  └─ approves, rejects, edits or escalates material conclusions
-```
-
-## 6. Product/control plane vs client data plane
+## 5. Product/control plane and client data plane
 
 ### Product/control plane — this repository
 
-May contain public-safe:
+May contain only public-safe strategy, architecture, generic controls, schemas, workflows, public-source references, synthetic fixtures, ADRs and roadmap material.
 
-- strategy and architecture;
-- generic controls;
-- schemas;
-- generic workflows;
-- public-source references;
-- synthetic fixtures;
-- ADRs and roadmap.
+### Client data plane — designed, not yet authorized/deployed for real clients
 
-### Client data plane — never this repository
+The accepted V1 design is:
 
-Will contain:
+```text
+Authenticated ingress
+       |
+       v
+Tenant-aware application/API
+       |
+       +--> one shared PostgreSQL database
+       |      tenant_id + server authorization + RLS/equivalent
+       |
+       +--> one private evidence/object store
+       |      tenant-scoped keys + immutable versions/hashes
+       |
+       +--> audit/review/decision records
+       |
+       +--> minimum selected context -> AI proposal -> professional review
 
-- customer contracts and policies;
-- system and supplier inventories;
-- vulnerabilities and incidents;
-- personnel or patient information;
-- implementation details;
-- evidence;
-- client-specific risk/assessment records.
+Nightly:
+PostgreSQL logical backup + evidence sync/export
+       -> checksums/manifest -> encrypted independent off-site storage
+       -> periodic actual restore proof
+```
 
-A future client data plane requires an explicit data-governance and security architecture decision before the first real dossier is ingested.
+This is an **architecture decision**, not a real-client-data authorization. Real processing starts only after the R2-WP04 minimum-safe-client-envelope, security/data/contract/professional gates and explicit principal authorization are satisfied.
+
+Customer/client material never belongs in this repository.
+
+## 6. Tenant and evidence invariants
+
+- tenant context derives from authenticated authorization context, not user-supplied `tenant_id` alone;
+- every tenant-owned domain record carries `tenant_id`;
+- RLS/equivalent is defense in depth and cross-tenant negative tests must fail;
+- evidence objects are private by default;
+- reviewed evidence versions are immutable and integrity-bound by hash;
+- changes create a new evidence version rather than silently rewriting historical review evidence;
+- backup is not recovery until an actual restore succeeds.
 
 ## 7. AI architecture rule
 
-AI is a named actor, not an invisible implementation detail. Every AI-originated material suggestion should eventually carry:
+AI is a named actor. Material AI proposals should retain relevant actor/model/policy identity, timestamp, input/source provenance, output version/hash where practical, uncertainty and required review/disposition.
 
-- actor/model identity where relevant;
-- timestamp;
-- input/source provenance;
-- output version/hash where practical;
-- confidence/uncertainty where useful;
-- required review class;
-- reviewer and disposition.
+AI cannot self-promote a customer state to `VERIFIED` or another human-only material decision state.
 
-AI cannot change a control from `EVIDENCED` to `VERIFIED` without an authorized human review event.
+## 8. Open-source integration rule
 
-## 8. Open-source integration architecture
+External projects are capability sources, not automatic dependencies.
 
-External projects are treated as **capability sources**, not automatic platform dependencies.
+- Probo: reference/runtime option only if later evidence justifies it.
+- CISO Assistant: architecture/mapping inspiration; AGPL code excluded absent explicit licensing decision.
+- isms.sh / Unicis: workflow-pattern references only unless deliberately adopted.
+- Prowler: possible later read-only technical evidence source.
+- OSCAL/compliance-trestle: possible interoperability later, after internal workflow/model need is proven.
 
-- Probo: reference model now; runtime decision later.
-- CISO Assistant: architecture/mapping inspiration only; AGPL code excluded absent explicit licensing decision.
-- isms.sh: human/AI suggestion and review patterns; no runtime dependency yet.
-- Unicis: privacy workflow patterns; no runtime dependency yet.
-- Prowler: candidate read-only technical evidence provider in a later phase.
-- compliance-trestle/OSCAL: candidate interoperability layer only after internal model stability.
-
-See [`docs/OPEN_SOURCE_ADOPTION.md`](docs/OPEN_SOURCE_ADOPTION.md).
+Do not reinvent proven primitives, but do not import a platform merely because it has more features.
 
 ## 9. Connector principle
 
-Technical connectors are explicitly deferred until the manual/AI-assisted service model proves what evidence is actually valuable.
+Connectors remain deferred until real workflow evidence proves what evidence is useful. When introduced they should be read-only by default, minimum-permission, tenant-scoped, revocable, auditable and evidence-producing rather than verdict-producing.
 
-When introduced, connectors should be:
+Invariant:
 
-1. read-only by default;
-2. minimum-permission;
-3. tenant-scoped;
-4. evidence-producing rather than verdict-producing;
-5. revocable;
-6. observable/auditable;
-7. conflict-aware (declared state versus observed state).
+`observed configuration -> Evidence -> Assessment -> professional-reviewed state`
 
-## 10. Platform decision gate
+Never `scanner pass -> compliance PASS`.
 
-After Service MVP/pilots, choose deliberately among:
+## 10. Complexity gate
 
-- thin custom application over the SolidSecurity model;
-- Probo as a backend/runtime;
-- another permissively licensed component;
-- hybrid architecture.
-
-The decision must be based on validated workflow needs, not feature-count attraction.
+The default remains one shared database, one private evidence store and simple independent backup. Database-per-client, custom KMS/envelope encryption, active-active multi-cloud, permanent embedding infrastructure and broad connector programs require a concrete security, contract, scale or measured workflow reason.
