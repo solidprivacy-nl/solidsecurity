@@ -1,193 +1,93 @@
 # SolidSecurity Domain Model V1
 
-Status: **M1 candidate / schema contract only**  
-Mission gap: `SS-GAP-01`  
-Work contract: issue #28
+Status: **M1 canonical / schema contract only**  
+Historical mission gap provenance: `SS-GAP-01`
 
 ## Purpose
 
-Freeze the smallest relational model that can execute the accepted managed-service workflow before database migrations or UI code become canonical.
+Define the smallest relational model required by the accepted managed-service workflow before real database migrations or UI implementation. M1 is canonical as a **contract**; it is not a production migration and does not authorize real-client processing.
 
-This is not a production migration. It is the contract future PostgreSQL migrations must implement or explicitly supersede.
+Machine-readable authority: `model/domain_model_v1.yaml`  
+Non-migration PostgreSQL contract: `spec/postgres_schema_contract_v1.sql`
 
-## Non-negotiable separation
+## Non-negotiable traceability
 
-```text
-Source -> Requirement -> Control -> ClientImplementation -> Evidence
-       -> Assessment -> ProfessionalReview -> Decision / Assurance State
-```
+`Source -> Requirement -> Control -> ClientImplementation -> Evidence -> Assessment -> ProfessionalReview -> Decision / Assurance State`
 
-These concepts are separate records. A generated document is not implementation. Evidence can demonstrate a gap. An AI proposal is not a professional review or decision.
+These concepts are separate records. A generated document is not implementation. Evidence may prove a gap. An AI proposal is not a professional review or decision.
 
 ## Plane split
 
-### Global catalog
+### Global public-safe catalog
 
-Shared, public-safe methodology maintained once:
+Shared methodology maintained once:
 
-- `source`
-- `framework`
-- `requirement`
-- `control`
-- `control_assertion`
-- `requirement_control_map`
+- Source / Framework / Requirement;
+- Control / ControlAssertion;
+- RequirementControlMap.
 
-These records have no customer truth and therefore no `tenant_id`.
+These contain no customer truth and therefore are not tenant-owned.
 
 ### Identity root
 
-`user_identity` is the authentication/principal root for either a human or a governed non-human service identity. `identity_type` distinguishes those cases. A `membership` joins that identity to one tenant and role.
+`UserIdentity` supports both human and governed service identities. `Membership` joins an identity to one tenant/role. Authorization derives from authenticated identity plus active membership, never a client-supplied `tenant_id` alone.
 
-One human may legitimately belong to more than one tenant. A service/agent identity may also receive a narrowly scoped `agent_service` membership. Authorization is derived from the authenticated identity plus the active membership, never from a client-supplied `tenant_id` alone. Non-human identities remain unable to exercise human-only review, approval or material-decision authority.
+Service identities cannot acquire human-only professional review, approval or material-decision authority.
 
 ### Tenant dossier
 
-Every customer-owned state record carries `tenant_id`, including:
+Tenant-owned state includes organization/scope/engagement, applicability decisions, client implementations, vendors/AI use cases, evidence/evidence versions, assessments, findings/actions, client requests/responses, AI proposals, professional reviews/decisions/approvals, reports, approved assertions and recurring reviews.
 
-- organization and organizational scope;
-- engagement;
-- applicability decisions;
-- client control implementations;
-- vendors and AI use cases;
-- evidence and immutable evidence versions;
-- implementation/evidence links;
-- assessments and assessment/evidence links;
-- findings and actions;
-- client requests/responses;
-- AI proposals;
-- review queue, professional review, decision and approval;
-- reports and approved assertions;
-- approved-assertion links to controls/assertions and evidence versions;
-- audit events;
-- recurring/expiry review state.
+Every tenant-owned entity carries `tenant_id`.
 
-## Core entities
+## Evidence model
 
-### Tenant
+`Evidence` identifies the logical evidence object. `EvidenceVersion` identifies immutable ingested content/observation state and carries at minimum:
 
-Security boundary and customer dossier root. A tenant can contain one or more legal organizations/scopes without requiring a separate database.
-
-### Organization / OrganizationalScope
-
-`organization` represents a legal/operating entity. `organizational_scope` represents the bounded service/system/process perimeter being assessed. An engagement can cover one or more scopes.
-
-### UserIdentity / Membership
-
-`user_identity` stores an authenticated principal with `identity_type` (`human` or governed `service`). `membership` binds that principal to a tenant and bounded role. V1 roles are data, not separate schema families: `platform_admin`, `professional_reviewer`, `operations_contributor`, `client_admin`, `client_contributor`, `client_reader`, `agent_service`.
-
-### Engagement
-
-A SolidSecurity service relationship and variant (`baseline`, `care_managed`, `supplier_passport`, `audit_ready`). It anchors lifecycle state and reporting cadence without creating a separate schema per service product.
-
-### Requirement / Control / ControlAssertion
-
-Requirements are external obligations/criteria. Controls are reusable SolidSecurity objectives. Assertions are testable aspects under a stable control. `requirement_control_map` records analytical linkage only; it never proves client compliance.
-
-### ApplicabilityDecision
-
-Tenant/scope-specific applicability state for a requirement/control/assertion. Supports unresolved and professional-review states.
-
-### ClientImplementation
-
-How a control operates for a tenant/scope. This is distinct from evidence and from assessment.
-
-### Evidence / EvidenceVersion
-
-`evidence` is the logical artifact identity. `evidence_version` is an immutable captured version.
-
-PostgreSQL stores metadata only:
-
-- private object-store key;
+- tenant/evidence identity;
+- object locator;
 - SHA-256;
-- byte size/media type;
-- source/capture actor/time;
+- size/media type;
+- source/actor/timestamp;
 - validity/expiry;
-- coverage/population/sample/limitations;
+- coverage and limitations;
 - sensitivity.
 
-Large file bytes are never stored in the relational row. A new upload creates a new version; reviewed historical versions are not overwritten.
+A reviewed version is never silently overwritten. New content creates a new version.
 
-### Assessment
+## AI / professional authority
 
-Analysis against a control/assertion/implementation. Result and proof strength are separate dimensions. Assessments can reference multiple evidence versions through `assessment_evidence_link`.
+`AIProposal` is explicitly non-authoritative. Material professional review and decision objects require human authority according to the applicable review class. Proof Ladder/AI Authority rules remain separate policy enforcement and may not be bypassed by database state.
 
-### Finding / Action
+## Approved assertion provenance
 
-A finding records a gap, contradiction or missing evidence. Actions are remediation/verification work and have ownership/due-state independently from the assessment.
+Approved reusable assertions bind to the exact professional review and to the controls/assertions/evidence versions they represent. Reviewer identity derives from the professional review rather than being duplicated as a second source of truth.
 
-### ClientRequest / ClientResponse
+## Runtime topology contract
 
-Targeted information/evidence/approval requests. They support low-friction email/link interactions while writing back to one authoritative dossier.
+The designed normal topology is:
 
-### AIProposal
+- one shared PostgreSQL relational store;
+- tenant boundary = `tenant_id`;
+- one private shared evidence object store;
+- evidence bytes outside PostgreSQL;
+- server authorization + RLS/equivalent defense in depth;
+- no database-per-client registry/default.
 
-Stores proposed analytical/drafting output with provenance metadata: model/provider identifier, policy version and input references. It is always non-authoritative. The record does not contain a capability to issue a human-only decision.
+The SQL file is intentionally a contract and states `NOT A MIGRATION`.
 
-### ReviewQueueItem / ProfessionalReview / Decision / Approval
+## Deliberately prohibited V1 shortcuts
 
-`review_queue_item` routes material judgment. `professional_review` records accountable human review. `decision` records a governed state transition. `approval` records explicit approval/sign-off when a separate approval event is required.
+- per-framework client checklist as duplicate truth;
+- AI final compliance verdict table;
+- evidence blob bytes in PostgreSQL;
+- database-per-customer registry as default architecture;
+- autonomous risk acceptance.
 
-The separation prevents an AI assessment from becoming a professional decision merely because it is displayed in the same UI.
+## Synthetic coverage provenance
 
-### Report / ApprovedAssertion
+The existing Care/Supplier synthetic candidates remain useful non-authoritative workflow evidence. Their exact candidate provenance is retained in `spec/m1_workflow_coverage.yaml`; they do not become real-client or integrated operational evidence merely because M1 itself is canonical.
 
-Reports are generated/approved output artifacts. Approved assertions are reusable customer-facing statements with scope, expiry, exact professional-review provenance, linked control/assertion provenance and exact evidence-version provenance.
+## Change rule
 
-`approved_assertion_control_link` binds a reusable statement to one control and optionally one subordinate assertion. `approved_assertion_evidence_link` binds it to exact evidence versions. This allows a Supplier Passport statement to be reconstructed as:
-
-```text
-ApprovedAssertion -> Control[/ControlAssertion] -> EvidenceVersion -> ProfessionalReview
-```
-
-Semantic similarity can propose a reusable assertion but cannot create either link or authorize customer-facing use by itself. The existence of a report or approved assertion never changes a client control implementation state.
-
-### AuditEvent
-
-Append-oriented metadata event: tenant, actor, action, object reference, timestamp and safe metadata. Raw evidence/document bodies and secrets are prohibited from event metadata.
-
-### RecurringReview
-
-Schedules expiry/periodic review for an object such as evidence, approved assertion, vendor or control implementation without creating duplicated copies of that object.
-
-## Proven workflow additions
-
-Two entities are included beyond the literal M1 minimum because synthetic Care/Supplier execution already demonstrated their distinct lifecycle:
-
-- `vendor`
-- `ai_use_case`
-
-The approved-assertion control/evidence links are likewise retained because the Supplier candidate explicitly demonstrated questionnaire/passport reuse with provenance.
-
-Risk/exception/asset enterprise families are **not frozen as separate V1 tables** here. They may be added only when the operator workflow proves a distinct persistent lifecycle that cannot be represented by findings/actions/decisions without loss.
-
-## Tenant-isolation invariant
-
-Every tenant-owned table contains a non-null `tenant_id`. Every relationship between tenant-owned rows must be same-tenant. The runtime must enforce this at the server authorization layer and with PostgreSQL RLS/equivalent defense in depth.
-
-The schema contract intentionally does not encode a database-per-customer topology.
-
-## Evidence integrity invariant
-
-`evidence_version` is append-only from the application perspective after ingestion. Correction means a new version. A review or decision binds the exact version/hash it saw.
-
-## AI authority invariant
-
-AI may create `ai_proposal` and proposed `assessment` records. It cannot create an authoritative `professional_review`, risk/legal/compliance/certification decision, or independently assured state. Human/service authority is enforced outside prompt text and is represented explicitly in identity/membership/review/decision records.
-
-## Deletion and retention
-
-Tenant-owned objects carry lifecycle timestamps. Deletion/retention is policy/configuration driven; no universal legal duration is hard-coded. Audit and evidence version deletion must respect the separately governed retention/legal-hold design.
-
-## Portability
-
-The model assumes PostgreSQL capabilities but avoids Supabase-specific table names or Cloudflare-specific storage semantics. Auth provider subject and object-store key are adapter-facing fields.
-
-## Exit check
-
-M1 is complete only when:
-
-1. `model/domain_model_v1.yaml` validates;
-2. `spec/postgres_schema_contract_v1.sql` remains a non-migration contract consistent with this model;
-3. both synthetic Care and Supplier coverage maps resolve against declared entities and exact candidate provenance;
-4. B0 exact-head checks pass;
-5. required independent B1 accepts the exact candidate before it is integrated/canonicalized.
+Future migrations/runtime code must implement this contract or explicitly supersede it through governed change. Do not fork a second model for individual frameworks/customers unless real evidence proves the common model insufficient.
