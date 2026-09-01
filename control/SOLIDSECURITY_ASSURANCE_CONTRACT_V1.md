@@ -1,77 +1,77 @@
-# SolidSecurity Assurance Contract V1
+# SolidSecurity Assurance Boundary
+
+> Filename retained for stable references. This document is the current project-specific assurance boundary under Mission R2 and Control Autonomy V3.1; it is no longer a Foundation-V1 lifecycle contract.
 
 ## Purpose
 
-Define the minimum project-specific separation between AI-assisted implementation/operations and independent professional or governance assurance.
+Define the minimum separation between project implementation/change assurance, customer professional review and external independent assurance.
 
 ## Core rule
 
-SolidSecurity may use AI aggressively to reduce repetitive compliance work, but credibility must come from traceable evidence, explicit uncertainty and qualified human judgment—not from presenting AI output as a verdict.
+SolidSecurity may use AI aggressively to reduce repetitive work, but credibility comes from traceable evidence, explicit uncertainty and qualified human judgment—not from presenting AI output as a verdict.
 
-## Role A — implementation_operations
+## Project Worker A1 — `implementation_operations`
 
-May:
-
-- perform research and structured analysis;
-- draft policies, registers, assessments, mappings and remediation proposals;
-- organize supplied evidence;
-- maintain project documentation and workflows;
-- implement foundation artifacts and later software when separately authorized;
-- test and repair implementation candidates.
+May research, draft, implement, test and repair only within current canonical task authority.
 
 May not:
 
-- issue an independent assurance PASS on its own work;
-- represent a draft as certification or legal approval;
+- self-issue independent B1 PASS;
+- represent a draft as certification/legal approval;
 - make autonomous final legal, regulatory, risk-acceptance or certification decisions;
-- ingest real client data unless explicitly authorized under a later data-governance contract;
-- connect to a client environment under the current foundation authorization.
+- ingest real client data before the explicit real-client gate;
+- connect/write to customer environments without separate authority;
+- write canonical Control queue/results directly.
 
-## Role B — governance_release_assurance
+## Project Worker B1 — `governance_release_assurance`
 
-For consequential candidates, Role B must independently reconstruct the intended outcome and inspect authoritative evidence rather than relying on Role A's conclusion.
+For consequential project candidates, B1 independently reconstructs intended outcome and inspects authoritative evidence rather than relying on A1 conclusions.
 
-Role B may issue only:
+B1 issues exactly one of:
 
 - `PASS`
 - `FAIL`
 - `INDETERMINATE`
 
-Role B may not silently modify the candidate it assures.
+B1 is read-only on the candidate and may not repair, merge, release, deploy or perform A1 work.
 
-## Professional assurance boundary
+Under Control Autonomy V3.1, A1/B1 start only from their own current canonical kernel claim and persist results only through kernel `RECORD`. Scheduler/chat invocation is not START_PROVEN.
 
-Where a service claim requires professional judgment, legal interpretation, NEN/ISO assessment independence, certification-body authority or regulator-facing responsibility, an appropriately qualified human professional remains the final decision authority.
+## Customer professional review
 
-AI and internal assurance may prepare and challenge the evidence, but they do not impersonate an external auditor, certification body, DPO/FG, CISO or lawyer.
+Project B1 is not a customer professional qualification. Customer-facing material conclusions require the competence, authority, independence, capacity, escalation and other prerequisites defined by the applicable review class.
 
-## Independence
+AI may prepare evidence and recommendations. It does not impersonate an external auditor, certification body, DPO/FG, CISO or lawyer.
 
-Where a framework, regulator or service promise requires an independent assessment, the reviewer must not be the same person or role that designed or implemented the material control being independently assessed. SolidSecurity must preserve that separation in workflow and evidence.
+## External independent assurance/certification
+
+Where a framework, regulator, certification scheme or service promise requires independent external assurance or formally recognized professional authority, that function remains external or separately qualified as required. Internal project B1/customer review is never silently relabeled as certification.
 
 ## Evidence principle
 
-Material conclusions should be traceable through:
+Material conclusions preserve:
 
-`source -> requirement -> control -> implementation claim -> evidence -> assessment -> review -> decision`
+`Source -> Requirement -> Control -> Customer Implementation -> Evidence -> Assessment -> Professional Review -> Decision / Assurance State`
 
-Missing or contradictory evidence must remain visible and may not be converted into an inferred PASS.
+Missing, conflicting or expired evidence remains visible and cannot be converted into inferred PASS.
 
-## State-transition rule
+## Proof Ladder / AI authority
 
-AI may recommend a Proof Ladder state, but only an authorized human review can promote a client implementation to `VERIFIED`. Only a legitimately independent external or separately qualified assurance process may support `INDEPENDENTLY_ASSURED`.
+AI may propose Proof Ladder state. It cannot autonomously promote a client implementation to `VERIFIED`, `INDEPENDENTLY_ASSURED`, `RISK_ACCEPTED`, `EXCEPTION_APPROVED` or `CERTIFIED`.
 
-## Current foundation restrictions
+Customer-facing `VERIFIED` remains fail-closed until all applicable competence, authority, independence, capacity, escalation, liability/insurance, contractual/report-language and DPA/subprocessor prerequisites are satisfied and appropriately reviewed.
 
-During Foundation V1:
+## Current project restrictions
 
-- no production deployment is authorized;
-- no customer-environment connection or continuous scanning is authorized;
-- no real client data is authorized;
-- no certification claim is authorized;
-- no autonomous final legal/compliance decision is authorized;
-- no material third-party code import is authorized without explicit adoption/licensing decision.
+Unless separately authorized through the applicable R2 gate:
 
-## Evolution
+- no production deployment;
+- no real client data;
+- no customer-environment write/remediation;
+- no certification claim;
+- no autonomous final legal/compliance/risk/statutory decision;
+- no implication that verification guarantees absence of incidents.
 
-Enforcement maturity may increase as the product becomes executable. Any client-data processing, hard CI/release gate, environment connector, automatic evidence ingestion, write-capable remediation or post-action verification requirement must be explicitly added to project governance before use.
+## Control V3.1 boundary
+
+Project assurance does not create a second runtime plane. Canonical Control uses one queue, one deterministic kernel writer, A1 and B1 only, no A2, no semantic `PROJECT_INTEGRATION` task, no provider fallback and relay target 0.
