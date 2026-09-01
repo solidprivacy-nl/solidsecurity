@@ -1,5 +1,5 @@
 version: 2
-status: R2_WORKPACKAGES_CANDIDATE
+status: R2_WORKPACKAGES_CANONICAL
 mission_revision: 2026-08-20-r2
 governance_issue: 31
 
@@ -13,8 +13,31 @@ workpackages:
     operation: IMPLEMENTATION
     evidence_target: [E0_DESIGN, E1_SYNTHETIC]
     authority: {real_client_data: false, production_deployment: false, final_legal_compliance_verdict: false}
-    deliverables: [machine_readable_requirement_control_mapping_format, coverage_report_generator, multi_control_partial_and_gap_mapping_test_corpus, applicability_tailoring_contract, materiality_review_routing_contract, evidence_conflict_semantics, evidence_expiry_validity_semantics, structured_dossier_report_renderer, deterministic_ci_validation]
-    exit_evidence: [coverage_report_exposes_full_partial_gap_orphan_cases, applicability_provenance_is_reconstructable, material_conflict_blocks_silent_promotion, expiry_cannot_leave_unsupported_green_state, synthetic_dossier_renders_reproducibly, exact_head_ci_pass, independent_b1_pass]
+    deliverables:
+      - machine_readable_requirement_control_mapping_format
+      - coverage_report_generator
+      - multi_control_partial_gap_and_common_reuse_test_corpus
+      - applicability_tailoring_contract
+      - materiality_review_routing_contract
+      - evidence_conflict_semantics
+      - evidence_expiry_validity_semantics
+      - canonical_traceability_chain_enforcement
+      - proof_ladder_and_ai_authority_enforcement
+      - structured_dossier_report_renderer
+      - deterministic_ci_validation
+    exit_evidence:
+      - coverage_report_exposes_full_partial_gap_orphan_cases
+      - one_obligation_maps_to_multiple_controls
+      - common_control_or_evidence_reused_across_multiple_obligations_without_duplicate_client_truth
+      - canonical_source_to_decision_traceability_is_reconstructable
+      - proof_ladder_and_ai_authority_boundaries_fail_closed
+      - applicability_provenance_is_reconstructable
+      - material_conflict_blocks_silent_promotion
+      - expiry_cannot_leave_unsupported_green_state
+      - synthetic_dossier_renders_reproducibly
+      - exact_head_ci_pass
+      - independent_b1_pass
+
   R2-WP02:
     github_issue: 33
     title: Launch ICP, GTM, economics and repository/IP readiness
@@ -26,6 +49,7 @@ workpackages:
     authority: {real_client_data: false, production_deployment: false, pricing_commitment: false}
     deliverables: [primary_care_icp_and_disqualifiers, regulatory_positioning_matrix, competitor_and_alternative_analysis, incumbent_msp_objection_response, first_10_customer_design_partner_acquisition_hypothesis, channel_partner_hypotheses, bottom_up_unit_economics_model, market_interview_proposal_loss_reason_capture, repository_public_private_open_core_decision]
     exit_evidence: [one_primary_launch_icp_is_explicit, cbw_is_never_used_without_applicability_basis, supplier_is_secondary_until_evidence_promotes_it, prices_are_separated_into_hypothesis_vs_measured, economics_model_has_step_minutes_rate_cadence_and_payback, repository_ip_boundary_is_explicit, gtm_hypotheses_are_testable]
+
   R2-WP03:
     github_issue: 34
     title: Professional trust and liability readiness
@@ -36,7 +60,14 @@ workpackages:
     evidence_target: [E0_DESIGN]
     authority: {real_client_data: false, customer_verified_claims: false, legal_contract_approval: false}
     deliverables: [customer_review_class_matrix, competence_and_credential_expectations, independence_rules, capacity_and_loaded_cost_model, external_escalation_path, distinction_product_b1_vs_customer_professional_vs_external_assurance, professional_business_liability_posture, contractual_scope_and_liability_limit_requirements, verified_report_language_boundary, breached_after_verification_response_posture, dpa_subprocessor_retention_deletion_requirements]
-    exit_evidence: [every_customer_review_class_has_authority_and_competence_rule, internal_review_is_not_misrepresented_as_external_assurance, material_reviews_have_independence_and_escalation_rules, capacity_cost_assumptions_are_explicit, customer_verified_claims_remain_blocked_until_qualified_review, legal_insurance_items_are_ready_for_qualified_external_review]
+    exit_evidence:
+      - every_customer_review_class_has_authority_and_competence_rule
+      - internal_review_is_not_misrepresented_as_external_assurance
+      - material_reviews_have_independence_and_escalation_rules
+      - capacity_cost_assumptions_are_explicit
+      - verified_claims_fail_closed_until_all_applicable_competence_authority_independence_capacity_escalation_liability_insurance_contract_report_dpa_subprocessor_prerequisites_are_satisfied_and_reviewed
+      - legal_insurance_items_are_ready_for_qualified_external_review
+
   R2-WP04:
     github_issue: 35
     title: Bounded real design partner
@@ -46,8 +77,26 @@ workpackages:
     operation: CONTROLLED_PILOT
     evidence_target: [E2_CONTROLLED_REAL_CLIENT, E3_MARKET_COMMERCIAL]
     authority: {real_client_data: PRINCIPAL_EXPLICIT_GATE_REQUIRED, production_scale: false, customer_environment_write: false, final_legal_compliance_verdict: false}
-    measurements: [actual_documents_and_evidence_available, missing_ambiguous_facts, customer_response_latency, follow_up_burden, applicability_tailoring_disputes, evidence_conflicts_and_expiry_assumptions, professional_minutes_by_review_class, ai_accept_modify_reject, onboarding_and_recurring_effort, customer_comprehension, perceived_value_and_willingness_to_pay, incumbent_msp_objection]
-    exit_evidence: [one_bounded_real_lifecycle_or_baseline_completed, actual_effort_is_measured, real_model_workflow_defects_are_recorded, no_unresolved_material_tenant_authority_data_failure, icp_and_commercial_hypotheses_are_updated_from_e2_e3]
+    entry_evidence:
+      - minimum_safe_shared_tenant_aware_postgresql_runtime_proven
+      - tenant_isolation_negative_test_pass
+      - private_evidence_store_access_boundary_proven
+      - immutable_evidence_version_hash_integrity_proven
+      - encrypted_offsite_backup_and_actual_restore_proof_pass
+      - applicable_security_contract_professional_gates_pass
+      - principal_real_client_data_authorization
+    measurements: [actual_documents_and_evidence_available, missing_ambiguous_facts, customer_response_latency, follow_up_burden, applicability_tailoring_disputes, evidence_conflicts_and_expiry_assumptions, professional_minutes_by_review_class, ai_accept_modify_reject, onboarding_and_recurring_effort, customer_comprehension, perceived_value_and_willingness_to_pay, competitor_alternative_response, first_10_channel_outcomes, incumbent_msp_objection, loss_reasons]
+    exit_evidence:
+      - one_bounded_real_lifecycle_or_baseline_completed
+      - actual_customer_operator_reviewer_effort_is_measured
+      - real_model_workflow_defects_are_recorded
+      - no_unresolved_material_tenant_authority_data_failure
+      - competitor_alternative_first_10_channel_and_incumbent_hypotheses_are_tested
+      - icp_and_positioning_are_updated_from_observed_outcomes_and_loss_reasons
+      - pricing_economics_are_updated_from_measured_workload_reviewer_cost_cadence_reuse_and_ai_outcomes
+      - at_least_one_bounded_price_package_has_observed_willingness_to_pay_or_commercial_commitment
+      - rejected_or_inconclusive_pricing_remains_open_for_retest
+
   R2-WP05:
     github_issue: 36
     title: Productize from observed friction
@@ -58,6 +107,13 @@ workpackages:
     evidence_target: [E2_CONTROLLED_REAL_CLIENT, E3_MARKET_COMMERCIAL, E4_REPEATED_OPERATIONAL]
     authority: {production_deployment: SEPARATE_GATE_REQUIRED, real_client_expansion: SEPARATE_GATE_REQUIRED}
     priority_order: [authoritative_dossier_runtime_primitives, operator_workspace_repeated_work_reduction, interaction_layer_customer_friction_reduction, client_dashboard_proven_visibility_needs, automation_ranked_by_measured_minutes_and_assurance_impact]
-    exit_evidence: [product_replaces_repeated_observed_manual_work, tenant_and_object_negative_tests_fail_closed, operator_no_longer_uses_github_or_spreadsheets_as_client_dossier, customer_interactions_write_to_same_authoritative_dossier, automation_priorities_have_measured_workload_evidence]
+    exit_evidence:
+      - product_replaces_repeated_observed_manual_work
+      - tenant_and_object_negative_tests_fail_closed
+      - operator_no_longer_uses_github_or_spreadsheets_as_client_dossier
+      - customer_interactions_write_to_same_authoritative_dossier
+      - client_can_understand_current_state_arranged_controls_attention_points_actions_decisions_and_reports_without_grc_or_control_id_literacy
+      - client_surface_does_not_use_misleading_single_compliance_percentage
+      - automation_priorities_have_measured_workload_evidence
 
 later_options_not_active_workpackages: [technical_evidence_connectors, continuous_assurance, oscal_interoperability, white_label_delivery, benchmark_analytics, sector_expansion]
