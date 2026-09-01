@@ -3,26 +3,26 @@ name: Validate SolidSecurity foundation
 on:
   push:
     branches:
-      - 'agent/foundation-validation-v1'
-      - 'agent/mission-data-model-v1'
-      - 'agent/mission-r2-real-world-validation'
+      - main
   pull_request:
     paths:
       - 'model/**'
       - 'spec/**'
+      - 'control/CURRENT_STATE.md'
+      - 'control/PROJECT_GOVERNANCE_BOOTSTRAP.md'
+      - 'control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md'
       - 'control/SOLIDSECURITY_MISSION_CONTRACT_R2.md'
+      - 'docs/DOMAIN_MODEL_V1.md'
+      - 'docs/MISSION_DRIVEN_WORKFLOW.md'
       - 'ROADMAP.md'
+      - 'README.md'
       - 'tools/validate_foundation.py'
       - 'tools/validate_claims.py'
       - 'tools/validate_runtime_acceptance.py'
       - 'tools/validate_domain_model.py'
       - 'tools/validate_mission_r2.py'
+      - 'tools/validate_authority_drift.py'
       - 'requirements-validation.txt'
-      - 'README.md'
-      - 'control/CURRENT_STATE.md'
-      - 'control/SOLIDSECURITY_MISSION_CONTRACT_V1.md'
-      - 'docs/MISSION_DRIVEN_WORKFLOW.md'
-      - 'docs/DOMAIN_MODEL_V1.md'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
 
@@ -33,8 +33,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - name: Install validation dependency
@@ -46,6 +46,7 @@ jobs:
           python -m py_compile tools/validate_runtime_acceptance.py
           python -m py_compile tools/validate_domain_model.py
           python -m py_compile tools/validate_mission_r2.py
+          python -m py_compile tools/validate_authority_drift.py
       - name: Validate machine-readable foundation
         run: python tools/validate_foundation.py
       - name: Validate customer claim authority
@@ -56,3 +57,5 @@ jobs:
         run: python tools/validate_domain_model.py
       - name: Validate Mission R2 operating model and workpackages
         run: python tools/validate_mission_r2.py
+      - name: Validate current authority drift
+        run: python tools/validate_authority_drift.py
