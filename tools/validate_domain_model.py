@@ -16,7 +16,7 @@ def require(condition, message):
         errors.append(message)
 
 require(MODEL.get("version") == 1, "domain model version must be 1")
-require(MODEL.get("status") == "M1_CANDIDATE", "domain model must remain M1_CANDIDATE before integration")
+require(MODEL.get("status") == "M1_CANONICAL", "domain model status must remain M1_CANONICAL")
 rt = MODEL.get("runtime_topology", {})
 require(rt.get("relational_store") == "shared_postgresql", "V1 topology must be shared_postgresql")
 require(rt.get("tenant_boundary") == "tenant_id", "tenant boundary must be tenant_id")
