@@ -1,5 +1,5 @@
 version: 1
-status: M1_CANDIDATE
+status: M1_CANONICAL
 mission_gap: SS-GAP-01
 runtime_topology:
   relational_store: shared_postgresql
