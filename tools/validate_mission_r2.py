@@ -131,10 +131,12 @@ require(set(wp04.get("depends_on", [])) >= {"R2-WP01", "R2-WP02", "R2-WP03", "MI
         "real design partner must depend on kernel, launch, professional readiness and safe client envelope")
 entry = set(wp04.get("entry_evidence", []))
 for required in [
+    "minimum_safe_shared_tenant_aware_postgresql_runtime_proven",
     "tenant_isolation_negative_test_pass",
     "private_evidence_store_access_boundary_proven",
     "immutable_evidence_version_hash_integrity_proven",
     "encrypted_offsite_backup_and_actual_restore_proof_pass",
+    "applicable_security_contract_professional_gates_pass",
     "principal_real_client_data_authorization",
 ]:
     require(required in entry, f"R2-WP04 missing minimum safe real-client entry proof: {required}")
