@@ -1,0 +1,217 @@
+version: 1
+status: R2_WP01_CANDIDATE
+mission_gap: SS-R2-GAP-01
+as_of: 2026-09-02
+note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data."
+
+sources:
+  - source_id: SRC-SYNTH-ACCESS
+    source_type: internal_synthetic_requirement_set
+    version: v1
+  - source_id: SRC-SYNTH-RESILIENCE
+    source_type: internal_synthetic_requirement_set
+    version: v1
+  - source_id: SRC-SYNTH-SUPPLIER
+    source_type: internal_synthetic_requirement_set
+    version: v1
+
+requirements:
+  - requirement_id: REQ-ACCESS-LIFECYCLE
+    source_id: SRC-SYNTH-ACCESS
+    title: Govern the access lifecycle
+  - requirement_id: REQ-RECOVERY-TEST
+    source_id: SRC-SYNTH-RESILIENCE
+    title: Demonstrate recoverability through testing
+  - requirement_id: REQ-SUPPLIER-GOV
+    source_id: SRC-SYNTH-SUPPLIER
+    title: Govern material suppliers
+  - requirement_id: REQ-ORPHAN-MONITORING
+    source_id: SRC-SYNTH-SUPPLIER
+    title: Monitor supplier control drift
+
+controls:
+  - control_id: SS-ACCESS-002
+    title: Access lifecycle governance
+    materiality: critical
+  - control_id: SS-RES-001
+    title: Backup and recovery governance
+    materiality: critical
+  - control_id: SS-SUP-002
+    title: Supplier security governance
+    materiality: high
+
+requirement_control_maps:
+  - mapping_id: MAP-ACCESS-ACCESS
+    requirement_id: REQ-ACCESS-LIFECYCLE
+    control_id: SS-ACCESS-002
+    coverage: FULL
+    rationale: Primary control covers the internally authored access-lifecycle requirement.
+  - mapping_id: MAP-ACCESS-SUPPLIER
+    requirement_id: REQ-ACCESS-LIFECYCLE
+    control_id: SS-SUP-002
+    coverage: PARTIAL
+    rationale: Supplier governance contributes to third-party access oversight.
+  - mapping_id: MAP-RECOVERY
+    requirement_id: REQ-RECOVERY-TEST
+    control_id: SS-RES-001
+    coverage: FULL
+    rationale: Recovery governance directly covers restoration testing.
+  - mapping_id: MAP-SUPPLIER
+    requirement_id: REQ-SUPPLIER-GOV
+    control_id: SS-SUP-002
+    coverage: PARTIAL
+    rationale: Current synthetic implementation covers supplier review but not every monitoring aspect.
+
+applicability_decisions:
+  - applicability_id: APP-ACCESS
+    requirement_id: REQ-ACCESS-LIFECYCLE
+    scope_id: SCOPE-SYNTH-CARE
+    status: APPLICABLE
+    source_id: SRC-SYNTH-ACCESS
+    source_version: v1
+    rationale: Access governance is in scope for the synthetic care environment.
+    proposed_by_actor_type: AI
+    reviewed_by: reviewer-01
+    reviewed_at: 2026-09-01T09:00:00Z
+  - applicability_id: APP-RECOVERY
+    requirement_id: REQ-RECOVERY-TEST
+    scope_id: SCOPE-SYNTH-CARE
+    status: APPLICABLE
+    source_id: SRC-SYNTH-RESILIENCE
+    source_version: v1
+    rationale: Recovery testing is in scope for the synthetic care environment.
+    proposed_by_actor_type: AI
+    reviewed_by: reviewer-01
+    reviewed_at: 2026-09-01T09:05:00Z
+  - applicability_id: APP-SUPPLIER
+    requirement_id: REQ-SUPPLIER-GOV
+    scope_id: SCOPE-SYNTH-CARE
+    status: APPLICABLE
+    source_id: SRC-SYNTH-SUPPLIER
+    source_version: v1
+    rationale: Material supplier governance is in scope.
+    proposed_by_actor_type: AI
+    reviewed_by: reviewer-01
+    reviewed_at: 2026-09-01T09:10:00Z
+  - applicability_id: APP-ORPHAN
+    requirement_id: REQ-ORPHAN-MONITORING
+    scope_id: SCOPE-SYNTH-CARE
+    status: APPLICABLE
+    source_id: SRC-SYNTH-SUPPLIER
+    source_version: v1
+    rationale: Monitoring remains applicable even though no current control mapping exists.
+    proposed_by_actor_type: AI
+    reviewed_by: reviewer-01
+    reviewed_at: 2026-09-01T09:15:00Z
+
+client_implementations:
+  - implementation_id: IMP-ACCESS
+    control_id: SS-ACCESS-002
+    scope_id: SCOPE-SYNTH-CARE
+    implementation_status: OPERATING
+    source_of_claim: accepted_human_statement
+    description: Joiner, mover and leaver access changes follow an approved workflow.
+  - implementation_id: IMP-RECOVERY
+    control_id: SS-RES-001
+    scope_id: SCOPE-SYNTH-CARE
+    implementation_status: OPERATING
+    source_of_claim: accepted_human_statement
+    description: Recovery tests are scheduled and results are retained.
+  - implementation_id: IMP-SUPPLIER
+    control_id: SS-SUP-002
+    scope_id: SCOPE-SYNTH-CARE
+    implementation_status: OPERATING
+    source_of_claim: accepted_human_statement
+    description: Material suppliers are reviewed on a defined cadence.
+  - implementation_id: IMP-GENERATED-POLICY
+    control_id: SS-SUP-002
+    scope_id: SCOPE-SYNTH-CARE
+    implementation_status: DESIGNED
+    source_of_claim: generated_policy
+    description: AI-generated supplier-policy draft; design evidence only.
+
+evidence:
+  - evidence_id: EVID-ACCESS-RECERT
+    title: Synthetic access recertification record
+    sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    valid_from: 2026-07-01
+    expires_at: 2026-12-31
+  - evidence_id: EVID-RECOVERY-OLD
+    title: Synthetic historical recovery-test record
+    sha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    valid_from: 2025-01-01
+    expires_at: 2026-06-30
+  - evidence_id: EVID-GOV-REVIEW
+    title: Synthetic quarterly governance review
+    sha256: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    valid_from: 2026-07-01
+    expires_at: 2026-12-31
+
+assessments:
+  - assessment_id: ASM-ACCESS
+    requirement_id: REQ-ACCESS-LIFECYCLE
+    control_id: SS-ACCESS-002
+    implementation_id: IMP-ACCESS
+    evidence_ids: [EVID-ACCESS-RECERT, EVID-GOV-REVIEW]
+    result: EFFECTIVE
+    state: REVIEWED
+    proposed_proof_level: VERIFIED
+    assessor_actor_type: HUMAN
+    required_review_class: R2
+    evidence_conflict: false
+  - assessment_id: ASM-RECOVERY
+    requirement_id: REQ-RECOVERY-TEST
+    control_id: SS-RES-001
+    implementation_id: IMP-RECOVERY
+    evidence_ids: [EVID-RECOVERY-OLD]
+    result: NEEDS_REFRESH
+    state: REOPENED
+    proposed_proof_level: IMPLEMENTED
+    assessor_actor_type: HUMAN
+    required_review_class: R2
+    evidence_conflict: false
+  - assessment_id: ASM-SUPPLIER
+    requirement_id: REQ-SUPPLIER-GOV
+    control_id: SS-SUP-002
+    implementation_id: IMP-SUPPLIER
+    evidence_ids: [EVID-GOV-REVIEW]
+    result: INCONCLUSIVE
+    state: CONFLICT_DETECTED
+    proposed_proof_level: IMPLEMENTED
+    assessor_actor_type: AI
+    required_review_class: R2
+    evidence_conflict: true
+
+professional_reviews:
+  - review_id: REV-ACCESS
+    assessment_id: ASM-ACCESS
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
+    independence_class: INTERNAL_QUALIFIED
+    decision: ACCEPT
+    reviewed_at: 2026-09-01T10:00:00Z
+
+decisions:
+  - decision_id: DEC-ACCESS
+    assessment_id: ASM-ACCESS
+    review_id: REV-ACCESS
+    assurance_state: VERIFIED
+    authorized_by: reviewer-01
+    authorized_actor_type: HUMAN
+    effective_at: 2026-09-01T10:05:00Z
+
+ai_proposals:
+  - ai_proposal_id: AIP-SUPPLIER-POLICY
+    proposal_type: draft_policy
+    target_implementation_id: IMP-GENERATED-POLICY
+    proposed_proof_level: DESIGNED
+    authoritative: false
+
+expected_coverage:
+  REQ-ACCESS-LIFECYCLE: FULL
+  REQ-RECOVERY-TEST: FULL
+  REQ-SUPPLIER-GOV: PARTIAL
+  REQ-ORPHAN-MONITORING: GAP
+
+expected_orphans:
+  - REQ-ORPHAN-MONITORING
