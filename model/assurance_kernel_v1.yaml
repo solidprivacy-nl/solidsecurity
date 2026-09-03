@@ -15,6 +15,12 @@ sources:
     source_type: internal_synthetic_requirement_set
     version: v1
 
+control_scope:
+  - SS-ACCESS-002
+  - SS-RES-001
+  - SS-SUP-002
+  - SS-MON-001
+
 requirements:
   - requirement_id: REQ-ACCESS-LIFECYCLE
     source_id: SRC-SYNTH-ACCESS
@@ -210,3 +216,5 @@ expected_coverage:
 
 expected_orphans:
   - REQ-ORPHAN-MONITORING
+expected_orphan_controls:
+  - SS-MON-001
