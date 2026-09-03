@@ -2,7 +2,7 @@ version: 1
 status: R2_WP01_CANDIDATE
 mission_gap: SS-R2-GAP-01
 as_of: 2026-09-02
-note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data. Control metadata comes from model/sample_controls.yaml."
+note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data. Canonical control/proof/review authority remains in existing M1 models."
 
 sources:
   - source_id: SRC-SYNTH-ACCESS
@@ -65,47 +65,71 @@ applicability_decisions:
   - applicability_id: APP-ACCESS
     requirement_id: REQ-ACCESS-LIFECYCLE
     scope_id: SCOPE-SYNTH-CARE
+    scope_facts: [synthetic care workforce and systems are inside the bounded demonstration scope]
     status: APPLICABLE
     source_id: SRC-SYNTH-ACCESS
-    source_version: v1
+    source_framework_version: v1
     rationale: Access governance is in scope for the synthetic care environment.
-    proposed_by_actor_type: AI
-    reviewed_by: reviewer-01
-    reviewed_by_actor_type: HUMAN
+    uncertainty_or_exclusions: [synthetic applicability only; no legal conclusion or real client scope]
+    proposer_actor_type: AI
+    required_review_class: R2
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:00:00Z
+    effective_date: 2026-09-01
+    reevaluation_trigger: source version, scope facts or material assumptions change
+    expires_at: 2026-12-31
   - applicability_id: APP-RECOVERY
     requirement_id: REQ-RECOVERY-TEST
     scope_id: SCOPE-SYNTH-CARE
+    scope_facts: [synthetic recovery capability is inside the bounded demonstration scope]
     status: APPLICABLE
     source_id: SRC-SYNTH-RESILIENCE
-    source_version: v1
+    source_framework_version: v1
     rationale: Recovery testing is in scope for the synthetic care environment.
-    proposed_by_actor_type: AI
-    reviewed_by: reviewer-01
-    reviewed_by_actor_type: HUMAN
+    uncertainty_or_exclusions: [synthetic applicability only; no legal conclusion or real client scope]
+    proposer_actor_type: AI
+    required_review_class: R2
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:05:00Z
+    effective_date: 2026-09-01
+    reevaluation_trigger: source version, scope facts or material assumptions change
+    expires_at: 2026-12-31
   - applicability_id: APP-SUPPLIER
     requirement_id: REQ-SUPPLIER-GOV
     scope_id: SCOPE-SYNTH-CARE
+    scope_facts: [synthetic material suppliers are inside the bounded demonstration scope]
     status: APPLICABLE
     source_id: SRC-SYNTH-SUPPLIER
-    source_version: v1
+    source_framework_version: v1
     rationale: Material supplier governance is in scope.
-    proposed_by_actor_type: AI
-    reviewed_by: reviewer-01
-    reviewed_by_actor_type: HUMAN
+    uncertainty_or_exclusions: [synthetic applicability only; no legal conclusion or real supplier scope]
+    proposer_actor_type: AI
+    required_review_class: R2
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:10:00Z
+    effective_date: 2026-09-01
+    reevaluation_trigger: source version, scope facts or material assumptions change
+    expires_at: 2026-12-31
   - applicability_id: APP-ORPHAN
     requirement_id: REQ-ORPHAN-MONITORING
     scope_id: SCOPE-SYNTH-CARE
+    scope_facts: [synthetic supplier monitoring remains inside the bounded demonstration scope]
     status: APPLICABLE
     source_id: SRC-SYNTH-SUPPLIER
-    source_version: v1
+    source_framework_version: v1
     rationale: Monitoring remains applicable even though no current control mapping exists.
-    proposed_by_actor_type: AI
-    reviewed_by: reviewer-01
-    reviewed_by_actor_type: HUMAN
+    uncertainty_or_exclusions: [synthetic applicability only; missing control mapping intentionally remains a GAP]
+    proposer_actor_type: AI
+    required_review_class: R2
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:15:00Z
+    effective_date: 2026-09-01
+    reevaluation_trigger: source version, scope facts or material assumptions change
+    expires_at: 2026-12-31
 
 client_implementations:
   - implementation_id: IMP-ACCESS
@@ -133,26 +157,50 @@ client_implementations:
     source_of_claim: generated_policy
     description: AI-generated supplier-policy draft; design evidence only.
 
+evidence_validity_policies:
+  - policy_id: POL-SYNTH-183D
+    max_validity_days: 183
+
 evidence:
   - evidence_id: EVID-ACCESS-RECERT
     title: Synthetic access recertification record
     sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    source_ref: synthetic_access_recertification_record
+    captured_by_actor_type: HUMAN
+    captured_by: operator-01
+    captured_at: 2026-07-01T08:00:00Z
+    validity_policy_id: POL-SYNTH-183D
     valid_from: 2026-07-01
     expires_at: 2026-12-31
   - evidence_id: EVID-RECOVERY-OLD
     title: Synthetic historical recovery-test record
     sha256: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-    valid_from: 2025-01-01
-    expires_at: 2026-06-30
+    source_ref: synthetic_restore_test_record
+    captured_by_actor_type: SYSTEM
+    captured_by: backup-platform-01
+    captured_at: 2026-03-01T08:00:00Z
+    validity_policy_id: POL-SYNTH-183D
+    valid_from: 2026-03-01
+    expires_at: 2026-08-31
   - evidence_id: EVID-GOV-REVIEW
     title: Synthetic quarterly governance review with unresolved supplier exceptions
     sha256: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    source_ref: synthetic_internal_governance_review
+    captured_by_actor_type: HUMAN
+    captured_by: reviewer-01
+    captured_at: 2026-07-01T09:00:00Z
+    validity_policy_id: POL-SYNTH-183D
     valid_from: 2026-07-01
     expires_at: 2026-12-31
   - evidence_id: EVID-SUPPLIER-ATTESTATION
     title: Synthetic supplier attestation claiming all review findings closed
     sha256: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-    valid_from: 2026-08-01
+    source_ref: synthetic_supplier_attestation
+    captured_by_actor_type: HUMAN
+    captured_by: supplier-contact-01
+    captured_at: 2026-07-01T10:00:00Z
+    validity_policy_id: POL-SYNTH-183D
+    valid_from: 2026-07-01
     expires_at: 2026-12-31
 
 assessments:
@@ -166,7 +214,16 @@ assessments:
     proposed_proof_level: VERIFIED
     assessor_actor_type: HUMAN
     required_review_class: R2
-    evidence_conflict: false
+  - assessment_id: ASM-ACCESS-SUPPLIER
+    requirement_id: REQ-ACCESS-LIFECYCLE
+    control_id: SS-SUP-002
+    implementation_id: IMP-SUPPLIER
+    evidence_ids: [EVID-GOV-REVIEW]
+    result: EFFECTIVE
+    state: REVIEWED
+    proposed_proof_level: VERIFIED
+    assessor_actor_type: HUMAN
+    required_review_class: R2
   - assessment_id: ASM-RECOVERY
     requirement_id: REQ-RECOVERY-TEST
     control_id: SS-RES-001
@@ -177,7 +234,6 @@ assessments:
     proposed_proof_level: IMPLEMENTED
     assessor_actor_type: HUMAN
     required_review_class: R2
-    evidence_conflict: false
   - assessment_id: ASM-SUPPLIER
     requirement_id: REQ-SUPPLIER-GOV
     control_id: SS-SUP-002
@@ -188,8 +244,15 @@ assessments:
     proposed_proof_level: IMPLEMENTED
     assessor_actor_type: AI
     required_review_class: R2
-    evidence_conflict: true
-    conflict_reason: Governance review records unresolved exceptions while supplier attestation claims all findings are closed.
+
+evidence_conflicts:
+  - conflict_id: CONFLICT-SUPPLIER-01
+    assessment_id: ASM-SUPPLIER
+    evidence_ids: [EVID-GOV-REVIEW, EVID-SUPPLIER-ATTESTATION]
+    status: OPEN
+    rationale: Governance review records unresolved exceptions while supplier attestation claims all findings are closed.
+    detected_at: 2026-09-01T09:30:00Z
+    resolution: null
 
 professional_reviews:
   - review_id: REV-ACCESS
@@ -199,6 +262,13 @@ professional_reviews:
     independence_class: INTERNAL_QUALIFIED
     decision: ACCEPT
     reviewed_at: 2026-09-01T10:00:00Z
+  - review_id: REV-ACCESS-SUPPLIER
+    assessment_id: ASM-ACCESS-SUPPLIER
+    reviewer_id: reviewer-01
+    reviewer_actor_type: HUMAN
+    independence_class: INTERNAL_QUALIFIED
+    decision: ACCEPT
+    reviewed_at: 2026-09-01T10:02:00Z
 
 decisions:
   - decision_id: DEC-ACCESS
@@ -208,6 +278,13 @@ decisions:
     authorized_by: reviewer-01
     authorized_actor_type: HUMAN
     effective_at: 2026-09-01T10:05:00Z
+  - decision_id: DEC-ACCESS-SUPPLIER
+    assessment_id: ASM-ACCESS-SUPPLIER
+    review_id: REV-ACCESS-SUPPLIER
+    assurance_state: VERIFIED
+    authorized_by: reviewer-01
+    authorized_actor_type: HUMAN
+    effective_at: 2026-09-01T10:06:00Z
 
 ai_proposals:
   - ai_proposal_id: AIP-SUPPLIER-POLICY
