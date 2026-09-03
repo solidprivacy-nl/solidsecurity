@@ -1,6 +1,7 @@
 # SolidSecurity Synthetic Assurance Kernel Dossier
 
 Source: `model/assurance_kernel_v1.yaml`
+Canonical control catalog: `model/sample_controls.yaml`
 As-of: 2026-09-02
 Data class: synthetic only; no real client data.
 
@@ -26,7 +27,7 @@ Data class: synthetic only; no real client data.
 - Shared control reuse: `SS-SUP-002` -> `REQ-ACCESS-LIFECYCLE`, `REQ-SUPPLIER-GOV`
 - Shared evidence reuse: `EVID-GOV-REVIEW` -> `ASM-ACCESS`, `ASM-SUPPLIER`
 - Orphan requirements: `REQ-ORPHAN-MONITORING`
-- Orphan controls: none
+- Orphan controls: `SS-MON-001`
 - Evidence conflicts: `ASM-SUPPLIER`
 - Reopened after evidence expiry: `ASM-RECOVERY`
 - Generated-policy design-only implementations: `IMP-GENERATED-POLICY`
