@@ -13,17 +13,18 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = ROOT / "model/assurance_kernel_v1.yaml"
+CONTROL_CATALOG_PATH = ROOT / "model/sample_controls.yaml"
+PROOF_LADDER_PATH = ROOT / "model/proof_ladder.yaml"
+AI_AUTHORITY_PATH = ROOT / "model/ai_authority.yaml"
 GOLDEN_PATH = ROOT / "spec/assurance_kernel_v1_dossier.md"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-PROOF_LEVEL = {
-    "UNKNOWN": 0,
-    "DESIGNED": 1,
-    "IMPLEMENTED": 2,
-    "EVIDENCED": 3,
-    "VERIFIED": 4,
-    "INDEPENDENTLY_ASSURED": 5,
-}
-REVIEW_CLASS = {"R0": 0, "R1": 1, "R2": 2, "R3": 3, "R4": 4}
+
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    value = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{path.name} root must be a mapping")
+    return value
 
 
 def _as_date(value: object) -> date | None:
@@ -64,12 +65,62 @@ def _index(items: object, key: str, errors: list[str]) -> dict[str, dict[str, An
     return result
 
 
-def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+def _proof_levels(proof_ladder: dict[str, Any], errors: list[str]) -> dict[str, int]:
+    result: dict[str, int] = {}
+    states = proof_ladder.get("states")
+    if not isinstance(states, list):
+        errors.append("canonical proof ladder states must be a list")
+        return result
+    for state in states:
+        if not isinstance(state, dict):
+            errors.append("canonical proof ladder contains non-object state")
+            continue
+        state_id = state.get("id")
+        level = state.get("level")
+        if not isinstance(state_id, str) or not isinstance(level, int) or isinstance(level, bool):
+            errors.append("canonical proof ladder state identity invalid")
+            continue
+        if state_id in result:
+            errors.append(f"duplicate canonical proof state: {state_id}")
+            continue
+        result[state_id] = level
+    required = {"UNKNOWN", "DESIGNED", "IMPLEMENTED", "EVIDENCED", "VERIFIED", "INDEPENDENTLY_ASSURED"}
+    if not required.issubset(result):
+        errors.append(f"canonical proof ladder missing states: {sorted(required - set(result))}")
+    return result
+
+
+def _review_classes(ai_authority: dict[str, Any], errors: list[str]) -> dict[str, int]:
+    classes = ai_authority.get("review_classes")
+    if not isinstance(classes, dict):
+        errors.append("canonical AI authority review_classes must be a mapping")
+        return {}
+    result: dict[str, int] = {}
+    for key in classes:
+        if not isinstance(key, str) or not re.fullmatch(r"R[0-9]+", key):
+            errors.append(f"canonical review class invalid: {key!r}")
+            continue
+        result[key] = int(key[1:])
+    required = {"R0", "R1", "R2", "R3", "R4"}
+    if not required.issubset(result):
+        errors.append(f"canonical AI authority missing review classes: {sorted(required - set(result))}")
+    return result
+
+
+def validate_model(
+    model: dict[str, Any],
+    control_catalog: dict[str, Any],
+    proof_ladder: dict[str, Any],
+    ai_authority: dict[str, Any],
+) -> tuple[list[str], dict[str, Any]]:
     errors: list[str] = []
 
     def require(condition: bool, message: str) -> None:
         if not condition:
             errors.append(message)
+
+    proof_levels = _proof_levels(proof_ladder, errors)
+    review_classes = _review_classes(ai_authority, errors)
 
     require(model.get("version") == 1, "assurance kernel version must be 1")
     require(model.get("status") == "R2_WP01_CANDIDATE", "assurance kernel must remain an R2-WP01 candidate")
@@ -80,8 +131,9 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
         as_of = date.min
 
     sources = _index(model.get("sources"), "source_id", errors)
+    scopes = _index(model.get("scopes"), "scope_id", errors)
     requirements = _index(model.get("requirements"), "requirement_id", errors)
-    controls = _index(model.get("controls"), "control_id", errors)
+    catalog_controls = _index(control_catalog.get("controls"), "id", errors)
     mappings = _index(model.get("requirement_control_maps"), "mapping_id", errors)
     applicability = _index(model.get("applicability_decisions"), "applicability_id", errors)
     implementations = _index(model.get("client_implementations"), "implementation_id", errors)
@@ -91,9 +143,28 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     decisions = _index(model.get("decisions"), "decision_id", errors)
     ai_proposals = _index(model.get("ai_proposals"), "ai_proposal_id", errors)
 
+    control_scope = model.get("control_scope")
+    require(isinstance(control_scope, list) and bool(control_scope), "control_scope must be a non-empty list")
+    scoped_ids: list[str] = []
+    if isinstance(control_scope, list):
+        for control_id in control_scope:
+            require(isinstance(control_id, str) and bool(control_id), "control_scope IDs must be non-empty strings")
+            if isinstance(control_id, str) and control_id:
+                scoped_ids.append(control_id)
+        require(len(scoped_ids) == len(set(scoped_ids)), "control_scope must not contain duplicate control IDs")
+
+    controls: dict[str, dict[str, Any]] = {}
+    for control_id in scoped_ids:
+        control = catalog_controls.get(control_id)
+        require(control is not None, f"control_scope references unknown canonical control {control_id}")
+        if control is None:
+            continue
+        require(control.get("lifecycle_state") == "active", f"scoped canonical control {control_id} must be active")
+        require(control.get("minimum_review_class") in review_classes, f"canonical control {control_id} has invalid minimum_review_class")
+        controls[control_id] = control
+
     for requirement_id, requirement in requirements.items():
-        source_id = requirement.get("source_id")
-        require(source_id in sources, f"requirement {requirement_id} references unknown source")
+        require(requirement.get("source_id") in sources, f"requirement {requirement_id} references unknown source")
 
     maps_by_requirement: dict[str, list[dict[str, Any]]] = {rid: [] for rid in requirements}
     requirements_by_control: dict[str, set[str]] = {cid: set() for cid in controls}
@@ -101,7 +172,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
         requirement_id = mapping.get("requirement_id")
         control_id = mapping.get("control_id")
         require(requirement_id in requirements, f"mapping {mapping_id} references unknown requirement")
-        require(control_id in controls, f"mapping {mapping_id} references unknown control")
+        require(control_id in controls, f"mapping {mapping_id} references control outside canonical control_scope")
         require(mapping.get("coverage") in {"FULL", "PARTIAL"}, f"mapping {mapping_id} coverage must be FULL or PARTIAL")
         require(isinstance(mapping.get("rationale"), str) and bool(mapping.get("rationale")), f"mapping {mapping_id} requires rationale")
         if requirement_id in maps_by_requirement and control_id in controls:
@@ -112,6 +183,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     for applicability_id, item in applicability.items():
         requirement_id = item.get("requirement_id")
         require(requirement_id in requirements, f"applicability {applicability_id} references unknown requirement")
+        require(item.get("scope_id") in scopes, f"applicability {applicability_id} references unknown scope")
         require(item.get("status") == "APPLICABLE", f"synthetic kernel applicability {applicability_id} must be APPLICABLE")
         if requirement_id in requirements:
             applicability_by_requirement[requirement_id].append(item)
@@ -121,11 +193,13 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
             require(item.get("source_version") == source.get("version"), f"applicability {applicability_id} source version mismatch")
         require(isinstance(item.get("rationale"), str) and bool(item.get("rationale")), f"applicability {applicability_id} requires rationale")
         require(bool(item.get("reviewed_by")) and bool(item.get("reviewed_at")), f"applicability {applicability_id} requires governed review provenance")
+        require(item.get("reviewed_by_actor_type") == "HUMAN", f"applicability {applicability_id} requires human review authority")
     for requirement_id, items in applicability_by_requirement.items():
         require(len(items) == 1, f"requirement {requirement_id} must have exactly one applicability decision")
 
     for implementation_id, implementation in implementations.items():
-        require(implementation.get("control_id") in controls, f"implementation {implementation_id} references unknown control")
+        require(implementation.get("control_id") in controls, f"implementation {implementation_id} references control outside canonical control_scope")
+        require(implementation.get("scope_id") in scopes, f"implementation {implementation_id} references unknown scope")
         if implementation.get("source_of_claim") == "generated_policy":
             require(implementation.get("implementation_status") == "DESIGNED", f"generated policy {implementation_id} must remain DESIGNED")
 
@@ -144,7 +218,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
         control_id = assessment.get("control_id")
         implementation_id = assessment.get("implementation_id")
         require(requirement_id in requirements, f"assessment {assessment_id} references unknown requirement")
-        require(control_id in controls, f"assessment {assessment_id} references unknown control")
+        require(control_id in controls, f"assessment {assessment_id} references control outside canonical control_scope")
         require(implementation_id in implementations, f"assessment {assessment_id} references unknown implementation")
         if implementation_id in implementations:
             require(implementations[implementation_id].get("control_id") == control_id, f"assessment {assessment_id} implementation/control mismatch")
@@ -152,28 +226,35 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
             mapped_controls = {item.get("control_id") for item in maps_by_requirement.get(requirement_id, [])}
             require(control_id in mapped_controls, f"assessment {assessment_id} control is not mapped to its requirement")
             assessments_by_requirement[requirement_id].append(assessment)
+
         evidence_ids = assessment.get("evidence_ids")
         require(isinstance(evidence_ids, list) and len(evidence_ids) > 0, f"assessment {assessment_id} requires evidence")
         resolved_evidence: list[dict[str, Any]] = []
         if isinstance(evidence_ids, list):
+            require(len(evidence_ids) == len(set(evidence_ids)), f"assessment {assessment_id} must not duplicate evidence IDs")
             for evidence_id in evidence_ids:
                 require(evidence_id in evidence, f"assessment {assessment_id} references unknown evidence {evidence_id}")
                 if evidence_id in evidence:
                     resolved_evidence.append(evidence[evidence_id])
                     assessment_evidence_users[evidence_id].add(assessment_id)
-        require(assessment.get("proposed_proof_level") in PROOF_LEVEL, f"assessment {assessment_id} has invalid proof level")
+
+        proof_level = assessment.get("proposed_proof_level")
+        require(proof_level in proof_levels, f"assessment {assessment_id} has invalid proof level")
         review_class = assessment.get("required_review_class")
-        require(review_class in REVIEW_CLASS, f"assessment {assessment_id} has invalid review class")
-        if control_id in controls and controls[control_id].get("materiality") in {"high", "critical"}:
-            require(REVIEW_CLASS.get(review_class, -1) >= REVIEW_CLASS["R2"], f"material assessment {assessment_id} must route to R2 or stronger review")
+        require(review_class in review_classes, f"assessment {assessment_id} has invalid review class")
+        if control_id in controls:
+            minimum_review = controls[control_id].get("minimum_review_class")
+            if minimum_review in review_classes and review_class in review_classes:
+                require(review_classes[review_class] >= review_classes[minimum_review], f"assessment {assessment_id} review class is below canonical control minimum")
+
         if assessment.get("evidence_conflict") is True:
             require(assessment.get("state") == "CONFLICT_DETECTED", f"conflicted assessment {assessment_id} must remain CONFLICT_DETECTED")
             require(isinstance(evidence_ids, list) and len(set(evidence_ids)) >= 2, f"conflicted assessment {assessment_id} requires at least two distinct evidence sources")
             require(isinstance(assessment.get("conflict_reason"), str) and bool(assessment.get("conflict_reason")), f"conflicted assessment {assessment_id} requires conflict rationale")
+
         if resolved_evidence and all((_as_date(item.get("expires_at")) or date.min) < as_of for item in resolved_evidence):
             require(assessment.get("state") == "REOPENED", f"assessment {assessment_id} with only expired evidence must be REOPENED")
-            proof = PROOF_LEVEL.get(assessment.get("proposed_proof_level"), 99)
-            require(proof <= PROOF_LEVEL["IMPLEMENTED"], f"assessment {assessment_id} with only expired evidence cannot remain evidentially green")
+            require(proof_levels.get(proof_level, 99) <= proof_levels.get("IMPLEMENTED", 2), f"assessment {assessment_id} with only expired evidence cannot remain evidentially green")
 
     reviews_by_assessment: dict[str, list[dict[str, Any]]] = {aid: [] for aid in assessments}
     for review_id, review in reviews.items():
@@ -217,10 +298,11 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     for proposal_id, proposal in ai_proposals.items():
         require(proposal.get("target_implementation_id") in implementations, f"AI proposal {proposal_id} references unknown implementation")
         require(proposal.get("authoritative") is False, f"AI proposal {proposal_id} must remain non-authoritative")
-        require(proposal.get("proposed_proof_level") in PROOF_LEVEL, f"AI proposal {proposal_id} has invalid proof level")
+        proof_level = proposal.get("proposed_proof_level")
+        require(proof_level in proof_levels, f"AI proposal {proposal_id} has invalid proof level")
         target = implementations.get(proposal.get("target_implementation_id"), {})
         if target.get("source_of_claim") == "generated_policy":
-            require(PROOF_LEVEL.get(proposal.get("proposed_proof_level"), 99) <= PROOF_LEVEL["DESIGNED"], f"generated-policy AI proposal {proposal_id} cannot imply operating proof")
+            require(proof_levels.get(proof_level, 99) <= proof_levels.get("DESIGNED", 1), f"generated-policy AI proposal {proposal_id} cannot imply operating proof")
 
     derived_coverage: dict[str, str] = {}
     for requirement_id in requirements:
@@ -239,22 +321,19 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     orphan_requirements = sorted(rid for rid, items in maps_by_requirement.items() if not items)
     expected_orphans = sorted(model.get("expected_orphans", [])) if isinstance(model.get("expected_orphans"), list) else []
     require(orphan_requirements == expected_orphans, "derived orphan requirements do not match expected_orphans")
+
     orphan_controls = sorted(cid for cid, requirement_ids in requirements_by_control.items() if not requirement_ids)
+    expected_orphan_controls = sorted(model.get("expected_orphan_controls", [])) if isinstance(model.get("expected_orphan_controls"), list) else []
+    require(orphan_controls == expected_orphan_controls, "derived orphan controls do not match expected_orphan_controls")
 
     multi_control_requirements = sorted(rid for rid, items in maps_by_requirement.items() if len({item.get("control_id") for item in items}) > 1)
-    shared_controls = {
-        cid: sorted(requirement_ids)
-        for cid, requirement_ids in requirements_by_control.items()
-        if len(requirement_ids) > 1
-    }
-    shared_evidence = {
-        evidence_id: sorted(assessment_ids)
-        for evidence_id, assessment_ids in assessment_evidence_users.items()
-        if len(assessment_ids) > 1
-    }
+    shared_controls = {cid: sorted(requirement_ids) for cid, requirement_ids in requirements_by_control.items() if len(requirement_ids) > 1}
+    shared_evidence = {evidence_id: sorted(assessment_ids) for evidence_id, assessment_ids in assessment_evidence_users.items() if len(assessment_ids) > 1}
     require(bool(multi_control_requirements), "kernel must demonstrate one requirement mapped to multiple controls")
     require(bool(shared_controls), "kernel must demonstrate common-control reuse across requirements")
     require(bool(shared_evidence), "kernel must demonstrate evidence reuse across assessments")
+    require(bool(orphan_requirements), "kernel must demonstrate orphan requirement detection")
+    require(bool(orphan_controls), "kernel must demonstrate orphan control detection")
     require(any(value == "FULL" for value in derived_coverage.values()), "kernel must demonstrate FULL coverage")
     require(any(value == "PARTIAL" for value in derived_coverage.values()), "kernel must demonstrate PARTIAL coverage")
     require(any(value == "GAP" for value in derived_coverage.values()), "kernel must demonstrate GAP coverage")
@@ -262,6 +341,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     derived = {
         "as_of": as_of,
         "sources": sources,
+        "scopes": scopes,
         "requirements": requirements,
         "controls": controls,
         "mappings": mappings,
@@ -311,14 +391,7 @@ def _trace(requirement_id: str, derived: dict[str, Any]) -> str:
         return f"{source_id} -> {requirement_id} -> {','.join(controls)} -> PENDING_ASSESSMENT"
     assessment = sorted(assessments, key=lambda item: item["assessment_id"])[0]
     implementation = derived["implementations"][assessment["implementation_id"]]
-    chain = [
-        source_id,
-        requirement_id,
-        assessment["control_id"],
-        implementation["implementation_id"],
-        ",".join(sorted(assessment["evidence_ids"])),
-        assessment["assessment_id"],
-    ]
+    chain = [source_id, requirement_id, assessment["control_id"], implementation["implementation_id"], ",".join(sorted(assessment["evidence_ids"])), assessment["assessment_id"]]
     reviews = derived["reviews_by_assessment"].get(assessment["assessment_id"], [])
     decisions = derived["decisions_by_assessment"].get(assessment["assessment_id"], [])
     if reviews:
@@ -336,6 +409,7 @@ def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
         "# SolidSecurity Synthetic Assurance Kernel Dossier",
         "",
         "Source: `model/assurance_kernel_v1.yaml`",
+        "Canonical control catalog: `model/sample_controls.yaml`",
         f"As-of: {_iso_date(model.get('as_of'))}",
         "Data class: synthetic only; no real client data.",
         "",
@@ -349,9 +423,7 @@ def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
         control_text = ", ".join(controls) if controls else "none"
         applicability = derived["applicability_by_requirement"].get(requirement_id, [])
         applicability_text = applicability[0]["status"] if applicability else "MISSING"
-        lines.append(
-            f"| {requirement_id} | {applicability_text} | {derived['coverage'][requirement_id]} | {control_text} | {_assurance_state(requirement_id, derived)} |"
-        )
+        lines.append(f"| {requirement_id} | {applicability_text} | {derived['coverage'][requirement_id]} | {control_text} | {_assurance_state(requirement_id, derived)} |")
 
     lines.extend(["", "## Traceability", ""])
     for requirement_id in sorted(derived["requirements"]):
@@ -385,92 +457,56 @@ def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _expect_regression_failure(base: dict[str, Any], mutate, expected: str, failures: list[str]) -> None:
+def _expect_regression_failure(base: dict[str, Any], control_catalog: dict[str, Any], proof_ladder: dict[str, Any], ai_authority: dict[str, Any], mutate, expected: str, failures: list[str]) -> None:
     candidate = deepcopy(base)
     mutate(candidate)
-    errors, _ = validate_model(candidate)
+    errors, _ = validate_model(candidate, control_catalog, proof_ladder, ai_authority)
     if not any(expected in error for error in errors):
         failures.append(f"regression did not fail closed: {expected}")
 
 
-def run_regressions(model: dict[str, Any]) -> list[str]:
+def run_regressions(model: dict[str, Any], control_catalog: dict[str, Any], proof_ladder: dict[str, Any], ai_authority: dict[str, Any]) -> list[str]:
     failures: list[str] = []
 
-    _expect_regression_failure(
-        model,
-        lambda value: value["decisions"][0].update({"authorized_actor_type": "AI"}),
-        "requires human authority",
-        failures,
-    )
-    _expect_regression_failure(
-        model,
-        lambda value: value["evidence"][0].update({"expires_at": date(2026, 8, 31)}),
-        "relies on expired evidence",
-        failures,
-    )
+    def expect(mutate, expected: str) -> None:
+        _expect_regression_failure(model, control_catalog, proof_ladder, ai_authority, mutate, expected, failures)
+
+    expect(lambda value: value["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
+    expect(lambda value: value["evidence"][0].update({"expires_at": date(2026, 8, 31)}), "relies on expired evidence")
 
     def promote_conflict(value: dict[str, Any]) -> None:
-        value["professional_reviews"].append({
-            "review_id": "REV-SUPPLIER-BAD",
-            "assessment_id": "ASM-SUPPLIER",
-            "reviewer_id": "reviewer-02",
-            "reviewer_actor_type": "HUMAN",
-            "independence_class": "INTERNAL_QUALIFIED",
-            "decision": "ACCEPT",
-            "reviewed_at": "2026-09-01T11:00:00Z",
-        })
-        value["decisions"].append({
-            "decision_id": "DEC-SUPPLIER-BAD",
-            "assessment_id": "ASM-SUPPLIER",
-            "review_id": "REV-SUPPLIER-BAD",
-            "assurance_state": "VERIFIED",
-            "authorized_by": "reviewer-02",
-            "authorized_actor_type": "HUMAN",
-            "effective_at": "2026-09-01T11:05:00Z",
-        })
+        value["professional_reviews"].append({"review_id": "REV-SUPPLIER-BAD", "assessment_id": "ASM-SUPPLIER", "reviewer_id": "reviewer-02", "reviewer_actor_type": "HUMAN", "independence_class": "INTERNAL_QUALIFIED", "decision": "ACCEPT", "reviewed_at": "2026-09-01T11:00:00Z"})
+        value["decisions"].append({"decision_id": "DEC-SUPPLIER-BAD", "assessment_id": "ASM-SUPPLIER", "review_id": "REV-SUPPLIER-BAD", "assurance_state": "VERIFIED", "authorized_by": "reviewer-02", "authorized_actor_type": "HUMAN", "effective_at": "2026-09-01T11:05:00Z"})
 
-    _expect_regression_failure(model, promote_conflict, "cannot have assurance decision", failures)
-    _expect_regression_failure(
-        model,
-        lambda value: value["expected_coverage"].update({"REQ-SUPPLIER-GOV": "FULL"}),
-        "derived coverage does not match expected_coverage",
-        failures,
-    )
-    _expect_regression_failure(
-        model,
-        lambda value: value["client_implementations"][-1].update({"implementation_status": "OPERATING"}),
-        "must remain DESIGNED",
-        failures,
-    )
-    _expect_regression_failure(
-        model,
-        lambda value: value["assessments"][-1].update({"evidence_ids": ["EVID-GOV-REVIEW"]}),
-        "requires at least two distinct evidence sources",
-        failures,
-    )
+    expect(promote_conflict, "cannot have assurance decision")
+    expect(lambda value: value["expected_coverage"].update({"REQ-SUPPLIER-GOV": "FULL"}), "derived coverage does not match expected_coverage")
+    expect(lambda value: value["client_implementations"][-1].update({"implementation_status": "OPERATING"}), "must remain DESIGNED")
+    expect(lambda value: value["assessments"][-1].update({"evidence_ids": ["EVID-GOV-REVIEW"]}), "requires at least two distinct evidence sources")
+    expect(lambda value: value["assessments"][0].update({"required_review_class": "R1"}), "below canonical control minimum")
+    expect(lambda value: value["control_scope"].append("SS-NOT-A-CONTROL"), "references unknown canonical control")
+    expect(lambda value: value["applicability_decisions"][0].update({"reviewed_by_actor_type": "AI"}), "requires human review authority")
     return failures
 
 
 def main() -> int:
     try:
-        model = yaml.safe_load(MODEL_PATH.read_text(encoding="utf-8"))
+        model = _load_yaml(MODEL_PATH)
+        control_catalog = _load_yaml(CONTROL_CATALOG_PATH)
+        proof_ladder = _load_yaml(PROOF_LADDER_PATH)
+        ai_authority = _load_yaml(AI_AUTHORITY_PATH)
     except Exception as exc:
         print("SOLIDSECURITY_ASSURANCE_KERNEL=FAIL")
-        print(f"ERROR: assurance kernel model unreadable: {type(exc).__name__}")
-        return 2
-    if not isinstance(model, dict):
-        print("SOLIDSECURITY_ASSURANCE_KERNEL=FAIL")
-        print("ERROR: assurance kernel root must be a mapping")
+        print(f"ERROR: assurance kernel authority input unreadable: {type(exc).__name__}")
         return 2
 
-    errors, derived = validate_model(model)
+    errors, derived = validate_model(model, control_catalog, proof_ladder, ai_authority)
     if errors:
         print("SOLIDSECURITY_ASSURANCE_KERNEL=FAIL")
         for error in errors:
             print(f"ERROR: {error}")
         return 2
 
-    regressions = run_regressions(model)
+    regressions = run_regressions(model, control_catalog, proof_ladder, ai_authority)
     if regressions:
         print("SOLIDSECURITY_ASSURANCE_KERNEL=FAIL")
         for error in regressions:
@@ -494,10 +530,7 @@ def main() -> int:
             return 2
 
     print("SOLIDSECURITY_ASSURANCE_KERNEL=PASS")
-    print(
-        "coverage=" + ",".join(f"{key}:{derived['coverage'][key]}" for key in sorted(derived["coverage"]))
-        + f" orphan_requirements={len(derived['orphan_requirements'])} shared_controls={len(derived['shared_controls'])} shared_evidence={len(derived['shared_evidence'])}"
-    )
+    print("coverage=" + ",".join(f"{key}:{derived['coverage'][key]}" for key in sorted(derived["coverage"])) + f" orphan_requirements={len(derived['orphan_requirements'])} orphan_controls={len(derived['orphan_controls'])} shared_controls={len(derived['shared_controls'])} shared_evidence={len(derived['shared_evidence'])}")
     return 0
 
 
