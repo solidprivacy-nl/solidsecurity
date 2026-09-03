@@ -2,7 +2,7 @@ version: 1
 status: R2_WP01_CANDIDATE
 mission_gap: SS-R2-GAP-01
 as_of: 2026-09-02
-note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data."
+note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data. Control metadata comes from model/sample_controls.yaml."
 
 sources:
   - source_id: SRC-SYNTH-ACCESS
@@ -28,17 +28,6 @@ requirements:
   - requirement_id: REQ-ORPHAN-MONITORING
     source_id: SRC-SYNTH-SUPPLIER
     title: Monitor supplier control drift
-
-controls:
-  - control_id: SS-ACCESS-002
-    title: Access lifecycle governance
-    materiality: critical
-  - control_id: SS-RES-001
-    title: Backup and recovery governance
-    materiality: critical
-  - control_id: SS-SUP-002
-    title: Supplier security governance
-    materiality: high
 
 requirement_control_maps:
   - mapping_id: MAP-ACCESS-ACCESS
