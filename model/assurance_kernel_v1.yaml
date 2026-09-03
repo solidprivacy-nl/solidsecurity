@@ -1,8 +1,9 @@
 version: 1
 status: R2_WP01_CANDIDATE
 mission_gap: SS-R2-GAP-01
+semantic_projection_only: true
 as_of: 2026-09-02
-note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data. Canonical control/proof/review authority remains in existing M1 models."
+note: "Synthetic internally authored assurance-kernel fixture. No external standard text or real client data. This is a semantic test projection, not a persistence schema; canonical runtime entity truth remains model/domain_model_v1.yaml."
 
 sources:
   - source_id: SRC-SYNTH-ACCESS
@@ -75,6 +76,8 @@ applicability_decisions:
     required_review_class: R2
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
+    review_decision: ACCEPT
     reviewed_at: 2026-09-01T09:00:00Z
     effective_date: 2026-09-01
     reevaluation_trigger: source version, scope facts or material assumptions change
@@ -92,6 +95,8 @@ applicability_decisions:
     required_review_class: R2
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
+    review_decision: ACCEPT
     reviewed_at: 2026-09-01T09:05:00Z
     effective_date: 2026-09-01
     reevaluation_trigger: source version, scope facts or material assumptions change
@@ -109,6 +114,8 @@ applicability_decisions:
     required_review_class: R2
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
+    review_decision: ACCEPT
     reviewed_at: 2026-09-01T09:10:00Z
     effective_date: 2026-09-01
     reevaluation_trigger: source version, scope facts or material assumptions change
@@ -126,6 +133,8 @@ applicability_decisions:
     required_review_class: R2
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
+    review_decision: ACCEPT
     reviewed_at: 2026-09-01T09:15:00Z
     effective_date: 2026-09-01
     reevaluation_trigger: source version, scope facts or material assumptions change
@@ -259,6 +268,7 @@ professional_reviews:
     assessment_id: ASM-ACCESS
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
     independence_class: INTERNAL_QUALIFIED
     decision: ACCEPT
     reviewed_at: 2026-09-01T10:00:00Z
@@ -266,6 +276,7 @@ professional_reviews:
     assessment_id: ASM-ACCESS-SUPPLIER
     reviewer_id: reviewer-01
     reviewer_actor_type: HUMAN
+    review_class: R2
     independence_class: INTERNAL_QUALIFIED
     decision: ACCEPT
     reviewed_at: 2026-09-01T10:02:00Z
