@@ -142,9 +142,14 @@ evidence:
     valid_from: 2025-01-01
     expires_at: 2026-06-30
   - evidence_id: EVID-GOV-REVIEW
-    title: Synthetic quarterly governance review
+    title: Synthetic quarterly governance review with unresolved supplier exceptions
     sha256: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     valid_from: 2026-07-01
+    expires_at: 2026-12-31
+  - evidence_id: EVID-SUPPLIER-ATTESTATION
+    title: Synthetic supplier attestation claiming all review findings closed
+    sha256: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+    valid_from: 2026-08-01
     expires_at: 2026-12-31
 
 assessments:
@@ -174,13 +179,14 @@ assessments:
     requirement_id: REQ-SUPPLIER-GOV
     control_id: SS-SUP-002
     implementation_id: IMP-SUPPLIER
-    evidence_ids: [EVID-GOV-REVIEW]
+    evidence_ids: [EVID-GOV-REVIEW, EVID-SUPPLIER-ATTESTATION]
     result: INCONCLUSIVE
     state: CONFLICT_DETECTED
     proposed_proof_level: IMPLEMENTED
     assessor_actor_type: AI
     required_review_class: R2
     evidence_conflict: true
+    conflict_reason: Governance review records unresolved exceptions while supplier attestation claims all findings are closed.
 
 professional_reviews:
   - review_id: REV-ACCESS
