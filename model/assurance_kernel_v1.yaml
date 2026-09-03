@@ -15,6 +15,10 @@ sources:
     source_type: internal_synthetic_requirement_set
     version: v1
 
+scopes:
+  - scope_id: SCOPE-SYNTH-CARE
+    name: Synthetic Dutch care environment
+
 control_scope:
   - SS-ACCESS-002
   - SS-RES-001
@@ -67,6 +71,7 @@ applicability_decisions:
     rationale: Access governance is in scope for the synthetic care environment.
     proposed_by_actor_type: AI
     reviewed_by: reviewer-01
+    reviewed_by_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:00:00Z
   - applicability_id: APP-RECOVERY
     requirement_id: REQ-RECOVERY-TEST
@@ -77,6 +82,7 @@ applicability_decisions:
     rationale: Recovery testing is in scope for the synthetic care environment.
     proposed_by_actor_type: AI
     reviewed_by: reviewer-01
+    reviewed_by_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:05:00Z
   - applicability_id: APP-SUPPLIER
     requirement_id: REQ-SUPPLIER-GOV
@@ -87,6 +93,7 @@ applicability_decisions:
     rationale: Material supplier governance is in scope.
     proposed_by_actor_type: AI
     reviewed_by: reviewer-01
+    reviewed_by_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:10:00Z
   - applicability_id: APP-ORPHAN
     requirement_id: REQ-ORPHAN-MONITORING
@@ -97,6 +104,7 @@ applicability_decisions:
     rationale: Monitoring remains applicable even though no current control mapping exists.
     proposed_by_actor_type: AI
     reviewed_by: reviewer-01
+    reviewed_by_actor_type: HUMAN
     reviewed_at: 2026-09-01T09:15:00Z
 
 client_implementations:
