@@ -168,6 +168,8 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
             require(REVIEW_CLASS.get(review_class, -1) >= REVIEW_CLASS["R2"], f"material assessment {assessment_id} must route to R2 or stronger review")
         if assessment.get("evidence_conflict") is True:
             require(assessment.get("state") == "CONFLICT_DETECTED", f"conflicted assessment {assessment_id} must remain CONFLICT_DETECTED")
+            require(isinstance(evidence_ids, list) and len(set(evidence_ids)) >= 2, f"conflicted assessment {assessment_id} requires at least two distinct evidence sources")
+            require(isinstance(assessment.get("conflict_reason"), str) and bool(assessment.get("conflict_reason")), f"conflicted assessment {assessment_id} requires conflict rationale")
         if resolved_evidence and all((_as_date(item.get("expires_at")) or date.min) < as_of for item in resolved_evidence):
             require(assessment.get("state") == "REOPENED", f"assessment {assessment_id} with only expired evidence must be REOPENED")
             proof = PROOF_LEVEL.get(assessment.get("proposed_proof_level"), 99)
@@ -178,6 +180,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
         assessment_id = review.get("assessment_id")
         require(assessment_id in assessments, f"professional review {review_id} references unknown assessment")
         require(review.get("reviewer_actor_type") == "HUMAN", f"professional review {review_id} requires human authority")
+        require(bool(review.get("reviewer_id")) and bool(review.get("reviewed_at")), f"professional review {review_id} requires attributable human provenance")
         if assessment_id in assessments:
             reviews_by_assessment[assessment_id].append(review)
 
@@ -190,6 +193,7 @@ def validate_model(model: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
         require(review_id in reviews, f"decision {decision_id} references unknown professional review")
         require(state in {"VERIFIED", "INDEPENDENTLY_ASSURED"}, f"decision {decision_id} has unsupported assurance state")
         require(decision.get("authorized_actor_type") == "HUMAN", f"{state} decision {decision_id} requires human authority")
+        require(bool(decision.get("authorized_by")) and bool(decision.get("effective_at")), f"decision {decision_id} requires attributable human authorization provenance")
         if assessment_id in assessments and review_id in reviews:
             assessment = assessments[assessment_id]
             review = reviews[review_id]
@@ -436,6 +440,12 @@ def run_regressions(model: dict[str, Any]) -> list[str]:
         model,
         lambda value: value["client_implementations"][-1].update({"implementation_status": "OPERATING"}),
         "must remain DESIGNED",
+        failures,
+    )
+    _expect_regression_failure(
+        model,
+        lambda value: value["assessments"][-1].update({"evidence_ids": ["EVID-GOV-REVIEW"]}),
+        "requires at least two distinct evidence sources",
         failures,
     )
     return failures
