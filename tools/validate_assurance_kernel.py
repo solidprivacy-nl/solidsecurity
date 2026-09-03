@@ -74,6 +74,12 @@ def _as_datetime(value: object) -> datetime | None:
     return parsed if parsed.tzinfo is not None else None
 
 
+def _evidence_valid_at(item: dict[str, Any], as_of: date) -> bool:
+    valid_from = _as_date(item.get("valid_from"))
+    expires_at = _as_date(item.get("expires_at"))
+    return valid_from is not None and expires_at is not None and valid_from <= as_of <= expires_at
+
+
 def _index(items: object, key: str, errors: list[str]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     if not isinstance(items, list):
@@ -272,7 +278,10 @@ def validate_model(
         require(isinstance(item.get("source_ref"), str) and bool(item.get("source_ref")), f"evidence {evidence_id} requires source provenance")
         require(item.get("captured_by_actor_type") in {"HUMAN", "SYSTEM"}, f"evidence {evidence_id} captured actor type invalid")
         require(bool(item.get("captured_by")), f"evidence {evidence_id} requires capture identity")
-        require(_as_datetime(item.get("captured_at")) is not None, f"evidence {evidence_id} captured_at must be a timezone-aware ISO timestamp")
+        captured_at = _as_datetime(item.get("captured_at"))
+        require(captured_at is not None, f"evidence {evidence_id} captured_at must be a timezone-aware ISO timestamp")
+        if captured_at is not None:
+            require(captured_at.date() <= as_of, f"evidence {evidence_id} capture must not occur after dossier as_of")
         policy = validity_policies.get(item.get("validity_policy_id"))
         require(policy is not None, f"evidence {evidence_id} references unknown validity policy")
         valid_from = _as_date(item.get("valid_from"))
@@ -291,6 +300,7 @@ def validate_model(
         require(requirement_id in requirements, f"assessment {assessment_id} references unknown requirement")
         require(control_id in controls, f"assessment {assessment_id} references control outside canonical control_scope")
         require(implementation_id in implementations, f"assessment {assessment_id} references unknown implementation")
+        require(isinstance(assessment.get("result"), str) and bool(assessment.get("result")), f"assessment {assessment_id} requires explicit result")
         if implementation_id in implementations:
             implementation = implementations[implementation_id]
             require(implementation.get("control_id") == control_id, f"assessment {assessment_id} implementation/control mismatch")
@@ -319,9 +329,9 @@ def validate_model(
             minimum_review = controls[control_id].get("minimum_review_class")
             if minimum_review in review_classes and required_class in review_classes:
                 require(review_classes[required_class] >= review_classes[minimum_review], f"assessment {assessment_id} review class is below canonical control minimum")
-        if resolved_evidence and all((_as_date(item.get("expires_at")) or date.min) < as_of for item in resolved_evidence):
-            require(assessment.get("state") == "REOPENED", f"assessment {assessment_id} with only expired evidence must be REOPENED")
-            require(proof_levels.get(proof_level, 99) <= proof_levels.get("IMPLEMENTED", 2), f"assessment {assessment_id} with only expired evidence cannot remain evidentially green")
+        if resolved_evidence and not any(_evidence_valid_at(item, as_of) for item in resolved_evidence):
+            require(assessment.get("state") == "REOPENED", f"assessment {assessment_id} with no evidence valid at as_of must be REOPENED")
+            require(proof_levels.get(proof_level, 99) <= proof_levels.get("IMPLEMENTED", 2), f"assessment {assessment_id} with no evidence valid at as_of cannot remain evidentially green")
 
     for requirement_id, requirement_maps in maps_by_requirement.items():
         for control_id in {item.get("control_id") for item in requirement_maps if item.get("control_id") in controls}:
@@ -346,6 +356,8 @@ def validate_model(
         require(isinstance(conflict.get("rationale"), str) and bool(conflict.get("rationale")), f"conflict {conflict_id} requires rationale")
         detected_at = _as_datetime(conflict.get("detected_at"))
         require(detected_at is not None, f"conflict {conflict_id} detected_at must be a timezone-aware ISO timestamp")
+        if detected_at is not None:
+            require(detected_at.date() <= as_of, f"conflict {conflict_id} detection must not occur after dossier as_of")
         status = conflict.get("status")
         require(status in {"OPEN", "RESOLVED"}, f"conflict {conflict_id} status invalid")
         if assessment_id in assessments:
@@ -372,6 +384,7 @@ def validate_model(
                 require(resolved_at is not None, f"resolved conflict {conflict_id} resolved_at must be a timezone-aware ISO timestamp")
                 if detected_at is not None and resolved_at is not None:
                     require(resolved_at >= detected_at, f"resolved conflict {conflict_id} resolution must not precede detection")
+                    require(resolved_at.date() <= as_of, f"resolved conflict {conflict_id} resolution must not occur after dossier as_of")
                     if assessment_id in assessments:
                         previous = latest_resolution_by_assessment.get(assessment_id)
                         if previous is None or resolved_at > previous:
@@ -398,6 +411,7 @@ def validate_model(
         reviewed_at = _as_datetime(review.get("reviewed_at"))
         require(reviewed_at is not None, f"professional review {review_id} reviewed_at must be a timezone-aware ISO timestamp")
         if reviewed_at is not None:
+            require(reviewed_at.date() <= as_of, f"professional review {review_id} must not occur after dossier as_of")
             review_times[review_id] = reviewed_at
         if assessment_id in assessments:
             required_class = assessments[assessment_id].get("required_review_class")
@@ -422,6 +436,8 @@ def validate_model(
         require(bool(decision.get("authorized_by")), f"decision {decision_id} requires attributable human authorization")
         effective_at = _as_datetime(decision.get("effective_at"))
         require(effective_at is not None, f"decision {decision_id} effective_at must be a timezone-aware ISO timestamp")
+        if effective_at is not None:
+            require(effective_at.date() <= as_of, f"decision {decision_id} must not occur after dossier as_of")
         if assessment_id in assessments and review_id in reviews:
             assessment = assessments[assessment_id]
             review = reviews[review_id]
@@ -437,8 +453,8 @@ def validate_model(
             if effective_at is not None and resolution_time is not None:
                 require(effective_at >= resolution_time, f"decision {decision_id} must not precede latest conflict resolution")
             for evidence_id in _string_list(assessment.get("evidence_ids"), f"assessment {assessment_id} evidence_ids", errors):
-                expires_at = _as_date(evidence.get(evidence_id, {}).get("expires_at"))
-                require(expires_at is not None and expires_at >= as_of, f"assurance decision {decision_id} relies on expired evidence")
+                item = evidence.get(evidence_id, {})
+                require(_evidence_valid_at(item, as_of), f"assurance decision {decision_id} relies on evidence {evidence_id} not valid at dossier as_of")
             decisions_by_assessment[assessment_id].append(decision)
 
     for assessment_id, assessment_decisions in decisions_by_assessment.items():
@@ -552,7 +568,7 @@ def _traces(requirement_id: str, derived: dict[str, Any]) -> list[str]:
         for assessment in assessments:
             assessment_id = assessment["assessment_id"]
             implementation = derived["implementations"][assessment["implementation_id"]]
-            chain = [source_id, requirement_id, control_id, implementation["implementation_id"], ",".join(sorted(assessment["evidence_ids"])), assessment_id]
+            chain = [source_id, requirement_id, control_id, implementation["implementation_id"], ",".join(sorted(assessment["evidence_ids"])), assessment_id, f"RESULT={assessment['result']}"]
             conflict_records = sorted(derived["conflicts_by_assessment"].get(assessment_id, []), key=lambda item: item["conflict_id"])
             if conflict_records:
                 chain.append(",".join(f"{item['conflict_id']}:{item['status']}" for item in conflict_records))
@@ -642,13 +658,16 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], di
 
     expect(lambda value: value["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
     expect(lambda value: value["evidence"][0].update({"expires_at": date(2027, 12, 31)}), "validity window exceeds explicit policy")
-    expect(lambda value: value["evidence"][0].update({"expires_at": date(2026, 8, 31)}), "relies on expired evidence")
+    expect(lambda value: value["evidence"][0].update({"expires_at": date(2026, 8, 31)}), "not valid at dossier as_of")
+    expect(lambda value: value["evidence"][0].update({"valid_from": date(2026, 10, 1), "expires_at": date(2026, 12, 31)}), "not valid at dossier as_of")
+    expect(lambda value: value["evidence"][0].update({"captured_at": "2026-09-03T08:00:00Z"}), "capture must not occur after dossier as_of")
     expect(lambda value: value["professional_reviews"][0].update({"review_class": "R1"}), "actual review class is below assessment requirement")
     expect(lambda value: value["applicability_decisions"][0].update({"review_class": "R1"}), "actual review class is below required review class")
     expect(lambda value: value["applicability_decisions"][0].update({"review_decision": "REJECT"}), "requires explicit accepted review decision")
     expect(lambda value: value["applicability_decisions"][0].update({"reviewed_at": "not-a-timestamp"}), "reviewed_at must be a timezone-aware ISO timestamp")
     expect(lambda value: value["professional_reviews"][0].update({"reviewed_at": "not-a-timestamp"}), "reviewed_at must be a timezone-aware ISO timestamp")
     expect(lambda value: value["decisions"][0].update({"effective_at": "2026-09-01T09:59:00Z"}), "must not precede its professional review")
+    expect(lambda value: value["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}), "must not occur after dossier as_of")
 
     def promote_conflict(value: dict[str, Any]) -> None:
         value["assessments"][-1]["state"] = "REVIEWED"
@@ -688,7 +707,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], di
                 assessment["proposed_proof_level"] = "EVIDENCED"
                 break
 
-    expect(stale_recovery, "with only expired evidence must be REOPENED")
+    expect(stale_recovery, "with no evidence valid at as_of must be REOPENED")
 
     aggregate = deepcopy(model)
     aggregate["assessments"][1]["evidence_ids"] = ["EVID-GOV-REVIEW", "EVID-SUPPLIER-ATTESTATION"]
@@ -727,8 +746,8 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], di
 
     base_errors, base_derived = validate_model(model, *authorities)
     access_traces = _traces("REQ-ACCESS-LIFECYCLE", base_derived) if not base_errors else []
-    if len(access_traces) != 2 or not all(marker in "\n".join(access_traces) for marker in ("ASM-ACCESS", "ASM-ACCESS-SUPPLIER")):
-        failures.append("multi-control requirement trace does not render every assessment path")
+    if len(access_traces) != 2 or not all(marker in "\n".join(access_traces) for marker in ("ASM-ACCESS", "ASM-ACCESS-SUPPLIER", "RESULT=EFFECTIVE")):
+        failures.append("multi-control requirement trace does not render every assessment path and result")
 
     linked_review = deepcopy(model)
     linked_review["professional_reviews"].append({"review_id": "AAA-NON-AUTHORITATIVE", "assessment_id": "ASM-ACCESS", "reviewer_id": "reviewer-03", "reviewer_actor_type": "HUMAN", "review_class": "R2", "independence_class": "INTERNAL_QUALIFIED", "decision": "REJECT", "reviewed_at": "2026-09-01T09:55:00Z"})
