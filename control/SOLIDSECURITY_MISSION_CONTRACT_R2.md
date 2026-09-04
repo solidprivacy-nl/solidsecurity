@@ -3,7 +3,7 @@
 Status: `MISSION R2 / CANONICAL / CONTROL-MANAGED`  
 Governance provenance: issue #31  
 Supersedes: `SOLIDSECURITY_MISSION_CONTRACT_V1.md`  
-Canonical execution protocol: `CONTROL_AUTONOMY_V3_1` in `market-predictions/control-plane`
+Canonical development authority: current governed Control architecture and runtime in `market-predictions/control-plane`; Control implementation versions/topology are external live authority and are not duplicated in this Mission contract.
 
 ## Mission
 
@@ -73,9 +73,11 @@ Repeated governed real delivery can support scaling decisions, automation priori
 
 Engineering/change assurance and customer-facing assurance are distinct trust domains.
 
-### A. Product/change assurance
+### A. Product/change review
 
-Control V3.1 A1/B1 exact-candidate governance protects consequential project changes. It does not qualify a person or system to issue customer-facing professional assurance.
+Consequential project changes require fresh evidence-first review bound to the exact candidate/head/base and applicable acceptance criteria. Candidate movement invalidates stale review. Central Control may perform fresh critical review and may call an external exact-candidate reviewer. External/organizationally independent review remains mandatory whenever the project workpackage, risk or current Control/repository gate requires it.
+
+Project-change review does not qualify a person or system to issue customer-facing professional assurance.
 
 ### B. Customer-facing professional review
 
@@ -142,7 +144,7 @@ Multiple obligations reuse one common-control/evidence backbone without framewor
 
 ### SS-SC-07 — Mission-driven autonomous development
 
-Control can reconstruct authoritative state, select eligible mission gaps, route A1 implementation and independent B1 assurance and update canonical state without chat-memory or principal relay dependence.
+Central Control can reconstruct authoritative state, select eligible mission gaps, execute the governed build/review/repair/integration-or-hold lifecycle and update canonical state without chat-memory or principal relay dependence. SolidSecurity does not require or own a particular Control worker topology to satisfy this criterion.
 
 ### SS-SC-08 — Bottom-up commercially viable quality
 
@@ -191,8 +193,8 @@ Infrastructure complexity follows demonstrated risk/workflow/contract/scale need
 ### Real-world validation before broad productization
 After the minimum executable/safe assurance kernel exists, obtain controlled real evidence before building broad product surfaces from synthetic assumptions.
 
-### Risk-proportionate governance
-Mechanical checks should be deterministic. Consequential semantic/security/authority changes retain independent B1 review where required.
+### Risk-proportionate project governance
+Mechanical checks should be deterministic. Consequential changes require fresh exact-candidate critical review; external/independent review is added when required by the project workpackage, material risk or current Control/repository gate rather than by a permanently duplicated local lane architecture.
 
 ## Authority boundaries
 
@@ -222,21 +224,27 @@ The lean data architecture remains:
 
 No database-per-client, custom KMS or active-active multi-cloud is a default.
 
-## Mission development loop — Control Autonomy V3.1
+## Mission development boundary — central Control managed
 
-`Mission -> deterministic Feed/TICK -> canonical V3.1 task -> A1 CLAIM -> bounded IMPLEMENTATION/REPAIR -> kernel RECORD -> direct B1 successor -> B1 CLAIM -> independent exact-candidate assurance -> kernel RECORD -> HOLD_AFTER_PASS or separately authorized action -> next eligible gap`
+SolidSecurity defines mission gaps, dependencies, evidence requirements and authority constraints. Central Control owns the current runtime implementation.
 
-Hard rules:
+Conceptual lifecycle:
 
-- one canonical private runtime queue;
-- one deterministic kernel writer;
-- semantic workers exactly A1 and B1;
-- no A2;
-- no direct semantic-worker runtime/result writes;
-- no semantic `PROJECT_INTEGRATION` task;
+`Mission -> current central Control authority -> eligible bounded work -> implementation -> fresh exact-candidate review -> repair/re-review when needed -> governed integration or hold -> authoritative mission evidence -> next eligible gap`
+
+Hard project rules:
+
+- one central Control authority; no project-local queue/state plane;
+- current Control protocol, lock model, scheduling and worker topology are read fresh and are not frozen into Mission R2;
+- exact candidate/head/base and acceptance criteria remain bound through review;
+- candidate movement invalidates stale review;
+- deterministic validation is required where checks are mechanical;
+- external/independent exact-candidate review remains required when an applicable project/Control gate says so;
+- no direct project-worker bypass of canonical Control runtime state;
 - no project-local intake/handover runtime plane;
-- no provider fallback;
-- scheduler/chat invocation alone is not START_PROVEN.
+- no provider fallback introduced by SolidSecurity;
+- scheduler/chat invocation alone is never completion or assurance evidence;
+- `principal_manual_relay_count=0` remains the target.
 
 ## R2 gap-selection rule
 
@@ -253,7 +261,7 @@ Select work by this order:
 
 ## Definition of done
 
-A mission gap is complete only when its specified exit evidence exists at the required evidence class and all applicable deterministic validation, B1 and separately-authorized post-assurance gates are satisfied.
+A mission gap is complete only when its specified exit evidence exists at the required evidence class and all applicable deterministic validation, exact-candidate project-change review, integration/hold and separately authorized authority gates are satisfied.
 
 ## Terminal condition
 
