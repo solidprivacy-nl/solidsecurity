@@ -368,7 +368,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(item.get("source_type") == "internal_synthetic_evidence", f"evidence {evidence_id} has non-synthetic evidence source type")
         require(item.get("mission_evidence_class") == model.get("mission_evidence_class") == "E1_SYNTHETIC", f"evidence {evidence_id} Mission evidence class mismatch for synthetic fixture")
         require(item.get("captured_by_actor_type") in {"HUMAN", "SYSTEM"}, f"evidence {evidence_id} captured actor type invalid")
-        require(bool(item.get("captured_by")), f"evidence {evidence_id} requires capture identity")
+        captured_by = item.get("captured_by")
+        require(isinstance(captured_by, str) and bool(captured_by.strip()), f"evidence {evidence_id} requires string capture identity")
         captured_at = _as_datetime(item.get("captured_at"))
         require(captured_at is not None, f"evidence {evidence_id} captured_at must be a timezone-aware ISO timestamp")
         if captured_at is not None:
@@ -566,6 +567,13 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
                 if review_classes[actual_class] >= review_classes["R3"]:
                     require(review.get("independence_class") != "INTERNAL_QUALIFIED", f"professional review {review_id} R3+ review requires independence")
                     require(reviewer_id != assessments[assessment_id].get("assessor_id"), f"professional review {review_id} R3+ reviewer must differ from assessment author")
+                    implementation = implementations.get(assessments[assessment_id].get("implementation_id"), {})
+                    claimant_ids = {
+                        value.strip()
+                        for value in (implementation.get("declared_by"), implementation.get("owner_membership_id"))
+                        if isinstance(value, str) and value.strip()
+                    }
+                    require(reviewer_id not in claimant_ids, f"professional review {review_id} R3+ reviewer must differ from implementation claimant/owner")
                 if review_classes[actual_class] >= review_classes["R4"]:
                     require(review.get("independence_class") == "INDEPENDENT_EXTERNAL", f"professional review {review_id} R4 review requires external independence")
                     require(isinstance(review.get("external_authority_ref"), str) and bool(review.get("external_authority_ref")), f"professional review {review_id} R4 review requires external authority provenance")
@@ -590,6 +598,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             assessment = assessments[assessment_id]
             review = reviews[review_id]
             implementation = implementations.get(assessment.get("implementation_id"), {})
+            reviewed_proof_level = assessment.get("proposed_proof_level")
+            if state in proof_levels and reviewed_proof_level in proof_levels:
+                require(proof_levels[state] <= proof_levels[reviewed_proof_level], f"decision {decision_id} assurance state exceeds reviewed proposed proof level")
             require(implementation.get("source_of_claim") != "generated_policy", f"decision {decision_id} cannot promote generated-policy implementation")
             require(implementation.get("implementation_status") == "OPERATING", f"VERIFIED decision {decision_id} requires OPERATING implementation")
             require(review.get("assessment_id") == assessment_id, f"decision {decision_id} review/assessment mismatch")
@@ -776,6 +787,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].update({"reviewer_id": True}), "requires reviewer identity")
     expect(lambda v: v["evidence"][0].update({"source_type": "real_client_export"}), "non-synthetic evidence source type")
     expect(lambda v: v["evidence"][0].update({"mission_evidence_class": "E2_CONTROLLED_REAL_CLIENT"}), "Mission evidence class mismatch for synthetic fixture")
+    expect(lambda v: v["evidence"][0].update({"captured_by": True}), "requires string capture identity")
     expect(lambda v: v["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
     expect(lambda v: v["decisions"][0].update({"authorized_by": True}), "requires string human authorization identity")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2027-12-31"}), "validity window exceeds explicit policy")
@@ -813,6 +825,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["assessments"][0].update({"assessment_version": 0}), "requires positive assessment_version")
     expect(lambda v: v["assessments"][0].update({"materiality": "unknown"}), "has invalid materiality")
     expect(lambda v: v["assessments"][0].update({"materiality": "high"}), "below materiality minimum review class")
+    expect(lambda v: v["assessments"][0].update({"proposed_proof_level": "IMPLEMENTED"}), "assurance state exceeds reviewed proposed proof level")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-01T09:59:00Z"}), "must not precede its professional review")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}), "must not occur after dossier as_of")
     expect(lambda v: v["decisions"][0].update({"assurance_state": "INDEPENDENTLY_ASSURED"}), "outside R2-WP01 authority")
@@ -821,6 +834,20 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["control_scope"].append("SS-NOT-A-CONTROL"), "references unknown canonical control")
     expect(lambda v: v["expected_coverage"].update({"REQ-SUPPLIER-GOV": "FULL"}), "derived coverage does not match expected_coverage")
     expect(lambda v: v["client_implementations"][-1].update({"implementation_status": "OPERATING"}), "must remain DESIGNED")
+
+    def r3_review_claimant_self_review(v: dict[str, Any]) -> None:
+        v["assessments"][0]["required_review_class"] = "R3"
+        review = v["professional_reviews"][0]
+        review.update({"review_class": "R3", "independence_class": "INDEPENDENT_INTERNAL", "reviewer_id": v["client_implementations"][0]["declared_by"]})
+
+    expect(r3_review_claimant_self_review, "R3+ reviewer must differ from implementation claimant/owner")
+
+    def r3_review_owner_self_review(v: dict[str, Any]) -> None:
+        v["assessments"][0]["required_review_class"] = "R3"
+        review = v["professional_reviews"][0]
+        review.update({"review_class": "R3", "independence_class": "INDEPENDENT_INTERNAL", "reviewer_id": v["client_implementations"][0]["owner_membership_id"]})
+
+    expect(r3_review_owner_self_review, "R3+ reviewer must differ from implementation claimant/owner")
 
     def generated_policy_promotion(v: dict[str, Any]) -> None:
         v["assessments"][1]["implementation_id"] = "IMP-GENERATED-POLICY"
