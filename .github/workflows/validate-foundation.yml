@@ -14,6 +14,7 @@ on:
       - 'control/SOLIDSECURITY_MISSION_CONTRACT_R2.md'
       - 'docs/DOMAIN_MODEL_V1.md'
       - 'docs/MISSION_DRIVEN_WORKFLOW.md'
+      - 'docs/PUBLIC_REPO_POLICY.md'
       - 'docs/WORKPACKAGES_R2.md'
       - 'ARCHITECTURE.md'
       - 'STRATEGY.md'
