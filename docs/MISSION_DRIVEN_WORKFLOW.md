@@ -1,4 +1,4 @@
-# Mission-Driven Workflow R2 / Control V3.1
+# Mission-Driven Workflow R2
 
 ## Purpose
 
@@ -6,7 +6,7 @@ This document keeps three flows separate:
 
 1. the **customer service lifecycle**;
 2. the **SolidSecurity product/runtime workflow**;
-3. the **Control development workflow** that decides and governs what SolidSecurity builds next.
+3. the **central Control development boundary** that governs what SolidSecurity builds next.
 
 The customer never interacts with the Control development queue. Control never stores client evidence as project/runtime state.
 
@@ -117,66 +117,62 @@ This architecture is designed but does not authorize real-client processing unti
 
 ---
 
-# C. Control Autonomy V3.1 development workflow
+# C. Central Control development boundary
 
-This flow determines what project capability is built next. SolidSecurity does not implement its own orchestration layer.
+This flow determines what project capability is built next. SolidSecurity does not implement or mirror its own orchestration layer.
 
-## C1. Mission authority
+## C1. Authority
 
 - human-readable local doctrine: `control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`;
-- canonical machine-readable mission: `market-predictions/control-plane/control/missions/SOLIDSECURITY.mission.json`;
-- canonical runtime state: `market-predictions/control-plane@control-runtime-state`.
+- canonical machine-readable mission: current SolidSecurity mission in `market-predictions/control-plane`;
+- canonical Control architecture/index and runtime state: current central Control sources.
 
 Chat memory and local `CURRENT_STATE.md` are never execution/completion authority.
 
-## C2. Deterministic Feed/TICK
+## C2. Work eligibility
 
-The single Control Kernel reconstructs current mission/repository facts and feeds only eligible dependency-satisfied gaps into the one canonical V3.1 queue. Feed/TICK creates no semantic claim and performs no semantic implementation/assurance.
+Central Control reconstructs authoritative mission/repository/runtime facts and selects only eligible dependency-satisfied work under its current canonical architecture.
 
-## C3. A1 claim and implementation
+SolidSecurity supplies the workpackage purpose, evidence class, dependencies, acceptance criteria and authority boundaries. It does not prescribe a permanent Control worker topology, claim protocol, transport or scheduler.
 
-Exactly one semantic implementation worker exists: **A1 / `implementation_operations`**.
+## C3. Bounded implementation
 
-A1 may process only a canonical `IMPLEMENTATION` or `REPAIR` task after the V3.1 kernel has persisted a current bounded claim for exact task/role/worker/run identity. Scheduler/chat invocation is not START_PROVEN.
+Implementation changes only authorized target-repository scope and remains bound to the exact task/purpose and current Control authority. A scheduler/chat invocation is not START_PROVEN or completion evidence by itself.
 
-A1 changes only authorized target-repository scope and may not self-assure.
+No project worker may bypass central Control by creating a project-local queue, claim store, handover plane or direct canonical runtime mutation path.
 
-## C4. Kernel RECORD
+## C4. Fresh exact-candidate review
 
-A semantic worker never writes canonical queue/result state directly. When A1 completes, it submits a bounded result to the Control Kernel `RECORD` command. The kernel atomically validates the current claim, stores the immutable result, terminalizes the task and creates at most the direct successor authorized by V3.1.
+Consequential changes are reviewed against the exact candidate/head/base and applicable acceptance criteria.
 
-A successful implementation may therefore create one direct B1 assurance successor. A blocked/unavailable execution does not create a retry tree.
-
-## C5. B1 independent assurance
-
-Exactly one assurance worker exists: **B1 / `governance_release_assurance`**.
-
-B1 starts only from its own current kernel claim and independently reviews the exact frozen candidate and task acceptance criteria. B1 is read-only on the candidate and cannot repair, merge, release or deploy.
-
-The verdict is exactly one of `PASS`, `FAIL` or `INDETERMINATE` and is persisted only through kernel `RECORD`.
-
-## C6. Post-assurance behavior
-
-- `PASS` records authoritative independent project-change evidence;
-- repository integration occurs only when current live repository authority separately permits it;
-- SolidSecurity currently uses `HOLD_AFTER_PASS`, so PASS alone is not autonomous merge authority;
-- `FAIL` may yield only the bounded repair behavior defined by V3.1/current mission authority;
+- deterministic tests/CI cover mechanical invariants;
+- review is fresh and evidence-first rather than a restatement of implementation claims;
+- candidate movement invalidates stale review;
+- `PASS`, `FAIL` and `INDETERMINATE` remain the bounded project-change verdicts;
 - `INDETERMINATE` fails closed;
-- infrastructure/transport unavailability is not a semantic FAIL.
+- repair changes create a new candidate that must be reviewed again;
+- external/organizationally independent exact-candidate review is mandatory whenever the workpackage, material risk, current repository policy or central Control gate requires it.
 
-There is **no semantic `PROJECT_INTEGRATION` task** in V3.1.
+Central Control may implement fresh critical review with its current runner architecture; SolidSecurity does not create a permanent second assurance lane to achieve review separation.
 
-## C7. Hard V3.1 invariants
+## C5. Post-review behavior
+
+A PASS proves only the review gate. Integration, release, deployment and customer authority remain separate and require the current applicable authority.
+
+Central Control may hold, integrate, repair or continue only according to its current governed state and repository authority. SolidSecurity does not create a semantic integration task or other local continuation mechanism merely to mirror one Control version.
+
+## C6. Hard project invariants
 
 ```text
-runtime_writers=1
-runtime_queue=1
-semantic_workers=A1,B1
-A2=false
-direct_worker_runtime_write=false
-semantic_PROJECT_INTEGRATION=false
-provider_fallback=false
+central_control_authority=1
 project_local_runtime_state_plane=false
+project_local_scheduler=false
+direct_control_runtime_bypass=false
+exact_candidate_binding=true
+stale_review_after_candidate_movement=false
+deterministic_validation_where_mechanical=true
+external_review_when_required=true
+provider_fallback_introduced_locally=false
 principal_manual_relay_target=0
 ```
 
