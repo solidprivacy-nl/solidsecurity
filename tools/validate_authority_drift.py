@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CURRENT_FILES = [
     ROOT / "README.md",
     ROOT / "STRATEGY.md",
+    ROOT / "ARCHITECTURE.md",
     ROOT / "control" / "CURRENT_STATE.md",
     ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md",
     ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md",
@@ -44,6 +45,7 @@ for path in CURRENT_FILES:
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 strategy = (ROOT / "STRATEGY.md").read_text(encoding="utf-8")
+architecture = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
 workpackage_index = (ROOT / "docs" / "WORKPACKAGES_R2.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
@@ -69,6 +71,15 @@ required = {
             "current-Control exact-candidate project/change review",
             "candidate movement invalidates stale review evidence",
             "does not encode a fixed worker lane or role topology",
+        ],
+    ),
+    "ARCHITECTURE.md": (
+        architecture,
+        [
+            "current central Control authority",
+            "does not encode a fixed Control runtime version or worker topology",
+            "fresh exact-candidate project-change review",
+            "Candidate movement invalidates stale review evidence",
         ],
     ),
     "docs/MISSION_DRIVEN_WORKFLOW.md": (
