@@ -69,6 +69,8 @@ The calculation method is intentionally conventional and auditable. **Month is t
 
 `unit_step_cost = operator_cost + professional_cost + external_specialist_cost + fixed_provider_tooling_cost_allocation + variable_provider_tooling_cost`
 
+Every cost term in `unit_step_cost` is the amount allocated to **one occurrence** of that row. A periodic fixed provider/tooling cost that is not occurrence-driven is modeled as its own recurring row, preventing it from being multiplied once as a fixed period cost and again by another workflow's cadence.
+
 Onboarding rows are one-time work units; repeated onboarding actions are represented as separate rows rather than hidden in a cadence multiplier:
 
 `onboarding_delivery_cost = sum(onboarding unit_step_cost)`
@@ -80,6 +82,8 @@ For each recurring row:
 `recurring_monthly_step_cost = unit_step_cost * monthly_frequency`
 
 `recurring_monthly_delivery_cost = sum(recurring recurring_monthly_step_cost)`
+
+`recurring_customer_minutes_per_month = sum(customer_minutes * monthly_frequency)`
 
 Every package-price hypothesis must declare its price period in months:
 
@@ -104,7 +108,7 @@ Derived outputs:
 - onboarding delivery cost;
 - recurring monthly delivery cost;
 - professional minutes per client/month;
-- customer minutes per onboarding/recurring cycle;
+- customer minutes per onboarding and recurring month;
 - gross-margin sensitivity by monthly-normalized package-price hypothesis;
 - onboarding payback in months;
 - client capacity per professional monthly minute envelope;
