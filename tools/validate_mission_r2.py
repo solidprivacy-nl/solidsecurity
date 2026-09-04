@@ -206,6 +206,20 @@ require("client_surface_does_not_use_misleading_single_compliance_percentage" in
 
 require(REVIEW.get("adoption_status") == "CURATED_NOT_WHOLESALE", "review adoption must remain curated, not wholesale")
 require(REVIEW.get("reviewed_snapshot") == "0300142", "review snapshot provenance must remain explicit")
+require(REVIEW.get("authority_status") == "HISTORICAL_PROVENANCE_ONLY",
+        "review decision register must remain historical provenance only")
+require(REVIEW.get("current_authority_source") == "market-predictions/control-plane@main",
+        "review decision register must delegate current authority to central Control main")
+partial_review = {item.get("id"): item for item in REVIEW.get("partially_accepted", []) if isinstance(item, dict)}
+require(
+    partial_review.get("REV-P01", {}).get("decision") == "retain_risk_proportionate_fresh_exact_candidate_review_for_consequential_changes_without_fixed_worker_topology",
+    "historical review register must not reintroduce a fixed implementation/assurance lane topology",
+)
+not_adopted_review = {item.get("id"): item for item in REVIEW.get("not_adopted", []) if isinstance(item, dict)}
+require(
+    not_adopted_review.get("REV-N01", {}).get("finding") == "abandon_fresh_exact_candidate_review_for_consequential_changes_because_project_is_early",
+    "historical non-adoption must remain version-neutral exact-candidate review provenance",
+)
 require(len(REVIEW.get("accepted", [])) >= 10, "review decision register must preserve material accepted findings")
 require(len(REVIEW.get("not_adopted", [])) >= 1, "review decision register must preserve explicit non-adoptions")
 
