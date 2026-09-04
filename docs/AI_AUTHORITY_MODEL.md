@@ -73,41 +73,50 @@ A future runtime should distinguish human and AI actors explicitly. Material AI 
 
 These are different authorities and must never be silently equated:
 
-`product/change B1 assurance != customer professional review != external independent assurance/certification`.
+`product/change review != customer professional review != external independent assurance/certification`.
 
-- Project B1 answers whether a repository candidate satisfies its governed change contract. It does not qualify the reviewer to issue customer assurance.
-- Customer professional review is an engagement-scoped professional judgment under the applicable R2/R3 review class and customer gate.
-- External independent assurance/certification is issued only by the appropriately independent/external authority. Internal R2/R3 review is not certification.
+- Project/change review answers whether a repository candidate satisfies its governed change contract. It does not qualify the reviewer to issue customer assurance.
+- Customer professional review is an engagement-scoped professional judgment under the applicable R2/R3/R4 routing class and customer gate.
+- External independent assurance/certification is issued only by the appropriately independent/external authority. Internal customer review is not certification.
 
 ## Customer professional review classes
 
 The public model defines the minimum authority contract; actual reviewer identity, credentials, capacity and loaded cost remain engagement/restricted operating evidence where appropriate.
 
-| Class | Human/authority requirement | Customer-facing `VERIFIED` authority | Competence / credential expectation | Independence | Capacity / cost | Escalation |
-| --- | --- | --- | --- | --- | --- | --- |
-| R0 | No human required; mechanical transformation only | Prohibited | Mechanical operation only; no professional judgment | N/A | No professional capacity/cost requirement | R1+ when work becomes non-mechanical/material |
-| R1 | Human operational/sample reviewer | Prohibited | Trained internal operator for the defined process; credentials documented if the process requires them | Not independent assurance | Capacity and loaded-cost assumption required | R2 for material professional judgment |
-| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | Scope competence recorded; applicable credential expectation documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | R3 when independence/material conflict requires separation |
-| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | Scope competence and applicable credentials recorded | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | R4 where external authority/certification is required |
-| R4 | External authority/certification-body/regulator dependent | Internal authority is insufficient; external-authority outcome governs | External authority's competence/credential rules | External authority | Engagement capacity/cost assumption recorded where relevant | External authority/certification body/regulator |
+The permitted claim classes below reuse the canonical identifiers from `model/claim_vocabulary.yaml`. They state what the **customer professional-review path itself** may issue. They do not grant external assurance or certification authority.
+
+| Class | Human/authority requirement | Customer-facing `VERIFIED` authority | Permitted claim classes | Competence / credential expectation | Independence | Capacity / cost | Escalation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| R0 | No human required; mechanical transformation only | Prohibited | C0, C1, C2 | Mechanical operation only; no professional judgment | N/A | No professional capacity/cost requirement | R1+ when work becomes non-mechanical/material |
+| R1 | Human operational/sample reviewer | Prohibited | C0, C1, C2 | Trained internal operator for the defined process; credentials documented if the process requires them | Not independent assurance | Capacity and loaded-cost assumption required | R2 for material professional judgment |
+| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence recorded; applicable credential expectation documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | R3 when independence/material conflict requires separation |
+| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence and applicable credentials recorded | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | R4 where external authority/certification is required |
+| R4 | External authority/certification-body/regulator dependent routing | Internal authority is insufficient; external-authority outcome governs | C0, C1, C2, C3 | External authority's competence/credential rules | External authority | Engagement capacity/cost assumption recorded where relevant | External authority/certification body/regulator |
+
+`C4_INDEPENDENTLY_ASSURED` and `C5_CERTIFIED` are **not** permitted claim classes of any customer professional-review class. C4 requires a separate independent-assurance result with the required independence and scope; C5 requires an authorized certification process/formal decision. R4 therefore means “route to the required external authority,” not “internal R4 may certify.”
 
 A control/workflow may require a stronger class. A weaker actual class never substitutes for a stronger required class.
 
 ### Capacity and loaded-cost assumption record
 
-R1–R4 capacity/cost prerequisites use one public-safe reference shape defined in `model/ai_authority.yaml`. The underlying numeric capacity/cost values use the existing canonical `INTERNAL` data classification from `model/data_classification.yaml`, so they remain outside public Git; this does not introduce a second classification or storage tier.
+R1–R4 capacity/cost prerequisites use one exact public-safe reference shape defined in `model/ai_authority.yaml`. The underlying numeric capacity/cost values use the existing canonical `INTERNAL` data classification from `model/data_classification.yaml`, so they remain outside public Git; this does not introduce a second classification or storage tier.
 
-Each assumption record must carry:
+Every assumption record has the common metadata fields:
 
 - `review_class`;
 - `assumption_type` (`reviewer_capacity` or `loaded_cost`);
-- the canonical unit (`professional_minutes_per_month` or `currency_per_professional_hour`);
-- `evidence_status`;
-- Mission `mission_evidence_class`;
-- an attributable `calculation_reference`;
+- `unit`;
+- `evidence_status` using the current commercial evidence-status contract in `docs/COMMERCIAL_MODEL.md`;
+- `mission_evidence_class` using the exact identifiers from `model/mission_operating_model_r2.yaml:evidence_classes`;
+- attributable `calculation_reference`;
 - `restricted_record_ref` pointing to the non-public value/evidence record.
 
-The public repository must not contain the actual capacity or loaded-cost value merely to satisfy this gate. A missing reference, unit, evidence/status classification or calculation reference leaves the prerequisite unresolved; it does not default to satisfied.
+Type-specific metadata is deliberately minimal:
+
+- `reviewer_capacity` uses `professional_minutes_per_month` and needs no additional public field;
+- `loaded_cost` uses `currency_per_professional_hour` and additionally requires `currency_code` using ISO 4217 so a rate is not ambiguous across currencies.
+
+The public-safe contract shape is exact. It contains no numeric assumption `value`, embedded assumption-record collection, or alternative public value field. Adding such a field is a validation failure. A missing restricted reference, unit, status/evidence classification, calculation reference or required currency code leaves the prerequisite unresolved; it does not default to satisfied.
 
 ## Customer `VERIFIED` fail-closed gate
 
@@ -142,7 +151,7 @@ Review intensity is risk-based:
 - R1 — sample/operational review;
 - R2 — mandatory qualified professional review;
 - R3 — independent reviewer required;
-- R4 — external authority/certification/regulator-dependent.
+- R4 — route to the required external authority/certification/regulator-dependent process.
 
 Each control, mapping and workflow step may define a minimum review class. Material conflict or independence concerns escalate rather than being waived to preserve throughput.
 
