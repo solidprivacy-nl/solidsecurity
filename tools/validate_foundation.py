@@ -48,6 +48,22 @@ entities_doc = load_yaml("entities.yaml")
 claim_doc = load_yaml("claim_vocabulary.yaml")
 mission_doc = load_yaml("mission_operating_model_r2.yaml")
 
+# The public AI-authority document has one exact top-level contract. In particular,
+# sibling assumption-record/value containers are forbidden: restricted numeric values
+# are referenced from the public-safe contract rather than embedded elsewhere in this file.
+expected_ai_top_level_keys = {
+    "version",
+    "authority_classes",
+    "review_classes",
+    "customer_professional_review_classes",
+    "professional_review_assumption_record_contract",
+    "trust_domain_separation",
+    "customer_verified_gate",
+    "prohibited_ai_state_transitions",
+}
+require(isinstance(ai_doc, dict) and set(ai_doc) == expected_ai_top_level_keys,
+        "ai_authority.yaml must use the exact public-safe top-level contract; embedded/sibling assumption records are prohibited")
+
 # Common controls.
 domains = domains_doc.get("domains", {}) if isinstance(domains_doc, dict) else {}
 require(isinstance(domains, dict) and bool(domains), "control_domains.yaml must define domains")
@@ -313,6 +329,17 @@ for boundary in (
 verified_gate = ai_doc.get("customer_verified_gate", {}) if isinstance(ai_doc, dict) else {}
 require(isinstance(verified_gate, dict), "customer_verified_gate must be an object")
 if isinstance(verified_gate, dict):
+    expected_verified_gate_keys = {
+        "readiness_status",
+        "fail_closed",
+        "customer_verified_currently_enabled",
+        "legal_contract_approval_currently_enabled",
+        "missing_or_unresolved_state",
+        "required_prerequisites",
+        "transition_rule",
+    }
+    require(set(verified_gate) == expected_verified_gate_keys,
+            "customer VERIFIED gate must use the exact governed field set")
     require(verified_gate.get("readiness_status") == "DESIGN_ONLY", "customer VERIFIED gate must remain DESIGN_ONLY")
     require(verified_gate.get("fail_closed") is True, "customer VERIFIED gate must fail closed")
     require(verified_gate.get("customer_verified_currently_enabled") is False,
@@ -324,8 +351,8 @@ if isinstance(verified_gate, dict):
     prerequisites = set(verified_gate.get("required_prerequisites", [])) if isinstance(verified_gate.get("required_prerequisites"), list) else set()
     required_prerequisites = {
         "applicable_review_class_satisfied",
-        "reviewer_identity_and_scope_competence_recorded",
-        "credential_expectation_addressed",
+        "reviewer_identity_and_scope_competence_sufficient",
+        "credential_expectation_satisfied_or_not_applicable",
         "independence_requirement_satisfied",
         "reviewer_capacity_confirmed",
         "loaded_cost_assumption_recorded",
@@ -338,10 +365,13 @@ if isinstance(verified_gate, dict):
         "subprocessor_review_ready",
         "retention_and_deletion_schedule_ready",
     }
-    require(required_prerequisites.issubset(prerequisites),
-            f"customer VERIFIED gate missing prerequisites: {sorted(required_prerequisites - prerequisites)}")
+    require(prerequisites == required_prerequisites,
+            f"customer VERIFIED prerequisite set drifted: missing={sorted(required_prerequisites - prerequisites)} extra={sorted(prerequisites - required_prerequisites)}")
     require(isinstance(verified_gate.get("transition_rule"), str) and bool(verified_gate.get("transition_rule", "").strip()),
             "customer VERIFIED gate requires transition rule")
+    transition_rule = verified_gate.get("transition_rule", "")
+    require("sufficient scope competence" in transition_rule and "credential" in transition_rule and "not applicable" in transition_rule,
+            "customer VERIFIED transition rule must explicitly require sufficient competence and satisfied-or-not-applicable credentials")
 
 # Applicability must preserve unresolved/professional-review states.
 applicability = set(enums_doc.get("applicability_status", [])) if isinstance(enums_doc, dict) else set()
