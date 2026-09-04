@@ -40,6 +40,10 @@ customer_professional_review_classes:
   R0:
     human_reviewer_required: false
     customer_verified_authority: prohibited
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
     competence_expectation: mechanical_transformation_only
     credential_expectation: none
     independence_requirement: not_applicable
@@ -49,6 +53,10 @@ customer_professional_review_classes:
   R1:
     human_reviewer_required: true
     customer_verified_authority: prohibited
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
     competence_expectation: trained_internal_operator_for_defined_process
     credential_expectation: documented_if_process_requires_it
     independence_requirement: not_independent_assurance
@@ -58,6 +66,11 @@ customer_professional_review_classes:
   R2:
     human_reviewer_required: true
     customer_verified_authority: permitted_only_when_customer_verified_gate_passes
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
     competence_expectation: qualified_professional_for_scope
     credential_expectation: documented_and_satisfied_where_applicable
     independence_requirement: internal_qualified_allowed_only_without_material_conflict
@@ -67,6 +80,11 @@ customer_professional_review_classes:
   R3:
     human_reviewer_required: true
     customer_verified_authority: permitted_only_when_customer_verified_gate_passes
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
     competence_expectation: qualified_professional_for_scope
     credential_expectation: documented_and_satisfied_where_applicable
     independence_requirement: independent_internal_or_external
@@ -76,6 +94,11 @@ customer_professional_review_classes:
   R4:
     human_reviewer_required: true
     customer_verified_authority: external_authority_dependent
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
     competence_expectation: external_authority_or_certification_body_requirements
     credential_expectation: external_authority_requirements_apply
     independence_requirement: external_authority
@@ -85,7 +108,8 @@ customer_professional_review_classes:
 professional_review_assumption_record_contract:
   value_data_classification: INTERNAL
   public_repo_values_prohibited: true
-  required_fields:
+  public_safe_shape_exact: true
+  common_required_fields:
     - review_class
     - assumption_type
     - unit
@@ -93,26 +117,25 @@ professional_review_assumption_record_contract:
     - mission_evidence_class
     - calculation_reference
     - restricted_record_ref
+  vocabulary_sources:
+    evidence_status: docs/COMMERCIAL_MODEL.md
+    mission_evidence_class: model/mission_operating_model_r2.yaml:evidence_classes
   assumption_types:
     reviewer_capacity:
       unit: professional_minutes_per_month
+      type_specific_required_fields: []
     loaded_cost:
       unit: currency_per_professional_hour
-  evidence_status_values:
-    - HYPOTHESIS
-    - OBSERVED
-    - MEASURED
-    - VALIDATED_BOUNDED
-  mission_evidence_class_values:
-    - E0
-    - E1
-    - E2
-    - E3
+      type_specific_required_fields:
+        - currency_code
+      currency_standard: ISO_4217
   rule: >-
     R1-R4 capacity and loaded-cost prerequisites are satisfied only by an attributable record
-    using this shape. The numeric value is INTERNAL under canonical data classification and remains
-    outside public Git, referenced by restricted_record_ref; public Git records only the schema,
-    status/classification metadata, unit and calculation reference.
+    using this exact public-safe shape. Evidence status uses the current commercial validation
+    contract and Mission evidence class uses the canonical Mission R2 evidence_classes keys.
+    Loaded-cost records additionally identify an ISO 4217 currency code. The numeric capacity or
+    cost value is INTERNAL under canonical data classification and remains outside public Git,
+    referenced by restricted_record_ref; public Git contains no value field or embedded record.
 trust_domain_separation:
   product_change_b1_is_customer_professional_review: false
   customer_professional_review_is_external_independent_assurance: false
