@@ -89,9 +89,11 @@ The permitted claim classes below reuse the canonical identifiers from `model/cl
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | R0 | No human required; mechanical transformation only | Prohibited | C0, C1, C2 | Mechanical operation only; no professional judgment | N/A | No professional capacity/cost requirement | R1+ when work becomes non-mechanical/material |
 | R1 | Human operational/sample reviewer | Prohibited | C0, C1, C2 | Trained internal operator for the defined process; credentials documented if the process requires them | Not independent assurance | Capacity and loaded-cost assumption required | R2 for material professional judgment |
-| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence recorded; applicable credential expectation documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | R3 when independence/material conflict requires separation |
-| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence and applicable credentials recorded | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | R4 where external authority/certification is required |
+| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence recorded; applicable credential expectation documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent/credential-satisfying reviewer, or escalate to R3 when competence, credentials, independence or material-conflict separation is insufficient |
+| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence and applicable credentials recorded | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent independent reviewer, or escalate to R4 when competence/credentials remain insufficient or external authority/certification is required |
 | R4 | External authority/certification-body/regulator dependent routing | Internal authority is insufficient; external-authority outcome governs | C0, C1, C2, C3 | External authority's competence/credential rules | External authority | Capacity and loaded-cost assumptions are required | External authority/certification body/regulator |
+
+Insufficient competence or unmet applicable credentials are blockers, not softer review-quality concerns. They leave the prerequisite unresolved and require reassignment/escalation; they can never be waived merely because independence is otherwise acceptable.
 
 `C4_INDEPENDENTLY_ASSURED` and `C5_CERTIFIED` are **not** permitted claim classes of any customer professional-review class. C4 requires a separate independent-assurance result with the required independence and scope; C5 requires an authorized certification process/formal decision. R4 therefore means “route to the required external authority,” not “internal R4 may certify.”
 
@@ -153,7 +155,7 @@ Review intensity is risk-based:
 - R3 — independent reviewer required;
 - R4 — route to the required external authority/certification/regulator-dependent process.
 
-Each control, mapping and workflow step may define a minimum review class. Material conflict or independence concerns escalate rather than being waived to preserve throughput.
+Each control, mapping and workflow step may define a minimum review class. Insufficient competence, unmet applicable credentials, material conflict or independence concerns require reassignment/escalation rather than being waived to preserve throughput.
 
 ## Prompt and model neutrality
 
