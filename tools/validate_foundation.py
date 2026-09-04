@@ -154,22 +154,35 @@ for protected in ("VERIFIED", "INDEPENDENTLY_ASSURED"):
     if protected in proof_by_id:
         require(proof_by_id[protected].get("ai_can_assign") is False, f"AI must not assign {protected}")
 
-# AI authority must retain red-line actions and prohibited state transitions.
+# AI authority is a bounded public contract: exact sibling shapes prevent hidden payloads or drift.
 authority = ai_doc.get("authority_classes", {}) if isinstance(ai_doc, dict) else {}
-require(set(authority) == {"GREEN", "AMBER", "RED"}, "ai_authority.yaml must define GREEN/AMBER/RED exactly")
-red_examples = set(authority.get("RED", {}).get("examples", [])) if isinstance(authority.get("RED"), dict) else set()
-required_red = {
-    "final_compliance_verdict",
-    "material_risk_acceptance",
-    "security_exception_approval",
-    "final_incident_reporting_decision",
-    "certification_claim",
-    "independent_assurance",
+expected_authority = {
+    "GREEN": {
+        "mode": "autonomous_preparation",
+        "examples": [
+            "extract_candidate_facts", "draft_policy", "propose_mapping", "organize_evidence",
+            "prefill_questionnaire_from_approved_facts", "compare_versions",
+        ],
+    },
+    "AMBER": {
+        "mode": "ai_recommends_human_decides",
+        "examples": [
+            "applicability", "regulatory_scope", "ai_act_classification", "dpia_trigger",
+            "evidence_sufficiency", "proof_level_promotion", "material_finding_severity", "risk_treatment",
+        ],
+    },
+    "RED": {
+        "mode": "human_or_external_authority_required",
+        "examples": [
+            "final_compliance_verdict", "material_risk_acceptance", "security_exception_approval",
+            "final_incident_reporting_decision", "management_signoff", "certification_claim", "independent_assurance",
+        ],
+    },
 }
-require(required_red.issubset(red_examples), f"RED authority missing: {sorted(required_red - red_examples)}")
-prohibited = set(ai_doc.get("prohibited_ai_state_transitions", [])) if isinstance(ai_doc, dict) else set()
-required_prohibited = {"VERIFIED", "INDEPENDENTLY_ASSURED", "RISK_ACCEPTED", "EXCEPTION_APPROVED", "CERTIFIED"}
-require(required_prohibited.issubset(prohibited), f"AI transition deny-list missing: {sorted(required_prohibited - prohibited)}")
+require(authority == expected_authority, "ai_authority.yaml authority_classes drifted from the exact governed contract")
+expected_prohibited = ["VERIFIED", "INDEPENDENTLY_ASSURED", "RISK_ACCEPTED", "EXCEPTION_APPROVED", "CERTIFIED"]
+require(ai_doc.get("prohibited_ai_state_transitions") == expected_prohibited,
+        "AI transition deny-list must remain the exact governed set and order")
 
 # Canonical customer claim vocabulary is referenced, not copied into a second enum family.
 claim_classes = claim_doc.get("claim_classes", {}) if isinstance(claim_doc, dict) else {}
@@ -200,8 +213,15 @@ require(set(mission_evidence_classes) == required_mission_evidence_classes,
 
 # Customer professional trust remains explicit and fail-closed.
 review_descriptions = ai_doc.get("review_classes", {}) if isinstance(ai_doc, dict) else {}
-require(isinstance(review_descriptions, dict) and set(review_descriptions) == valid_review_classes,
-        "ai_authority.yaml review_classes must define R0..R4 exactly")
+expected_review_descriptions = {
+    "R0": "mechanical_no_human_review_required",
+    "R1": "operational_or_sample_review",
+    "R2": "mandatory_qualified_professional_review",
+    "R3": "independent_reviewer_required",
+    "R4": "external_authority_or_certification_dependent",
+}
+require(review_descriptions == expected_review_descriptions,
+        "ai_authority.yaml review_classes drifted from the exact governed R0..R4 contract")
 customer_reviews = ai_doc.get("customer_professional_review_classes", {}) if isinstance(ai_doc, dict) else {}
 require(isinstance(customer_reviews, dict) and set(customer_reviews) == valid_review_classes,
         "ai_authority.yaml customer_professional_review_classes must define R0..R4 exactly")
