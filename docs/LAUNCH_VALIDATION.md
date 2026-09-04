@@ -22,13 +22,15 @@ Allowed `evidence_status` values are:
 
 Allowed Mission evidence classes used here are:
 
-- `E0_DESIGN` — design/synthetic assumption;
+- `E0_DESIGN` — design assumption;
+- `E1_SYNTHETIC` — measured synthetic workflow evidence;
 - `E2_CONTROLLED_REAL_CLIENT` — controlled real-client delivery/workflow fact;
-- `E3_MARKET_COMMERCIAL` — market, ICP, channel, willingness-to-pay, proposal or commercial-outcome evidence.
+- `E3_MARKET_COMMERCIAL` — market, ICP, channel, willingness-to-pay, proposal or commercial-outcome evidence;
+- `E4_REPEATED_OPERATIONAL` — repeated governed operating evidence.
 
-Evidence status never substitutes for Mission evidence class. Delivery minutes from a design partner are E2; they do not become E3 merely because they were measured in a pilot. A single record may cite both E2 and E3 only when separately attributable observations in that record genuinely support both classes. Never promote a lower evidence class into a higher-class claim.
+Evidence status never substitutes for Mission evidence class. Delivery minutes from a design partner are E2; they do not become E3 merely because they were measured in a pilot. A single record may cite multiple Mission classes only when separately attributable observations genuinely support each class. Never promote a lower evidence class into a higher-class claim.
 
-`HYPOTHESIS` records are E0. `OBSERVED_MARKET` records are E3. `MEASURED_PILOT` records declare E2 and/or E3 according to the actual observation. `VALIDATED_BOUNDED` records must preserve the supporting Mission evidence class(es), sample and scope.
+`HYPOTHESIS` records are normally E0. Measured synthetic workflow evidence is E1. `OBSERVED_MARKET` records are E3. `MEASURED_PILOT` records declare E2 and/or E3 according to the actual observation. Repeated governed delivery evidence may reach E4 without becoming E3 commercial evidence. `VALIDATED_BOUNDED` records must preserve the supporting Mission evidence class(es), sample and scope.
 
 Never promote `HYPOTHESIS` to `VALIDATED_BOUNDED` without the underlying records.
 
@@ -54,74 +56,81 @@ The purpose is to learn where SolidSecurity is genuinely better fit, not to prov
 Comparative acquisition hypotheses are not judged retrospectively from whatever numbers happen to appear. Before the first observation for an experiment, the restricted experiment record must freeze:
 
 - `experiment_id`;
-- hypothesis and comparator;
-- primary metric and exact numerator/denominator or duration definition;
-- observation window;
-- minimum denominator/sample required for a decision;
-- `decision_direction`: exactly `HIGHER_IS_BETTER` or `LOWER_IS_BETTER`;
+- treatment hypothesis and comparator;
+- treatment-arm metric definition, including exact numerator/denominator or duration definition;
+- comparator-arm metric definition using the same outcome semantics;
+- arm allocation rule and minimum denominator/sample **per arm**;
+- `comparison_metric`: the exact treatment-vs-comparator contrast used for the decision, normally `treatment_rate - comparator_rate` or an explicitly defined ratio/duration difference;
+- observation window and one `decision_at` / registered stopping point;
+- `decision_direction`: exactly `HIGHER_IS_BETTER` or `LOWER_IS_BETTER` for the declared comparison metric;
 - numeric `support_threshold`;
 - numeric `reject_threshold`;
 - confounders/exclusions known at start;
 - `registered_at` timestamp.
+
+The decision metric must be a **contrast between treatment and comparator**, not a treatment-arm rate interpreted in isolation. A comparative hypothesis can never be marked `SUPPORTED` merely because the treatment arm clears an absolute threshold while the comparator performs better.
 
 Thresholds must be mutually exclusive by construction:
 
 - for `HIGHER_IS_BETTER`, `support_threshold > reject_threshold`;
 - for `LOWER_IS_BETTER`, `support_threshold < reject_threshold`.
 
-A registration with equal or overlapping/contradictory outcome predicates is invalid and cannot yield a directional result. After the first observation, changing comparator, metric, window, direction or thresholds requires a new `experiment_id`; the old experiment remains intact.
+A registration with equal or overlapping/contradictory outcome predicates is invalid and cannot yield a directional result. After the first observation, changing comparator, arm metric, allocation, comparison metric, window, stopping point, direction or thresholds requires a new `experiment_id`; the old experiment remains intact.
 
-Outcome is mechanical after the minimum sample is reached:
+Outcome is mechanical **only at the pre-registered `decision_at` / end of the observation window**:
 
-- `HIGHER_IS_BETTER`: `SUPPORTED` when metric `>= support_threshold`; `NOT_SUPPORTED` when metric `<= reject_threshold`; otherwise `INCONCLUSIVE`;
-- `LOWER_IS_BETTER`: `SUPPORTED` when metric `<= support_threshold`; `NOT_SUPPORTED` when metric `>= reject_threshold`; otherwise `INCONCLUSIVE`;
-- if the window ends below minimum sample, or a complete valid decision rule was not pre-registered: `INCONCLUSIVE`.
+- both arms must satisfy their pre-registered minimum denominator/sample; otherwise outcome is `INCONCLUSIVE`;
+- `HIGHER_IS_BETTER`: `SUPPORTED` when the comparison metric `>= support_threshold`; `NOT_SUPPORTED` when it `<= reject_threshold`; otherwise `INCONCLUSIVE`;
+- `LOWER_IS_BETTER`: `SUPPORTED` when the comparison metric `<= support_threshold`; `NOT_SUPPORTED` when it `>= reject_threshold`; otherwise `INCONCLUSIVE`;
+- an incomplete/invalid pre-registration is `INCONCLUSIVE`.
 
-Because the threshold ordering is part of registration validity, one observation can never satisfy both `SUPPORTED` and `NOT_SUPPORTED`.
+Intermediate results before `decision_at` are provisional diagnostics only and **cannot** authorize track promotion, strategy adoption or experiment termination. If genuine early stopping is required, its complete statistical/decision rule and admissible stopping boundaries must be pre-registered before the first observation; otherwise early stopping is prohibited.
+
+Because the threshold ordering and stopping point are part of registration validity, one completed experiment can never satisfy both `SUPPORTED` and `NOT_SUPPORTED`, and an early transient result cannot become a promotion decision.
 
 An `INCONCLUSIVE` result may guide another experiment but cannot be used as evidence that a channel or segment won.
 
-Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second metric) with its own comparator, commercial metric, observation window, minimum sample, direction and mutually exclusive support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
+Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second contrast metric) with its own comparator arms, commercial comparison metric, allocation, observation window/stopping point, per-arm minimum sample, direction and mutually exclusive support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
 
 ## First-10 acquisition hypotheses
 
 The “first 10” is a learning target, not a forecast or commitment. The initial comparisons are:
 
-| Hypothesis | Comparator | Primary metric |
+| Hypothesis | Comparator | Pre-registered comparison metric |
 | --- | --- | --- |
-| Warm domain introductions produce more qualified substantive conversations | Problem-triggered direct outreach | qualified substantive conversations / approached organizations |
-| Applicability-grounded, problem-triggered outreach produces more qualified substantive conversations | Generic outcome-led outreach that makes no unsupported regulatory claim | qualified substantive conversations / approached organizations |
-| Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | qualified next steps / substantive conversations |
-| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | qualified next steps / substantive conversations, with a separate pre-registered E3 commercial-value decision rule required for any track-promotion decision |
+| Warm domain introductions produce more qualified substantive conversations | Problem-triggered direct outreach | treatment qualified-conversation rate minus comparator qualified-conversation rate |
+| Applicability-grounded, problem-triggered outreach produces more qualified substantive conversations | Generic outcome-led outreach that makes no unsupported regulatory claim | treatment qualified-conversation rate minus comparator qualified-conversation rate |
+| Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | treatment qualified-next-step rate minus comparator qualified-next-step rate |
+| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | treatment qualified-next-step rate minus comparator qualified-next-step rate, plus a separate pre-registered E3 commercial-value comparison required for any track-promotion decision |
 
-These comparisons do not have universal hard-coded thresholds because direction and thresholds are part of each pre-registered experiment and must be frozen before observations. A missing/invalid rule makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
+These comparisons do not have universal hard-coded thresholds because direction, thresholds, arm allocation, minimum samples and stopping point are part of each pre-registered experiment and must be frozen before observations. A missing/invalid rule makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
 
-Supplier remains secondary while tested. It is promoted only when the pre-registered supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately pre-registered E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence or anecdotal commercial observations can never promote the track.
+Supplier remains secondary while tested. It is promoted only when the completed pre-registered supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately completed pre-registered E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence, interim metrics or anecdotal commercial observations can never promote the track.
 
-Do not scale a channel because it produces conversations; compare the pre-registered metric, ICP fit, burden, commercial evidence and learning quality.
+Do not scale a channel because it produces conversations; compare the pre-registered treatment-vs-comparator metric, ICP fit, burden, commercial evidence and learning quality.
 
 ## Channel hypothesis scorecard
 
 For each channel/experiment, capture at minimum:
 
-- `experiment_id` and channel/category;
+- `experiment_id` and treatment/comparator category;
 - `evidence_status`;
 - `mission_evidence_class`;
-- number of approached organizations;
-- number of substantive conversations;
-- number meeting primary ICP;
-- number explicitly disqualified and reason category;
-- next-step/proposal count;
-- outcome count;
-- primary-metric numerator, denominator and resulting value;
-- pre-registered direction/threshold/window reference;
-- mechanical experiment outcome (`SUPPORTED`, `NOT_SUPPORTED`, `INCONCLUSIVE`);
+- arm allocation and per-arm approached organizations;
+- per-arm substantive conversations;
+- per-arm number meeting primary ICP;
+- per-arm number explicitly disqualified and reason category;
+- per-arm next-step/proposal and outcome counts;
+- treatment-arm metric, comparator-arm metric and resulting pre-registered comparison metric;
+- pre-registered direction/threshold/window/`decision_at` reference;
+- whether the decision point has been reached;
+- mechanical experiment outcome (`SUPPORTED`, `NOT_SUPPORTED`, `INCONCLUSIVE`) only when eligible for final evaluation;
 - dominant objection categories;
 - median/typical sales-cycle observations when enough data exists;
 - customer-acquisition effort/cost only in the restricted commercial record;
 - date range and sample limitations.
 
-No rate is called validated when the denominator/sample is too small to support the pre-registered decision rule.
+No rate is called validated when either arm's denominator/sample is too small to support the pre-registered decision rule.
 
 ## Interview / proposal / loss-reason capture
 
@@ -163,12 +172,13 @@ Do not create a new category for every anecdote; use notes for nuance and change
 
 ## Promotion rules
 
-- Care remains the primary launch track until a pre-registered E3 comparison supports a change.
-- Supplier remains secondary until both the pre-registered supplier-versus-Care acquisition experiment and its separately pre-registered E3 commercial-value gate are `SUPPORTED`.
+- Care remains the primary launch track until a **completed** pre-registered E3 comparison supports a change.
+- Supplier remains secondary until both the completed pre-registered supplier-versus-Care acquisition experiment and its separately completed pre-registered E3 commercial-value gate are `SUPPORTED`.
+- Interim/provisional observations never authorize promotion.
 - Direct Cyberbeveiligingswet/NIS2 positioning requires explicit applicability basis; generic market urgency is insufficient.
 - A channel, ICP rule, objection response or offer becomes current strategy only after evidence is summarized and the bounded conclusion is intentionally adopted into `STRATEGY.md` / `POSITIONING.md`.
 - Detailed market records stay private; only deliberately public-safe aggregate learnings may flow back into this repository.
 
 ## WP02 public-safe exit contribution
 
-This contract proves the launch hypotheses are falsifiable, the pre-registration/decision rule is defined and Mission evidence classes cannot be silently substituted. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require the correct E3/E2 evidence in the approved restricted locations.
+This contract proves the launch hypotheses are falsifiable, comparative, pre-registered and protected against post-hoc/early-stopping promotion; Mission evidence classes cannot be silently substituted. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require the correct E3/E2/E4 evidence in the approved restricted locations.
