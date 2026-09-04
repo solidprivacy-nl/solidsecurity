@@ -119,3 +119,9 @@ Never `scanner pass -> compliance PASS`.
 ## 10. Complexity gate
 
 The default remains one shared database, one private evidence store and simple independent backup. Database-per-client, custom KMS/envelope encryption, active-active multi-cloud, permanent embedding infrastructure and broad connector programs require a concrete security, contract, scale or measured workflow reason.
+
+## 11. Central Control authority boundary
+
+SolidSecurity owns its product/domain architecture, Mission R2 requirements and repository change constraints. Runtime orchestration, queue/claim mechanics, worker topology and cutover state are owned by the **current central Control authority** and must be read fresh rather than duplicated here.
+
+This architecture therefore **does not encode a fixed Control runtime version or worker topology**. Consequential repository changes remain bound to their exact candidate/head/base and require a **fresh exact-candidate project-change review** under the currently applicable Control/project gate. **Candidate movement invalidates stale review evidence**; review success does not by itself grant integration, deployment, real-client, legal/compliance or certification authority.
