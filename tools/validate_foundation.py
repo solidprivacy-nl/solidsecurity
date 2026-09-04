@@ -38,23 +38,20 @@ def require(condition: bool, message: str) -> None:
 def forbidden_public_assumption_paths(value: object, path: str = "ai_authority") -> list[str]:
     """Find embedded assumption record/value payloads outside the one public-safe contract."""
     found: list[str] = []
-    if not isinstance(value, dict):
-        return found
-    for key, child in value.items():
-        child_path = f"{path}.{key}"
-        if path == "ai_authority" and key == "professional_review_assumption_record_contract":
-            # This subtree is separately exact-shape validated below and is the only
-            # permitted public representation of professional capacity/cost assumptions.
-            continue
-        normalized = str(key).lower()
-        if normalized == "value" or ("assumption" in normalized and ("record" in normalized or "value" in normalized)):
-            found.append(child_path)
-        if isinstance(child, dict):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{path}.{key}"
+            if path == "ai_authority" and key == "professional_review_assumption_record_contract":
+                # This subtree is separately exact-shape validated below and is the only
+                # permitted public representation of professional capacity/cost assumptions.
+                continue
+            normalized = str(key).lower()
+            if normalized == "value" or ("assumption" in normalized and ("record" in normalized or "value" in normalized)):
+                found.append(child_path)
             found.extend(forbidden_public_assumption_paths(child, child_path))
-        elif isinstance(child, list):
-            for index, item in enumerate(child):
-                if isinstance(item, dict):
-                    found.extend(forbidden_public_assumption_paths(item, f"{child_path}[{index}]"))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            found.extend(forbidden_public_assumption_paths(item, f"{path}[{index}]"))
     return found
 
 
@@ -334,15 +331,14 @@ if isinstance(assumption_contract, dict):
         require(evidence_rules is not None,
                 "commercial evidence-status contract must retain the exact normative Evidence rules structure")
         if evidence_rules is not None:
-            before = evidence_rules.group("before")
-            pilot = evidence_rules.group("pilot")
-            validated = evidence_rules.group("validated")
-            require(re.search(r"must be marked `HYPOTHESIS`\.", before) is not None,
-                    "commercial evidence-status contract missing normative HYPOTHESIS declaration")
-            require(re.search(r"captured as `MEASURED_PILOT`", pilot) is not None,
-                    "commercial evidence-status contract missing normative MEASURED_PILOT declaration")
-            require(re.search(r"may be labeled `VALIDATED` only", validated) is not None,
-                    "commercial evidence-status contract missing normative VALIDATED declaration")
+            expected_commercial_declarations = {
+                "before": "Synthetic/model measurements may be used for scenario planning only and must be marked `HYPOTHESIS`.",
+                "pilot": "Actual time, follow-up, evidence availability, review burden and customer effort are captured as `MEASURED_PILOT` for the bounded engagement.",
+                "validated": "A price, workload or capacity assumption may be labeled `VALIDATED` only when the evidence class and sample are stated and the conclusion does not generalize beyond what the measured data supports.",
+            }
+            for section_name, expected_text in expected_commercial_declarations.items():
+                require(evidence_rules.group(section_name).strip() == expected_text,
+                        f"commercial evidence-status contract {section_name} declaration drifted from the canonical normative sentence")
 
     assumption_types = assumption_contract.get("assumption_types", {})
     require(isinstance(assumption_types, dict) and set(assumption_types) == {"reviewer_capacity", "loaded_cost"},
