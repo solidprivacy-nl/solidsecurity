@@ -71,6 +71,7 @@ applicability_decisions:
   rationale: Access governance is in scope for the synthetic care environment.
   uncertainty_or_exclusions:
   - synthetic applicability only; no legal conclusion or real client scope
+  proposer_id: ai-applicability-proposer-v1
   proposer_actor_type: AI
   required_review_class: R2
   reviewer_id: reviewer-01
@@ -92,6 +93,7 @@ applicability_decisions:
   rationale: Recovery testing is in scope for the synthetic care environment.
   uncertainty_or_exclusions:
   - synthetic applicability only; no legal conclusion or real client scope
+  proposer_id: ai-applicability-proposer-v1
   proposer_actor_type: AI
   required_review_class: R2
   reviewer_id: reviewer-01
@@ -113,6 +115,7 @@ applicability_decisions:
   rationale: Material supplier governance is in scope.
   uncertainty_or_exclusions:
   - synthetic applicability only; no legal conclusion or real supplier scope
+  proposer_id: ai-applicability-proposer-v1
   proposer_actor_type: AI
   required_review_class: R2
   reviewer_id: reviewer-01
@@ -136,6 +139,7 @@ applicability_decisions:
   uncertainty_or_exclusions:
   - synthetic applicability only; missing control mapping intentionally remains a
     GAP
+  proposer_id: ai-applicability-proposer-v1
   proposer_actor_type: AI
   required_review_class: R2
   reviewer_id: reviewer-01
