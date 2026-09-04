@@ -6,14 +6,29 @@ Turn the Care launch thesis into falsifiable E3 market/commercial learning witho
 
 `STRATEGY.md` remains the strategic source of truth. `POSITIONING.md` owns public-safe ICP/positioning. `COMMERCIAL_MODEL.md` owns economics semantics. This document owns only the **launch experiments and evidence-capture contract**.
 
-## Evidence labels
+## Evidence status and Mission class
 
-Every launch claim or observation is explicitly one of:
+Every record keeps two independent dimensions:
 
-- `HYPOTHESIS` — E0 design assumption, not market proof;
-- `OBSERVED_MARKET` — E3 observation from a real market interaction, with source/date/context;
-- `MEASURED_PILOT` — E2/E3 measurement from an authorized bounded design partner;
+1. `evidence_status` — how mature the recorded claim is;
+2. `mission_evidence_class` — what kind of Mission evidence the underlying observation actually proves.
+
+Allowed `evidence_status` values are:
+
+- `HYPOTHESIS` — design assumption, not market proof;
+- `OBSERVED_MARKET` — real market observation with source/date/context;
+- `MEASURED_PILOT` — measurement from an authorized bounded design partner;
 - `VALIDATED_BOUNDED` — conclusion supported by stated evidence/sample and bounded to that scope.
+
+Allowed Mission evidence classes used here are:
+
+- `E0_DESIGN` — design/synthetic assumption;
+- `E2_CONTROLLED_REAL_CLIENT` — controlled real-client delivery/workflow fact;
+- `E3_MARKET_COMMERCIAL` — market, ICP, channel, willingness-to-pay, proposal or commercial-outcome evidence.
+
+Evidence status never substitutes for Mission evidence class. Delivery minutes from a design partner are E2; they do not become E3 merely because they were measured in a pilot. A single record may cite both E2 and E3 only when separately attributable observations in that record genuinely support both classes. Never promote a lower evidence class into a higher-class claim.
+
+`HYPOTHESIS` records are E0. `OBSERVED_MARKET` records are E3. `MEASURED_PILOT` records declare E2 and/or E3 according to the actual observation. `VALIDATED_BOUNDED` records must preserve the supporting Mission evidence class(es), sample and scope.
 
 Never promote `HYPOTHESIS` to `VALIDATED_BOUNDED` without the underlying records.
 
@@ -34,37 +49,69 @@ The relevant alternatives to test are categories, not presumed inferior competit
 
 The purpose is to learn where SolidSecurity is genuinely better fit, not to prove every alternative wrong.
 
+## Pre-registered acquisition decision rule
+
+Comparative acquisition hypotheses are not judged retrospectively from whatever numbers happen to appear. Before the first observation for an experiment, the restricted experiment record must freeze:
+
+- `experiment_id`;
+- hypothesis and comparator;
+- primary metric and exact numerator/denominator or duration definition;
+- observation window;
+- minimum denominator/sample required for a decision;
+- `support_threshold`;
+- `reject_threshold`;
+- confounders/exclusions known at start;
+- `registered_at` timestamp.
+
+After the first observation, changing comparator, metric, window or thresholds requires a new `experiment_id`; the old experiment remains intact.
+
+Outcome is mechanical:
+
+- `SUPPORTED` — minimum sample reached and the pre-registered support threshold is met;
+- `NOT_SUPPORTED` — minimum sample reached and the pre-registered reject threshold is met;
+- `INCONCLUSIVE` — neither condition is met, the window ends below minimum sample, or the decision rule was not pre-registered.
+
+An `INCONCLUSIVE` result may guide another experiment but cannot be used as evidence that a channel or segment won.
+
 ## First-10 acquisition hypotheses
 
-The “first 10” is a learning target, not a forecast or commitment.
+The “first 10” is a learning target, not a forecast or commitment. The initial comparisons are:
 
-Test in this order:
+| Hypothesis | Comparator | Primary metric |
+| --- | --- | --- |
+| Warm domain introductions produce more qualified substantive conversations | Problem-triggered direct outreach | qualified substantive conversations / approached organizations |
+| Applicability-grounded, problem-triggered outreach produces more qualified substantive conversations | Generic outcome-led outreach that makes no unsupported regulatory claim | qualified substantive conversations / approached organizations |
+| Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | qualified next steps / substantive conversations |
+| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | qualified next steps / substantive conversations, with separate E3 commercial evidence required for any track-promotion decision |
 
-1. **Warm domain introductions** — care organizations reachable through existing professional networks. Hypothesis: trust transfer shortens the learning cycle.
-2. **Problem-triggered direct outreach** — organizations showing evidence/audit/privacy/security-governance pressure. Hypothesis: concrete recurring burden converts better than generic NIS2 fear messaging.
-3. **Trusted advisor/referral partners** — MSPs, privacy/security advisors or sector specialists that do not want to own the entire managed assurance lifecycle. Hypothesis: complementarity can outperform displacement messaging.
-4. **Supplier/questionnaire trigger** — secondary only. Hypothesis: acute tender/customer questionnaire burden may reveal a stronger wedge; it does not become the primary track until evidence says so.
+These comparisons do not have universal hard-coded thresholds because the threshold is part of each pre-registered experiment and must be frozen before observations. A missing threshold makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
 
-Do not scale a channel because it produces conversations; compare qualified-fit rate, burden, conversion evidence and learning quality.
+Supplier remains secondary while tested. It is promoted only when a pre-registered supplier-versus-Care experiment is `SUPPORTED` **and** separately attributable E3 evidence supports the commercial-value conclusion; delivery-effort E2 evidence alone can never promote the track.
+
+Do not scale a channel because it produces conversations; compare the pre-registered metric, ICP fit, burden, commercial evidence and learning quality.
 
 ## Channel hypothesis scorecard
 
-For each channel, capture at minimum:
+For each channel/experiment, capture at minimum:
 
-- `channel_id` / category;
-- evidence label;
+- `experiment_id` and channel/category;
+- `evidence_status`;
+- `mission_evidence_class`;
 - number of approached organizations;
 - number of substantive conversations;
 - number meeting primary ICP;
 - number explicitly disqualified and reason category;
 - next-step/proposal count;
 - outcome count;
+- primary-metric numerator, denominator and resulting value;
+- pre-registered threshold/window reference;
+- mechanical experiment outcome (`SUPPORTED`, `NOT_SUPPORTED`, `INCONCLUSIVE`);
 - dominant objection categories;
 - median/typical sales-cycle observations when enough data exists;
 - customer-acquisition effort/cost only in the restricted commercial record;
 - date range and sample limitations.
 
-No rate is called validated when the denominator/sample is too small to support the claim.
+No rate is called validated when the denominator/sample is too small to support the pre-registered decision rule.
 
 ## Interview / proposal / loss-reason capture
 
@@ -85,7 +132,7 @@ Each substantive market interaction should produce a restricted record with:
 - proposal/next step/outcome;
 - loss/no-decision reason category;
 - free-text evidence/quote stored only where permitted;
-- evidence label and confidence/sample limitation.
+- `evidence_status`, `mission_evidence_class`, confidence and sample limitation.
 
 ## Loss/no-decision taxonomy
 
@@ -106,12 +153,12 @@ Do not create a new category for every anecdote; use notes for nuance and change
 
 ## Promotion rules
 
-- Care remains the primary launch track until E3 evidence says otherwise.
-- Supplier remains secondary until its observed acquisition/value evidence is materially stronger, not merely interesting.
+- Care remains the primary launch track until a pre-registered E3 comparison supports a change.
+- Supplier remains secondary until the supplier-versus-Care experiment is `SUPPORTED` and the required separate E3 commercial evidence exists.
 - Direct Cyberbeveiligingswet/NIS2 positioning requires explicit applicability basis; generic market urgency is insufficient.
 - A channel, ICP rule, objection response or offer becomes current strategy only after evidence is summarized and the bounded conclusion is intentionally adopted into `STRATEGY.md` / `POSITIONING.md`.
 - Detailed market records stay private; only deliberately public-safe aggregate learnings may flow back into this repository.
 
 ## WP02 public-safe exit contribution
 
-This contract proves the launch hypotheses are testable and the capture vocabulary is defined. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require E3/E2 evidence in the approved restricted locations.
+This contract proves the launch hypotheses are falsifiable, the pre-registration/decision rule is defined and Mission evidence classes cannot be silently substituted. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require the correct E3/E2 evidence in the approved restricted locations.
