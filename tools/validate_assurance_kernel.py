@@ -155,6 +155,11 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     require(as_of is not None, "as_of must be a valid ISO date")
     if as_of is None:
         as_of = date.min
+    expected_materiality_minimums = {"low": "R1", "medium": "R2", "high": "R3", "critical": "R4"}
+    materiality_minimums = model.get("materiality_review_minimums")
+    require(materiality_minimums == expected_materiality_minimums, "materiality review routing must remain low=R1, medium=R2, high=R3, critical=R4")
+    if not isinstance(materiality_minimums, dict):
+        materiality_minimums = {}
     sources = _index(model.get("sources"), "source_id", errors)
     scopes = _index(model.get("scopes"), "scope_id", errors)
     requirements = _index(model.get("requirements"), "requirement_id", errors)
@@ -194,6 +199,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             maps_by_requirement[requirement_id].append(mapping)
             requirements_by_control[control_id].add(requirement_id)
     applicability_by_requirement: dict[str, list[dict[str, Any]]] = {rid: [] for rid in requirements}
+    applicability_review_times: dict[str, datetime] = {}
+    applicability_effective_dates: dict[str, date] = {}
     for applicability_id, item in applicability.items():
         requirement_id = item.get("requirement_id")
         require(requirement_id in requirements, f"applicability {applicability_id} references unknown requirement")
@@ -218,12 +225,14 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(review_classes[required_class] >= review_classes["R2"], f"applicability {applicability_id} material decision requires R2 or stronger review")
         if required_class in review_classes and actual_class in review_classes:
             require(review_classes[actual_class] >= review_classes[required_class], f"applicability {applicability_id} actual review class is below required review class")
-        require(bool(item.get("reviewer_id")), f"applicability {applicability_id} requires reviewer identity")
+        reviewer_id = item.get("reviewer_id")
+        require(bool(reviewer_id), f"applicability {applicability_id} requires reviewer identity")
         require(item.get("reviewer_actor_type") == "HUMAN", f"applicability {applicability_id} requires human review authority")
         independence_class = item.get("independence_class")
         require(independence_class in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"applicability {applicability_id} independence class invalid")
         if actual_class in review_classes and review_classes[actual_class] >= review_classes["R3"]:
             require(independence_class != "INTERNAL_QUALIFIED", f"applicability {applicability_id} R3+ review requires independence")
+            require(reviewer_id != item.get("proposer_id"), f"applicability {applicability_id} R3+ reviewer must differ from proposer")
         if actual_class in review_classes and review_classes[actual_class] >= review_classes["R4"]:
             require(independence_class == "INDEPENDENT_EXTERNAL", f"applicability {applicability_id} R4 review requires external independence")
             require(isinstance(item.get("external_authority_ref"), str) and bool(item.get("external_authority_ref")), f"applicability {applicability_id} R4 review requires external authority provenance")
@@ -235,6 +244,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(effective is not None and expires is not None and effective <= as_of <= expires, f"applicability {applicability_id} effective/expiry window invalid for as_of")
         if reviewed_at is not None and effective is not None:
             require(reviewed_at.date() <= effective, f"applicability {applicability_id} review must not occur after effective date")
+        if requirement_id in requirements and reviewed_at is not None:
+            applicability_review_times[requirement_id] = reviewed_at
+        if requirement_id in requirements and effective is not None:
+            applicability_effective_dates[requirement_id] = effective
         require(isinstance(item.get("reevaluation_trigger"), str) and bool(item.get("reevaluation_trigger")), f"applicability {applicability_id} requires reevaluation trigger")
     for requirement_id, items in applicability_by_requirement.items():
         require(len(items) == 1, f"requirement {requirement_id} must have exactly one applicability decision")
@@ -304,6 +317,12 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             declared_at = implementation_declared_times.get(str(implementation_id))
             if declared_at is not None:
                 require(assessed_at >= declared_at, f"assessment {assessment_id} predates accepted implementation declaration")
+            app_reviewed_at = applicability_review_times.get(str(requirement_id))
+            if app_reviewed_at is not None:
+                require(assessed_at >= app_reviewed_at, f"assessment {assessment_id} predates applicability review for requirement {requirement_id}")
+            app_effective = applicability_effective_dates.get(str(requirement_id))
+            if app_effective is not None:
+                require(assessed_at.date() >= app_effective, f"assessment {assessment_id} predates applicability effective date for requirement {requirement_id}")
         apps = applicability_by_requirement.get(requirement_id, [])
         assessed_scope = apps[0].get("scope_id") if len(apps) == 1 else None
         if implementation_id in implementations:
@@ -334,12 +353,17 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         proof_level = assessment.get("proposed_proof_level")
         require(proof_level in proof_levels, f"assessment {assessment_id} has invalid proof level")
         require(assessment.get("state") in {"REVIEWED", "REOPENED", "CONFLICT_DETECTED"}, f"assessment {assessment_id} has invalid state")
+        materiality = assessment.get("materiality")
+        require(materiality in materiality_minimums, f"assessment {assessment_id} has invalid materiality")
         required_class = assessment.get("required_review_class")
         require(required_class in review_classes, f"assessment {assessment_id} has invalid review class")
         if control_id in controls:
             minimum_review = controls[control_id].get("minimum_review_class")
             if minimum_review in review_classes and required_class in review_classes:
                 require(review_classes[required_class] >= review_classes[minimum_review], f"assessment {assessment_id} review class is below canonical control minimum")
+        materiality_minimum = materiality_minimums.get(materiality)
+        if materiality_minimum in review_classes and required_class in review_classes:
+            require(review_classes[required_class] >= review_classes[materiality_minimum], f"assessment {assessment_id} review class is below materiality minimum review class")
         if resolved_evidence and not any(_evidence_valid_at(item, as_of) for item in resolved_evidence):
             require(assessment.get("state") == "REOPENED", f"assessment {assessment_id} with no evidence valid at as_of must be REOPENED")
             require(proof_levels.get(proof_level, 99) <= proof_levels.get("IMPLEMENTED", 2), f"assessment {assessment_id} with no evidence valid at as_of cannot remain evidentially green")
@@ -385,14 +409,23 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(isinstance(resolution, dict), f"resolved conflict {conflict_id} requires governed resolution")
             if isinstance(resolution, dict):
                 require(isinstance(resolution.get("rationale"), str) and bool(resolution.get("rationale")), f"resolved conflict {conflict_id} requires resolution rationale")
-                require(bool(resolution.get("reviewer_id")), f"resolved conflict {conflict_id} requires reviewer identity")
+                reviewer_id = resolution.get("reviewer_id")
+                require(bool(reviewer_id), f"resolved conflict {conflict_id} requires reviewer identity")
                 require(resolution.get("reviewer_actor_type") == "HUMAN", f"resolved conflict {conflict_id} requires human reviewer")
                 resolution_class = resolution.get("review_class")
                 require(resolution_class in review_classes, f"resolved conflict {conflict_id} review class invalid")
+                resolution_independence = resolution.get("independence_class")
+                require(resolution_independence in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"resolved conflict {conflict_id} independence class invalid")
                 if assessment_id in assessments and resolution_class in review_classes:
                     required_class = assessments[assessment_id].get("required_review_class")
                     if required_class in review_classes:
                         require(review_classes[resolution_class] >= review_classes[required_class], f"resolved conflict {conflict_id} review class is below assessment requirement")
+                    if review_classes[resolution_class] >= review_classes["R3"]:
+                        require(resolution_independence != "INTERNAL_QUALIFIED", f"resolved conflict {conflict_id} R3+ resolution requires independence")
+                        require(reviewer_id != assessments[assessment_id].get("assessor_id"), f"resolved conflict {conflict_id} R3+ reviewer must differ from assessment author")
+                    if review_classes[resolution_class] >= review_classes["R4"]:
+                        require(resolution_independence == "INDEPENDENT_EXTERNAL", f"resolved conflict {conflict_id} R4 resolution requires external independence")
+                        require(isinstance(resolution.get("external_authority_ref"), str) and bool(resolution.get("external_authority_ref")), f"resolved conflict {conflict_id} R4 resolution requires external authority provenance")
                 resolved_at = _as_datetime(resolution.get("resolved_at"))
                 require(resolved_at is not None, f"resolved conflict {conflict_id} resolved_at must be a timezone-aware ISO timestamp")
                 if detected_at is not None and resolved_at is not None:
@@ -415,7 +448,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         assessment_id = review.get("assessment_id")
         require(assessment_id in assessments, f"professional review {review_id} references unknown assessment")
         require(review.get("reviewer_actor_type") == "HUMAN", f"professional review {review_id} requires human authority")
-        require(bool(review.get("reviewer_id")), f"professional review {review_id} requires reviewer identity")
+        reviewer_id = review.get("reviewer_id")
+        require(bool(reviewer_id), f"professional review {review_id} requires reviewer identity")
         actual_class = review.get("review_class")
         require(actual_class in review_classes, f"professional review {review_id} actual review class invalid")
         require(review.get("independence_class") in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"professional review {review_id} independence class invalid")
@@ -433,8 +467,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
                 require(review_classes[actual_class] >= review_classes[required_class], f"professional review {review_id} actual review class is below assessment requirement")
                 if review_classes[actual_class] >= review_classes["R3"]:
                     require(review.get("independence_class") != "INTERNAL_QUALIFIED", f"professional review {review_id} R3+ review requires independence")
+                    require(reviewer_id != assessments[assessment_id].get("assessor_id"), f"professional review {review_id} R3+ reviewer must differ from assessment author")
                 if review_classes[actual_class] >= review_classes["R4"]:
                     require(review.get("independence_class") == "INDEPENDENT_EXTERNAL", f"professional review {review_id} R4 review requires external independence")
+                    require(isinstance(review.get("external_authority_ref"), str) and bool(review.get("external_authority_ref")), f"professional review {review_id} R4 review requires external authority provenance")
             reviews_by_assessment[assessment_id].append(review)
     decisions_by_assessment: dict[str, list[dict[str, Any]]] = {aid: [] for aid in assessments}
     for decision_id, decision in decisions.items():
@@ -625,6 +661,11 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].pop("reevaluation_trigger"), "requires reevaluation trigger")
     expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R3", "review_class": "R3", "independence_class": "INTERNAL_QUALIFIED"}), "R3+ review requires independence")
     expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R4", "review_class": "R4", "independence_class": "INDEPENDENT_EXTERNAL"}), "R4 review requires external authority provenance")
+    def applicability_self_review(v: dict[str, Any]) -> None:
+        item = v["applicability_decisions"][0]
+        item.update({"proposer_actor_type": "HUMAN", "proposer_id": "reviewer-01", "required_review_class": "R3", "review_class": "R3", "independence_class": "INDEPENDENT_INTERNAL"})
+    expect(applicability_self_review, "R3+ reviewer must differ from proposer")
+    expect(lambda v: v["applicability_decisions"][0].update({"reviewed_at": "2026-09-01T09:41:00Z"}), "predates applicability review")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "UNKNOWN"}), "invalid implementation_status")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "DESIGNED"}), "requires OPERATING implementation")
     expect(lambda v: v["client_implementations"][0].update({"source_of_claim": "generated_polcy"}), "invalid source_of_claim")
@@ -637,6 +678,8 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["assessments"][0].update({"assessed_at": "2026-09-01T10:01:00Z"}), "must not precede assessment ASM-ACCESS latest state")
     expect(lambda v: v["assessments"][0].pop("assessor_id"), "requires assessor identity")
     expect(lambda v: v["assessments"][0].update({"assessment_version": 0}), "requires positive assessment_version")
+    expect(lambda v: v["assessments"][0].update({"materiality": "unknown"}), "has invalid materiality")
+    expect(lambda v: v["assessments"][0].update({"materiality": "high"}), "below materiality minimum review class")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-01T09:59:00Z"}), "must not precede its professional review")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}), "must not occur after dossier as_of")
     expect(lambda v: v["decisions"][0].update({"assurance_state": "INDEPENDENTLY_ASSURED"}), "outside R2-WP01 authority")
@@ -683,9 +726,15 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["evidence_conflicts"][0].update({"evidence_ids":["EVID-GOV-REVIEW"]}), "requires at least two evidence records")
     expect(lambda v: v["evidence"][-1].update({"source_ref":"synthetic_internal_governance_review"}), "requires distinct evidence source provenance")
     expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-06-30T23:59:00Z"}), "detection precedes referenced evidence capture")
+    def weak_r3_resolution(v: dict[str, Any]) -> None:
+        assessment = v["assessments"][-1]
+        assessment["state"] = "REVIEWED"
+        assessment["required_review_class"] = "R3"
+        v["evidence_conflicts"][0] = {**v["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic weak R3 resolution","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R3","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
+    expect(weak_r3_resolution, "R3+ resolution requires independence")
     partial = deepcopy(model)
     partial["assessments"][-1]["state"] = "REVIEWED"
-    partial["evidence_conflicts"][0] = {**partial["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic conflict resolved after evidence reconciliation","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
+    partial["evidence_conflicts"][0] = {**partial["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic conflict resolved after evidence reconciliation","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
     partial["professional_reviews"].append({"review_id":"REV-SUPPLIER","assessment_id":"ASM-SUPPLIER","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","decision":"ACCEPT","reviewed_at":"2026-09-01T11:05:00Z"})
     partial["decisions"].append({"decision_id":"DEC-SUPPLIER","assessment_id":"ASM-SUPPLIER","review_id":"REV-SUPPLIER","assurance_state":"VERIFIED","authorized_by":"reviewer-02","authorized_actor_type":"HUMAN","effective_at":"2026-09-01T11:10:00Z"})
     partial_errors, partial_derived = validate_model(partial, *authorities)
