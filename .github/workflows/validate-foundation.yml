@@ -15,6 +15,7 @@ on:
       - 'docs/DOMAIN_MODEL_V1.md'
       - 'docs/MISSION_DRIVEN_WORKFLOW.md'
       - 'docs/WORKPACKAGES_R2.md'
+      - 'ARCHITECTURE.md'
       - 'STRATEGY.md'
       - 'ROADMAP.md'
       - 'README.md'
