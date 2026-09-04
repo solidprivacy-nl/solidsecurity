@@ -125,6 +125,88 @@ prohibited = set(ai_doc.get("prohibited_ai_state_transitions", [])) if isinstanc
 required_prohibited = {"VERIFIED", "INDEPENDENTLY_ASSURED", "RISK_ACCEPTED", "EXCEPTION_APPROVED", "CERTIFIED"}
 require(required_prohibited.issubset(prohibited), f"AI transition deny-list missing: {sorted(required_prohibited - prohibited)}")
 
+# Customer professional trust remains explicit and fail-closed.
+review_descriptions = ai_doc.get("review_classes", {}) if isinstance(ai_doc, dict) else {}
+require(isinstance(review_descriptions, dict) and set(review_descriptions) == valid_review_classes,
+        "ai_authority.yaml review_classes must define R0..R4 exactly")
+customer_reviews = ai_doc.get("customer_professional_review_classes", {}) if isinstance(ai_doc, dict) else {}
+require(isinstance(customer_reviews, dict) and set(customer_reviews) == valid_review_classes,
+        "ai_authority.yaml customer_professional_review_classes must define R0..R4 exactly")
+if isinstance(customer_reviews, dict):
+    required_fields = {
+        "human_reviewer_required", "customer_verified_authority", "competence_expectation",
+        "credential_expectation", "independence_requirement", "capacity_assumption_required",
+        "loaded_cost_assumption_required", "escalation",
+    }
+    for review_class in sorted(valid_review_classes):
+        item = customer_reviews.get(review_class, {})
+        require(isinstance(item, dict), f"customer professional review {review_class} must be an object")
+        if not isinstance(item, dict):
+            continue
+        require(required_fields.issubset(item), f"customer professional review {review_class} missing required fields")
+        for field in ("customer_verified_authority", "competence_expectation", "credential_expectation", "independence_requirement", "escalation"):
+            require(isinstance(item.get(field), str) and bool(item.get(field)), f"customer professional review {review_class} invalid {field}")
+        for field in ("human_reviewer_required", "capacity_assumption_required", "loaded_cost_assumption_required"):
+            require(isinstance(item.get(field), bool), f"customer professional review {review_class} invalid {field}")
+    for review_class in ("R0", "R1"):
+        require(customer_reviews.get(review_class, {}).get("customer_verified_authority") == "prohibited",
+                f"{review_class} must not issue customer VERIFIED")
+    for review_class in ("R2", "R3"):
+        item = customer_reviews.get(review_class, {})
+        require(item.get("human_reviewer_required") is True, f"{review_class} requires human reviewer")
+        require(item.get("customer_verified_authority") == "permitted_only_when_customer_verified_gate_passes",
+                f"{review_class} customer VERIFIED must remain gate-dependent")
+        require(item.get("capacity_assumption_required") is True, f"{review_class} requires reviewer capacity assumption")
+        require(item.get("loaded_cost_assumption_required") is True, f"{review_class} requires loaded-cost assumption")
+    require(customer_reviews.get("R3", {}).get("independence_requirement") == "independent_internal_or_external",
+            "R3 must require independent review")
+    require(customer_reviews.get("R4", {}).get("customer_verified_authority") == "external_authority_dependent",
+            "R4 must remain external-authority dependent")
+    require(customer_reviews.get("R4", {}).get("independence_requirement") == "external_authority",
+            "R4 must require external authority")
+
+separation = ai_doc.get("trust_domain_separation", {}) if isinstance(ai_doc, dict) else {}
+for boundary in (
+    "product_change_b1_is_customer_professional_review",
+    "customer_professional_review_is_external_independent_assurance",
+    "internal_review_may_claim_certification",
+):
+    require(isinstance(separation, dict) and separation.get(boundary) is False,
+            f"trust-domain separation weakened: {boundary}")
+
+verified_gate = ai_doc.get("customer_verified_gate", {}) if isinstance(ai_doc, dict) else {}
+require(isinstance(verified_gate, dict), "customer_verified_gate must be an object")
+if isinstance(verified_gate, dict):
+    require(verified_gate.get("readiness_status") == "DESIGN_ONLY", "customer VERIFIED gate must remain DESIGN_ONLY")
+    require(verified_gate.get("fail_closed") is True, "customer VERIFIED gate must fail closed")
+    require(verified_gate.get("customer_verified_currently_enabled") is False,
+            "WP03 must not enable customer VERIFIED claims")
+    require(verified_gate.get("legal_contract_approval_currently_enabled") is False,
+            "WP03 must not approve legal contract terms")
+    require(verified_gate.get("missing_or_unresolved_state") == "NEEDS_REVIEW",
+            "missing customer VERIFIED prerequisite must resolve to NEEDS_REVIEW")
+    prerequisites = set(verified_gate.get("required_prerequisites", [])) if isinstance(verified_gate.get("required_prerequisites"), list) else set()
+    required_prerequisites = {
+        "applicable_review_class_satisfied",
+        "reviewer_identity_and_scope_competence_recorded",
+        "credential_expectation_addressed",
+        "independence_requirement_satisfied",
+        "reviewer_capacity_confirmed",
+        "loaded_cost_assumption_recorded",
+        "escalation_path_available",
+        "liability_and_insurance_posture_reviewed",
+        "contractual_scope_and_liability_limits_reviewed",
+        "verified_report_language_approved",
+        "post_verification_incident_posture_defined",
+        "client_contract_and_dpa_ready",
+        "subprocessor_review_ready",
+        "retention_and_deletion_schedule_ready",
+    }
+    require(required_prerequisites.issubset(prerequisites),
+            f"customer VERIFIED gate missing prerequisites: {sorted(required_prerequisites - prerequisites)}")
+    require(isinstance(verified_gate.get("transition_rule"), str) and bool(verified_gate.get("transition_rule", "").strip()),
+            "customer VERIFIED gate requires transition rule")
+
 # Applicability must preserve unresolved/professional-review states.
 applicability = set(enums_doc.get("applicability_status", [])) if isinstance(enums_doc, dict) else set()
 required_applicability = {"APPLICABLE", "NOT_APPLICABLE", "UNDETERMINED", "PENDING_PROFESSIONAL_REVIEW"}
@@ -162,7 +244,11 @@ require(pilot_gate_doc.get("real_client_data_allowed") is False, "pilot_gate mus
 require(pilot_gate_doc.get("state") == "DESIGN_ONLY", "pilot_gate state must remain DESIGN_ONLY before separately authorized transition")
 required_gate_names = {
     "foundation_assurance",
+    "client_contract_and_dpa",
+    "subprocessor_review",
+    "retention_schedule",
     "tenant_isolation_test",
+    "export_delete_test",
     "llm_processing_policy_test",
     "independent_security_data_governance_assurance",
     "principal_real_pilot_authorization",
