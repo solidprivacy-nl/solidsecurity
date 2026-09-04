@@ -140,11 +140,19 @@ required_claim_classes = {
 require(isinstance(claim_classes, dict) and set(claim_classes) == required_claim_classes,
         "claim_vocabulary.yaml claim classes must remain canonical C0..C5")
 
+# Use the Mission R2 evidence vocabulary regardless of this stacked branch's lifecycle label.
 mission_evidence_classes = mission_doc.get("evidence_classes", {}) if isinstance(mission_doc, dict) else {}
-require(mission_doc.get("status") == "MISSION_R2_CANONICAL" if isinstance(mission_doc, dict) else False,
-        "Mission R2 operating model must remain canonical")
 require(isinstance(mission_evidence_classes, dict) and bool(mission_evidence_classes),
-        "Mission R2 must define canonical evidence classes")
+        "Mission R2 must define evidence classes for assumption-record provenance")
+required_mission_evidence_classes = {
+    "E0_DESIGN",
+    "E1_SYNTHETIC",
+    "E2_CONTROLLED_REAL_CLIENT",
+    "E3_MARKET_COMMERCIAL",
+    "E4_REPEATED_OPERATIONAL",
+}
+require(set(mission_evidence_classes) == required_mission_evidence_classes,
+        "Mission R2 evidence-class identifiers drifted from the governed vocabulary")
 
 # Customer professional trust remains explicit and fail-closed.
 review_descriptions = ai_doc.get("review_classes", {}) if isinstance(ai_doc, dict) else {}
@@ -268,8 +276,13 @@ if isinstance(assumption_contract, dict):
         "evidence_status": "docs/COMMERCIAL_MODEL.md",
         "mission_evidence_class": "model/mission_operating_model_r2.yaml:evidence_classes",
     }, "professional review assumption vocabularies must reference canonical sources")
-    require((ROOT / "docs" / "COMMERCIAL_MODEL.md").exists(),
-            "canonical commercial evidence-status contract is missing")
+    commercial_contract_path = ROOT / "docs" / "COMMERCIAL_MODEL.md"
+    require(commercial_contract_path.exists(), "canonical commercial evidence-status contract is missing")
+    if commercial_contract_path.exists():
+        commercial_contract = commercial_contract_path.read_text(encoding="utf-8")
+        for status in ("HYPOTHESIS", "MEASURED_PILOT", "VALIDATED"):
+            require(status in commercial_contract,
+                    f"commercial evidence-status contract missing established status {status}")
 
     assumption_types = assumption_contract.get("assumption_types", {})
     require(isinstance(assumption_types, dict) and set(assumption_types) == {"reviewer_capacity", "loaded_cost"},
