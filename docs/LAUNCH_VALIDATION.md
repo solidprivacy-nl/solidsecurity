@@ -34,7 +34,11 @@ Evidence status never substitutes for Mission evidence class. Delivery minutes f
 
 Never promote `HYPOTHESIS` to `VALIDATED_BOUNDED` without the underlying records.
 
-Named prospects, partner names, proposal terms, detailed loss reasons and internal commercial values are `PROPRIETARY_RESTRICTED` and belong in the private operations/IP location selected by `PUBLIC_REPO_POLICY.md`.
+Storage follows the identity/data owner:
+
+- named **non-client prospects**, partner names, proposal terms, detailed loss reasons and internal commercial values are `PROPRIETARY_RESTRICTED` and belong in the private operations/IP location selected by `PUBLIC_REPO_POLICY.md`;
+- a controlled design partner or existing client identity and any interaction/outcome/willingness-to-pay record still linked to that client are `CLIENT_CONFIDENTIAL` and remain only in the approved client data plane;
+- only deliberately de-identified/aggregated E3 learnings may be copied from client-linked observations into the private commercial/operations ledger, with their source boundary and evidence class still reconstructable without exposing the client record.
 
 ## Alternative landscape — launch hypotheses
 
@@ -92,6 +96,8 @@ An `INCONCLUSIVE` result may guide another experiment but cannot be used as evid
 
 Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second contrast metric) with its own comparator arms, commercial comparison metric, allocation, observation window/stopping point, per-arm minimum sample, direction and mutually exclusive support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
 
+For **Supplier track promotion specifically**, that E3 commercial-value gate is not an arbitrary Supplier-versus-no-offer comparison: its treatment arm is Supplier and its comparator arm is the primary **Care** track, using the **same pre-registered commercial-value outcome semantics** for both arms. The promotion conclusion must therefore show Supplier outperforming Care on the declared bounded commercial-value contrast; a Supplier-only absolute threshold cannot promote the secondary track while Care has stronger value evidence.
+
 ## First-10 acquisition hypotheses
 
 The “first 10” is a learning target, not a forecast or commitment. The initial comparisons are:
@@ -101,11 +107,11 @@ The “first 10” is a learning target, not a forecast or commitment. The initi
 | Warm domain introductions produce more qualified substantive conversations | Problem-triggered direct outreach | treatment qualified-conversation rate minus comparator qualified-conversation rate |
 | Applicability-grounded, problem-triggered outreach produces more qualified substantive conversations | Generic outcome-led outreach that makes no unsupported regulatory claim | treatment qualified-conversation rate minus comparator qualified-conversation rate |
 | Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | treatment qualified-next-step rate minus comparator qualified-next-step rate |
-| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | treatment qualified-next-step rate minus comparator qualified-next-step rate, plus a separate pre-registered E3 commercial-value comparison required for any track-promotion decision |
+| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | treatment qualified-next-step rate minus comparator qualified-next-step rate, plus a separate pre-registered Supplier-versus-Care E3 commercial-value contrast on the same outcome semantics required for any track-promotion decision |
 
 These comparisons do not have universal hard-coded thresholds because direction, thresholds, arm allocation, minimum samples and stopping point are part of each pre-registered experiment and must be frozen before observations. A missing/invalid rule makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
 
-Supplier remains secondary while tested. It is promoted only when the completed pre-registered supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately completed pre-registered E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence, interim metrics or anecdotal commercial observations can never promote the track.
+Supplier remains secondary while tested. It is promoted only when the completed pre-registered Supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately completed pre-registered Supplier-versus-Care E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence, interim metrics, Supplier-only absolute value evidence or anecdotal commercial observations can never promote the track.
 
 Do not scale a channel because it produces conversations; compare the pre-registered treatment-vs-comparator metric, ICP fit, burden, commercial evidence and learning quality.
 
@@ -127,17 +133,23 @@ For each channel/experiment, capture at minimum:
 - mechanical experiment outcome (`SUPPORTED`, `NOT_SUPPORTED`, `INCONCLUSIVE`) only when eligible for final evaluation;
 - dominant objection categories;
 - median/typical sales-cycle observations when enough data exists;
-- customer-acquisition effort/cost only in the restricted commercial record;
+- customer-acquisition effort/cost only in the appropriately restricted record;
 - date range and sample limitations.
 
 No rate is called validated when either arm's denominator/sample is too small to support the pre-registered decision rule.
 
 ## Interview / proposal / loss-reason capture
 
-Each substantive market interaction should produce a restricted record with:
+Each substantive market interaction produces an attributable restricted record, but its storage plane depends on the organization relationship:
+
+- for a non-client prospect, the record may live in the private operations/IP commercial store as `PROPRIETARY_RESTRICTED`;
+- for an existing client or controlled design partner, the attributable record is `CLIENT_CONFIDENTIAL` and remains in the approved client data plane; it is **not copied** into the operations/IP commercial store;
+- only a deliberately de-identified/aggregated E3 derivative may enter the commercial store from a client-linked interaction.
+
+The attributable source record captures as applicable:
 
 - interaction date and channel;
-- organization/prospect identity (restricted);
+- organization identity in its permitted storage plane;
 - role(s) interviewed;
 - ICP-fit signals and disqualifiers;
 - actual current alternative (MSP, consultant, SaaS, internal, none, other);
@@ -173,12 +185,12 @@ Do not create a new category for every anecdote; use notes for nuance and change
 ## Promotion rules
 
 - Care remains the primary launch track until a **completed** pre-registered E3 comparison supports a change.
-- Supplier remains secondary until both the completed pre-registered supplier-versus-Care acquisition experiment and its separately completed pre-registered E3 commercial-value gate are `SUPPORTED`.
+- Supplier remains secondary until both the completed pre-registered Supplier-versus-Care acquisition experiment and the separately completed pre-registered Supplier-versus-Care E3 commercial-value gate on the same outcome semantics are `SUPPORTED`.
 - Interim/provisional observations never authorize promotion.
 - Direct Cyberbeveiligingswet/NIS2 positioning requires explicit applicability basis; generic market urgency is insufficient.
 - A channel, ICP rule, objection response or offer becomes current strategy only after evidence is summarized and the bounded conclusion is intentionally adopted into `STRATEGY.md` / `POSITIONING.md`.
-- Detailed market records stay private; only deliberately public-safe aggregate learnings may flow back into this repository.
+- Detailed market records stay in their permitted private/client storage plane; only deliberately public-safe aggregate learnings may flow back into this repository.
 
 ## WP02 public-safe exit contribution
 
-This contract proves the launch hypotheses are falsifiable, comparative, pre-registered and protected against post-hoc/early-stopping promotion; Mission evidence classes cannot be silently substituted. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require the correct E3/E2/E4 evidence in the approved restricted locations.
+This contract proves the launch hypotheses are falsifiable, comparative, pre-registered and protected against post-hoc/early-stopping promotion; Mission evidence classes cannot be silently substituted. It does **not** prove market demand, channel performance, willingness-to-pay or validated economics. Those require the correct E3/E2/E4 evidence in the approved restricted/client locations.
