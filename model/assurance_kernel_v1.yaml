@@ -2,6 +2,7 @@ version: 1
 status: R2_WP01_CANDIDATE
 mission_gap: SS-R2-GAP-01
 semantic_projection_only: true
+mission_evidence_class: E1_SYNTHETIC
 as_of: '2026-09-02'
 note: Synthetic internally authored assurance-kernel fixture. No external standard
   text or real client data. This is a semantic test projection, not a persistence
