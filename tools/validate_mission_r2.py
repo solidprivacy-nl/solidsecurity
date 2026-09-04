@@ -44,8 +44,19 @@ for key in [
     require(sub.get(key) is True, f"proof substitution guard must remain true: {key}")
 
 trust = MODEL.get("professional_trust_domains", {})
-require(trust.get("product_change_assurance", {}).get("customer_assurance_qualification") is False,
-        "product/change B1 must not imply customer professional qualification")
+project_review = trust.get("product_change_assurance", {})
+require(project_review.get("mechanism") == "current_control_exact_candidate_review_contract",
+        "product/change review must delegate runtime mechanics to current central Control")
+require(project_review.get("exact_candidate_binding_required") is True,
+        "product/change review must retain exact-candidate binding")
+require(project_review.get("stale_review_after_candidate_movement_forbidden") is True,
+        "candidate movement must invalidate stale project-change review")
+require(project_review.get("external_independent_review_when_applicable_gate_requires") is True,
+        "external/independent review must remain mandatory when an applicable gate requires it")
+require(project_review.get("local_fixed_worker_topology_required") is False,
+        "Mission R2 must not require a duplicated local Control worker topology")
+require(project_review.get("customer_assurance_qualification") is False,
+        "product/change review must not imply customer professional qualification")
 require(trust.get("external_independent_assurance", {}).get("internal_review_is_equivalent") is False,
         "internal review must not equal external independent assurance")
 
@@ -115,10 +126,17 @@ for required in [
     "common_control_or_evidence_reused_across_multiple_obligations_without_duplicate_client_truth",
     "canonical_source_to_decision_traceability_is_reconstructable",
     "proof_ladder_and_ai_authority_boundaries_fail_closed",
+    "exact_head_ci_pass",
+    "fresh_exact_candidate_project_change_review_pass",
 ]:
-    require(required in wp01_exit, f"R2-WP01 missing executable SC04/common-control evidence: {required}")
+    require(required in wp01_exit, f"R2-WP01 missing executable/review evidence: {required}")
+require("independent_b1_pass" not in wp01_exit,
+        "R2-WP01 must not hard-code retired Control B1 lane semantics")
 
-wp03_exit = set(wps.get("R2-WP03", {}).get("exit_evidence", []))
+wp03 = wps.get("R2-WP03", {})
+require("distinction_project_change_review_vs_customer_professional_vs_external_assurance" in set(wp03.get("deliverables", [])),
+        "R2-WP03 must distinguish project-change review from customer/external assurance without worker-lane coupling")
+wp03_exit = set(wp03.get("exit_evidence", []))
 require(
     "verified_claims_fail_closed_until_all_applicable_competence_authority_independence_capacity_escalation_liability_insurance_contract_report_dpa_subprocessor_prerequisites_are_satisfied_and_reviewed" in wp03_exit,
     "R2-WP03 must fail-close customer VERIFIED until all professional/contract/data prerequisites are satisfied",
@@ -165,6 +183,7 @@ for required_phrase in [
     "database/project per customer as default",
     "bounded real design partner",
     "bottom-up unit-economics",
+    "fresh exact-candidate project-change review",
 ]:
     require(required_phrase.lower() in ROADMAP.lower(), f"roadmap missing R2 invariant: {required_phrase}")
 
@@ -174,6 +193,7 @@ for phrase in [
     "Professional trust model",
     "Materiality",
     "Applicability and tailoring doctrine",
+    "current governed Control architecture",
 ]:
     require(phrase.lower() in MISSION.lower(), f"Mission R2 missing required doctrine: {phrase}")
 
