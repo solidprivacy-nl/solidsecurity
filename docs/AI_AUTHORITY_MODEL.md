@@ -95,7 +95,7 @@ A control/workflow may require a stronger class. A weaker actual class never sub
 
 ### Capacity and loaded-cost assumption record
 
-R1–R4 capacity/cost prerequisites use one public-safe reference shape defined in `model/ai_authority.yaml`; the sensitive numeric assumptions themselves remain outside public Git in the approved restricted store.
+R1–R4 capacity/cost prerequisites use one public-safe reference shape defined in `model/ai_authority.yaml`. The underlying numeric capacity/cost values use the existing canonical `INTERNAL` data classification from `model/data_classification.yaml`, so they remain outside public Git; this does not introduce a second classification or storage tier.
 
 Each assumption record must carry:
 
@@ -105,7 +105,7 @@ Each assumption record must carry:
 - `evidence_status`;
 - Mission `mission_evidence_class`;
 - an attributable `calculation_reference`;
-- `restricted_record_ref` pointing to the restricted value/evidence record.
+- `restricted_record_ref` pointing to the non-public value/evidence record.
 
 The public repository must not contain the actual capacity or loaded-cost value merely to satisfy this gate. A missing reference, unit, evidence/status classification or calculation reference leaves the prerequisite unresolved; it does not default to satisfied.
 
