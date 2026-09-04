@@ -1,15 +1,17 @@
 # SolidSecurity Current State
 
-> **Snapshot only — never routing or execution authority.** Live execution state must be read from `market-predictions/control-plane@control-runtime-state` and current repository facts.
+> **Snapshot only — never routing or execution authority.** Live execution/cutover state must be read from the current canonical sources in `market-predictions/control-plane` and current repository/runtime facts.
 
 ## Canonical project status
 
 - Mission: **R2 / canonical**
 - Domain model: **M1 / canonical schema contract**
 - Control-managed: **yes**
-- Execution protocol: **CONTROL_AUTONOMY_V3_1**
+- Control runtime/protocol: **owned centrally; read fresh from current Control authority**
 - Local mission doctrine: `control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`
 - Active R2 sequence starts with `R2-WP01 — Executable assurance kernel`
+
+SolidSecurity does not mirror a Control version, worker topology, queue protocol or cutover phase in this file. A Control architecture change therefore cannot silently make this project snapshot authoritative or stale the Mission itself.
 
 ## Mission
 
@@ -47,16 +49,15 @@ The designed V1 direction is deliberately lean:
 
 This design does **not** authorize real-client data or production deployment.
 
-## Control V3.1 authority
+## Central Control boundary
 
-- one canonical queue in central Control runtime state;
-- one deterministic Control Kernel runtime writer;
-- semantic workers exactly A1 (`implementation_operations`) and B1 (`governance_release_assurance`);
-- no A2;
-- no semantic `PROJECT_INTEGRATION` task;
-- no direct semantic-worker writes to queue or canonical worker results;
-- no project-local intake/handover runtime plane;
-- no provider fallback;
+- central Control is the sole development-runtime authority; SolidSecurity creates no competing queue/state plane;
+- current Control runtime version, locks, scheduling, worker topology and integration state are external live facts and must be read fresh;
+- consequential project candidates retain exact candidate/head/base binding and fresh critical review;
+- external/independent exact-candidate review remains required whenever the current project or Control gate requires it;
+- stale review never follows a moved candidate;
+- no direct project worker writes to canonical Control state outside the current central contract;
+- no SolidSecurity-specific scheduler, intake/handover runtime plane or provider fallback;
 - `principal_manual_relay_count=0` remains the target/invariant.
 
 ## Authority boundaries
@@ -68,7 +69,7 @@ Current project authority does not by itself authorize:
 - customer-environment write/remediation access;
 - autonomous final legal/compliance/certification/risk-acceptance decisions;
 - certification claims;
-- bypass of independent assurance for consequential work.
+- bypass of a review/assurance gate that is currently applicable to a consequential change.
 
 ## Repository visibility
 
