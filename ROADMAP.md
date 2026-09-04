@@ -2,7 +2,7 @@
 
 ## Canonical status
 
-Mission R2 and M1 are canonical. The predecessor convergence step is complete. Active product work begins with **R2-01 / R2-WP01 — Executable assurance kernel** and remains governed by central Control Autonomy V3.1.
+Mission R2 and M1 are canonical. The predecessor convergence step is complete. Active product work begins with **R2-01 / R2-WP01 — Executable assurance kernel** and remains governed by the current central Control authority.
 
 The roadmap retires the highest-value uncertainty with the smallest coherent safe change.
 
@@ -16,8 +16,10 @@ Core rules:
 - controlled real-world learning before broad productization;
 - simplest safe architecture first;
 - one common-control backbone rather than framework silos;
-- deterministic validation where mechanical, independent B1 where consequence warrants it;
+- deterministic validation where mechanical, fresh exact-candidate project-change review where consequential, and external/independent review when the applicable gate requires it;
 - mission evidence, not issue closure, determines progress.
+
+SolidSecurity does not own or mirror the central Control runtime version, worker topology, queue protocol or cutover state. Those are live external governance facts.
 
 ## Preserved foundations
 
@@ -37,7 +39,7 @@ R2 preserves:
 
 ## R2-00 — Mission/M1 convergence — COMPLETE
 
-Authoritative evidence already exists that Mission R2 and M1 were governed and integrated. The M1 schema contract remains a contract, not a production migration.
+Mission R2 and M1 are the target canonical project truth of this convergence candidate. The M1 schema contract remains a contract, not a production migration.
 
 No future work may regress M1 or R2 back to candidate status merely because a successor workpackage is open.
 
@@ -62,7 +64,8 @@ Required proof:
 - material conflict blocks silent promotion;
 - evidence expiry cannot leave unsupported green state;
 - deterministic structured synthetic dossier rendering;
-- exact-head deterministic validation and independent B1.
+- exact-head deterministic validation;
+- fresh exact-candidate project-change review PASS, including external/independent review whenever the applicable project/Control gate requires it.
 
 Implementation rule: use existing M1 entities and simple Python/YAML validation. Do not create a rules engine, new database, service or framework-specific client truth model.
 
@@ -95,7 +98,7 @@ Do not create private infrastructure speculatively; create a separate private st
 
 Before customer-facing `VERIFIED`, every applicable competence, authority, independence, capacity, escalation, liability/insurance, contract/report-language and DPA/subprocessor prerequisite must be satisfied and appropriately reviewed.
 
-`project B1 != customer professional review != external independent assurance/certification`.
+`project-change review != customer professional review != external independent assurance/certification`.
 
 ---
 
@@ -181,7 +184,7 @@ Never:
 
 ## Capacity rule
 
-The roadmap is a priority system, not a commitment to build every option. Central Control V3.1 determines eligible work; semantic implementation capacity is intentionally one A1 lane and semantic assurance one B1 lane.
+The roadmap is a priority system, not a commitment to build every option. Central Control determines eligible work and current execution capacity; SolidSecurity does not encode a fixed lane count or worker-role topology locally.
 
 ## Repository visibility rule
 
