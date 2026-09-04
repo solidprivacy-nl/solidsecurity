@@ -1,51 +1,49 @@
 # SolidSecurity Assurance Boundary
 
-> Filename retained for stable references. This document is the current project-specific assurance boundary under Mission R2 and Control Autonomy V3.1; it is no longer a Foundation-V1 lifecycle contract.
+> Filename retained for stable references. This document is the current project-specific assurance boundary under Mission R2; it does not define or duplicate the central Control runtime implementation.
 
 ## Purpose
 
-Define the minimum separation between project implementation/change assurance, customer professional review and external independent assurance.
+Define the minimum separation between project implementation/change review, customer professional review and external independent assurance.
 
 ## Core rule
 
 SolidSecurity may use AI aggressively to reduce repetitive work, but credibility comes from traceable evidence, explicit uncertainty and qualified human judgment—not from presenting AI output as a verdict.
 
-## Project Worker A1 — `implementation_operations`
+## Project implementation/change review
 
-May research, draft, implement, test and repair only within current canonical task authority.
+A project implementation function may research, draft, implement, test and repair only within current governed authority.
 
-May not:
+It may not:
 
-- self-issue independent B1 PASS;
+- represent its own first-pass conclusion as sufficient review evidence for a consequential change;
 - represent a draft as certification/legal approval;
 - make autonomous final legal, regulatory, risk-acceptance or certification decisions;
 - ingest real client data before the explicit real-client gate;
 - connect/write to customer environments without separate authority;
-- write canonical Control queue/results directly.
+- bypass the current central Control runtime contract.
 
-## Project Worker B1 — `governance_release_assurance`
+For consequential project candidates, review is evidence-first and bound to the exact candidate/head/base and applicable acceptance criteria. The reviewer function must reconstruct the intended outcome and inspect authoritative repository/test/runtime evidence rather than relying on implementation claims.
 
-For consequential project candidates, B1 independently reconstructs intended outcome and inspects authoritative evidence rather than relying on A1 conclusions.
-
-B1 issues exactly one of:
+A project-change review verdict is exactly one of:
 
 - `PASS`
 - `FAIL`
 - `INDETERMINATE`
 
-B1 is read-only on the candidate and may not repair, merge, release, deploy or perform A1 work.
+Candidate movement invalidates stale review. `INDETERMINATE` fails closed. A PASS does not silently grant merge, release, deployment or customer authority when a separate current gate applies.
 
-Under Control Autonomy V3.1, A1/B1 start only from their own current canonical kernel claim and persist results only through kernel `RECORD`. Scheduler/chat invocation is not START_PROVEN.
+Central Control may perform fresh same-runner critical review or call an external exact-candidate reviewer according to its current governed architecture. When the SolidSecurity workpackage, risk, or current Control/repository policy requires external or organizationally independent review, that requirement remains mandatory; this project does not weaken it by naming a local worker lane.
 
 ## Customer professional review
 
-Project B1 is not a customer professional qualification. Customer-facing material conclusions require the competence, authority, independence, capacity, escalation and other prerequisites defined by the applicable review class.
+Project-change review is not a customer professional qualification. Customer-facing material conclusions require the competence, authority, independence, capacity, escalation and other prerequisites defined by the applicable review class.
 
 AI may prepare evidence and recommendations. It does not impersonate an external auditor, certification body, DPO/FG, CISO or lawyer.
 
 ## External independent assurance/certification
 
-Where a framework, regulator, certification scheme or service promise requires independent external assurance or formally recognized professional authority, that function remains external or separately qualified as required. Internal project B1/customer review is never silently relabeled as certification.
+Where a framework, regulator, certification scheme or service promise requires independent external assurance or formally recognized professional authority, that function remains external or separately qualified as required. Internal project/customer review is never silently relabeled as certification.
 
 ## Evidence principle
 
@@ -72,6 +70,8 @@ Unless separately authorized through the applicable R2 gate:
 - no autonomous final legal/compliance/risk/statutory decision;
 - no implication that verification guarantees absence of incidents.
 
-## Control V3.1 boundary
+## Central Control boundary
 
-Project assurance does not create a second runtime plane. Canonical Control uses one queue, one deterministic kernel writer, A1 and B1 only, no A2, no semantic `PROJECT_INTEGRATION` task, no provider fallback and relay target 0.
+Project assurance does not create a second runtime plane. SolidSecurity follows the current canonical central Control authority for scheduling, locks, queue mutation, runtime state and integration. Local project documentation must not freeze a Control version, worker topology, claim protocol or transport mechanism.
+
+Project invariants remain: exact-candidate binding, deterministic mechanical validation, fresh critical review, required external/independent review when applicable, stale-review invalidation, no runtime bypass, no provider fallback introduced locally and zero principal relay as the target.
