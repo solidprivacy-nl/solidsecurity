@@ -36,7 +36,7 @@ workpackages:
       - expiry_cannot_leave_unsupported_green_state
       - synthetic_dossier_renders_reproducibly
       - exact_head_ci_pass
-      - independent_b1_pass
+      - fresh_exact_candidate_project_change_review_pass
 
   R2-WP02:
     github_issue: 33
@@ -59,7 +59,7 @@ workpackages:
     operation: IMPLEMENTATION
     evidence_target: [E0_DESIGN]
     authority: {real_client_data: false, customer_verified_claims: false, legal_contract_approval: false}
-    deliverables: [customer_review_class_matrix, competence_and_credential_expectations, independence_rules, capacity_and_loaded_cost_model, external_escalation_path, distinction_product_b1_vs_customer_professional_vs_external_assurance, professional_business_liability_posture, contractual_scope_and_liability_limit_requirements, verified_report_language_boundary, breached_after_verification_response_posture, dpa_subprocessor_retention_deletion_requirements]
+    deliverables: [customer_review_class_matrix, competence_and_credential_expectations, independence_rules, capacity_and_loaded_cost_model, external_escalation_path, distinction_project_change_review_vs_customer_professional_vs_external_assurance, professional_business_liability_posture, contractual_scope_and_liability_limit_requirements, verified_report_language_boundary, breached_after_verification_response_posture, dpa_subprocessor_retention_deletion_requirements]
     exit_evidence:
       - every_customer_review_class_has_authority_and_competence_rule
       - internal_review_is_not_misrepresented_as_external_assurance
