@@ -929,6 +929,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     partial = deepcopy(model)
     partial["assessments"][-1]["state"] = "REVIEWED"
     partial["assessments"][-1]["assessed_at"] = "2026-09-01T11:01:00Z"
+    partial["assessments"][-1]["proposed_proof_level"] = "VERIFIED"
     partial["evidence_conflicts"][0] = {**partial["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic conflict resolved after evidence reconciliation","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
     partial["professional_reviews"].append({"review_id":"REV-SUPPLIER","assessment_id":"ASM-SUPPLIER","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","decision":"ACCEPT","reviewed_at":"2026-09-01T11:05:00Z"})
     partial["decisions"].append({"decision_id":"DEC-SUPPLIER","assessment_id":"ASM-SUPPLIER","review_id":"REV-SUPPLIER","assurance_state":"VERIFIED","authorized_by":"reviewer-02","authorized_actor_type":"HUMAN","effective_at":"2026-09-01T11:10:00Z"})
