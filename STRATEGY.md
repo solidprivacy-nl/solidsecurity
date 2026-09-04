@@ -149,7 +149,9 @@ Commercial learning must distinguish E0/E1 assumptions from E2/E3 measured custo
 
 ## 10. Professional trust
 
-`product/change B1 assurance != customer professional review != external independent assurance/certification`.
+`current-Control exact-candidate project/change review != customer professional review != external independent assurance/certification`.
+
+Project/change review follows the current central Control authority and preserves exact candidate/head/base binding. **candidate movement invalidates stale review evidence**; this strategy does not encode a fixed worker lane or role topology.
 
 Customer-facing review classes require explicit competence, independence, capacity, cost and escalation rules. Professional liability, contractual scope, report language and breach/incident posture must be resolved before customer-facing `VERIFIED` claims are used.
 

@@ -2,6 +2,8 @@ version: 1
 review: solidsecurity-review_claude
 reviewed_snapshot: "0300142"
 adoption_status: CURATED_NOT_WHOLESALE
+authority_status: HISTORICAL_PROVENANCE_ONLY
+current_authority_source: market-predictions/control-plane@main
 
 accepted:
   - id: REV-01
@@ -47,7 +49,7 @@ accepted:
 partially_accepted:
   - id: REV-P01
     finding: reduce_governance_overhead
-    decision: retain_A_B_for_consequential_changes_but_self_execute_mechanical_B0
+    decision: retain_risk_proportionate_fresh_exact_candidate_review_for_consequential_changes_without_fixed_worker_topology
   - id: REV-P02
     finding: make_repository_private_immediately
     decision: repository_IP_decision_is_mandatory_but_visibility_change_requires_repository_authority_and_deliberate_transition
@@ -60,17 +62,17 @@ partially_accepted:
 
 not_adopted:
   - id: REV-N01
-    finding: abandon_independent_A_B_governance_because_project_is_early
-    reason: consequential_semantic_security_authority_changes_still_benefit_from_independent_exact_head_review
+    finding: abandon_fresh_exact_candidate_review_for_consequential_changes_because_project_is_early
+    reason: consequential_semantic_security_authority_changes_still_benefit_from_fresh_exact_candidate_review_under_the_current_project_or_Control_gate
   - id: REV-N02
-    finding: infer_no_independent_foundation_assurance_from_single_GitHub_account
-    reason: project_change_assurance_identity_is_evidenced_separately_from_customer_facing_professional_independence; the_trust_domains_are_now_explicit
+    finding: infer_no_legitimate_project_change_review_from_single_GitHub_account
+    reason: project_change_review_evidence_is_separate_from_customer_facing_professional_independence; the_trust_domains_are_explicit
   - id: REV-N03
     finding: bypass_data_security_gates_to_reach_a_real_customer_faster
     reason: roadmap_moves_real_validation_earlier_without_lowering_real_client_authority_or_data_gates
 
 superseded_by_current_state:
   - finding: no_code_no_tests_no_ci
-    current_state: M1_candidate_contains_machine_readable_model_SQL_contract_validator_and_green_CI
+    current_state: historical_snapshot_was_superseded_by_machine_readable_models_contracts_validators_and_CI
   - finding: foundation_assurance_contract_was_not_followed
-    current_state: independent_blind_first_exact_head_PASS_exists_for_foundation_PR3
+    current_state: historical_snapshot_was_superseded_by_later_exact_candidate_review_evidence
