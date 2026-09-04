@@ -10,7 +10,7 @@ Pricing should reflect actual scope, evidence burden, review intensity, cadence 
 
 Earlier repository versions contained indicative price ranges. They were explicitly hypotheses, were not based on measured real-client workload and are **not treated as validated R2 pricing**.
 
-R2 deliberately does not publish a new price list before bottom-up economics and real design-partner evidence exist. Future detailed pricing/economics are commercially sensitive operating information and should be private/restricted by default.
+R2 deliberately does not publish a new price list before bottom-up economics and real design-partner evidence exist. Future detailed pricing/economics are commercially sensitive operating information and are stored in the private operations/IP location selected by `PUBLIC_REPO_POLICY.md`.
 
 ## Offer hypotheses
 
@@ -37,6 +37,7 @@ Every commercial package hypothesis must be decomposed into measurable work unit
 Required fields per workflow step:
 
 - `workflow_step`;
+- `phase`: onboarding or recurring;
 - `trigger_or_cadence`;
 - `operator_minutes`;
 - `professional_review_minutes`;
@@ -52,7 +53,34 @@ Required fields per workflow step:
 - `rework_or_exception_rate`;
 - `fixed_provider_tooling_cost_allocation`;
 - `variable_provider_tooling_cost`;
-- `expected_frequency_per_month_or_year`.
+- `expected_frequency_per_month_or_year`;
+- evidence label (`HYPOTHESIS`, `MEASURED_PILOT`, or bounded `VALIDATED`).
+
+### Calculation contract
+
+The calculation method is intentionally conventional and auditable:
+
+`operator_cost = operator_minutes / 60 * loaded_operator_rate`
+
+`professional_cost = professional_review_minutes / 60 * loaded_professional_rate`
+
+`step_delivery_cost = (operator_cost + professional_cost + external_specialist_cost + fixed_provider_tooling_cost_allocation + variable_provider_tooling_cost) * expected_frequency`
+
+`onboarding_delivery_cost = sum(onboarding step_delivery_cost)`
+
+`recurring_period_delivery_cost = sum(recurring step_delivery_cost)`
+
+For a package-price hypothesis `P`:
+
+`contribution_before_overhead = P - recurring_period_delivery_cost`
+
+`gross_margin_sensitivity = contribution_before_overhead / P`
+
+`onboarding_payback_period = onboarding_delivery_cost / positive recurring contribution per equivalent period`
+
+`professional_client_capacity = available professional minutes per period / professional minutes required per client per period`
+
+These are calculation definitions, not published commercial values. Rates, minutes, package-price hypotheses, margins, named provider costs and measured client observations are `PROPRIETARY_RESTRICTED`.
 
 Derived outputs:
 
@@ -60,9 +88,9 @@ Derived outputs:
 - recurring monthly/annual delivery cost;
 - professional minutes per client/month;
 - customer minutes per onboarding/recurring cycle;
-- gross-margin sensitivity by package price;
+- gross-margin sensitivity by package-price hypothesis;
 - onboarding payback period;
-- revenue/client capacity per professional FTE;
+- client capacity per professional FTE/minute envelope;
 - margin impact of external review/assurance requirements.
 
 ## Evidence rules
@@ -78,6 +106,22 @@ Actual time, follow-up, evidence availability, review burden and customer effort
 ### Validated commercial assumption
 
 A price, workload or capacity assumption may be labeled `VALIDATED` only when the evidence class and sample are stated and the conclusion does not generalize beyond what the measured data supports.
+
+## Storage and source-of-truth boundary
+
+This public document is the **calculation and evidence-label contract**, not the confidential value ledger.
+
+The restricted economics ledger must retain, for every value:
+
+- value and unit;
+- workflow/package context;
+- evidence label;
+- source/date or measurement period;
+- sample/boundary;
+- last review date;
+- supersession history where the assumption changes.
+
+Do not store the restricted ledger, detailed rates, prices, margins or identifiable customer/prospect economics in this public repository. Until the approved private operations/IP location exists, those values remain unrecorded here rather than being leaked for convenience.
 
 ## Commercial optimization order
 
@@ -111,10 +155,12 @@ Track at minimum:
 
 Before any new price list is treated as commercial source of truth:
 
-1. the bottom-up model exists;
+1. the bottom-up model is populated with identified evidence labels;
 2. professional trust/cost assumptions are explicit;
 3. at least one bounded real engagement supplies measured workload evidence;
 4. hypothesis vs measured vs validated values are separated;
 5. onboarding payback and recurring capacity are visible;
 6. pricing has an identified ICP/scope boundary;
-7. detailed internal economics are stored in an appropriate private/restricted location.
+7. detailed internal economics are stored in the approved private/restricted location.
+
+A public-safe formula or empty template does not satisfy this gate by itself.
