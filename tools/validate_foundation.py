@@ -201,7 +201,7 @@ if isinstance(customer_reviews, dict):
             "independence_requirement": "internal_qualified_allowed_only_without_material_conflict",
             "capacity_assumption_required": True,
             "loaded_cost_assumption_required": True,
-            "escalation": "R3_when_independence_or_material_conflict_requires_separation",
+            "escalation": "reassign_or_R3_when_competence_credentials_independence_or_material_conflict_insufficient",
         },
         "R3": {
             "human_reviewer_required": True,
@@ -212,7 +212,7 @@ if isinstance(customer_reviews, dict):
             "independence_requirement": "independent_internal_or_external",
             "capacity_assumption_required": True,
             "loaded_cost_assumption_required": True,
-            "escalation": "R4_when_external_authority_or_certification_is_required",
+            "escalation": "reassign_independent_reviewer_or_R4_when_competence_credentials_or_external_authority_requirements_insufficient",
         },
         "R4": {
             "human_reviewer_required": True,
