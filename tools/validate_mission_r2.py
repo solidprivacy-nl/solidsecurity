@@ -121,6 +121,37 @@ for wp_id, issue_no in expected_issues.items():
     require(wps.get(wp_id, {}).get("github_issue") == issue_no,
             f"{wp_id} must remain bound to GitHub issue #{issue_no}")
 
+expected_authority = {
+    "R2-WP01": {
+        "real_client_data": False,
+        "production_deployment": False,
+        "final_legal_compliance_verdict": False,
+    },
+    "R2-WP02": {
+        "real_client_data": False,
+        "production_deployment": False,
+        "pricing_commitment": False,
+    },
+    "R2-WP03": {
+        "real_client_data": False,
+        "customer_verified_claims": False,
+        "legal_contract_approval": False,
+    },
+    "R2-WP04": {
+        "real_client_data": "PRINCIPAL_EXPLICIT_GATE_REQUIRED",
+        "production_scale": False,
+        "customer_environment_write": False,
+        "final_legal_compliance_verdict": False,
+    },
+    "R2-WP05": {
+        "production_deployment": "SEPARATE_GATE_REQUIRED",
+        "real_client_expansion": "SEPARATE_GATE_REQUIRED",
+    },
+}
+for wp_id, authority in expected_authority.items():
+    require(wps.get(wp_id, {}).get("authority") == authority,
+            f"{wp_id} authority boundary drifted from the governed R2 contract")
+
 wp01_exit = set(wps.get("R2-WP01", {}).get("exit_evidence", []))
 for required in [
     "common_control_or_evidence_reused_across_multiple_obligations_without_duplicate_client_truth",
