@@ -55,7 +55,7 @@ Required fields per workflow step:
 - `variable_provider_tooling_cost`;
 - for recurring rows, `expected_occurrences` and `cadence_period_months`;
 - `evidence_status` (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`);
-- `mission_evidence_class` (`E0_DESIGN`, `E2_CONTROLLED_REAL_CLIENT`, `E3_MARKET_COMMERCIAL`, or an explicitly justified combination).
+- `mission_evidence_class`: one or more canonical Mission classes from `E0_DESIGN`, `E1_SYNTHETIC`, `E2_CONTROLLED_REAL_CLIENT`, `E3_MARKET_COMMERCIAL`, `E4_REPEATED_OPERATIONAL`, but only where the underlying observation actually proves that class.
 
 Required package-level revenue fields:
 
@@ -82,7 +82,7 @@ Revenue mode must also match the package's workflow phases:
 
 A package with a mismatched revenue mode/workflow shape is invalid. Recurring work can therefore never disappear from cost calculations merely because a package was labeled `ONE_TIME`, and a recurring price can never produce a fictitious 100% margin when no recurring work exists.
 
-`evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence.
+`evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence, and repeated operational evidence is not automatically market evidence.
 
 ### Calculation contract
 
@@ -147,7 +147,7 @@ These are calculation definitions, not published commercial values. Classificati
 
 - identifiable real-client measurements (including client-linked minutes, workload, review burden, costs or outcomes) are `CLIENT_CONFIDENTIAL` and remain only in the approved client data plane;
 - named prospect/proposal/channel observations, internal loaded rates, package-price hypotheses, margins, named provider costs and de-identified/aggregated operating economics are `PROPRIETARY_RESTRICTED` and belong in the private operations/IP location;
-- public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and disclose no restricted pricing or margin assumptions.
+- public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN` or, for actually timed synthetic runs, `E1_SYNTHETIC`, contain no client/prospect identity and disclose no restricted pricing or margin assumptions.
 
 Derived outputs:
 
@@ -163,9 +163,13 @@ Derived outputs:
 
 ## Evidence rules
 
-### Before real delivery
+### Design assumptions
 
-Synthetic/model measurements may be used for scenario planning only and must be marked `HYPOTHESIS` with `mission_evidence_class: E0_DESIGN`.
+Untimed design/model assumptions are `HYPOTHESIS` with `mission_evidence_class: E0_DESIGN`.
+
+### Measured synthetic workflow
+
+Actually executed/timed synthetic workflows are represented as `HYPOTHESIS` or another appropriately bounded maturity status with `mission_evidence_class: E1_SYNTHETIC`. E1 may improve the mechanics or workload estimate but cannot substitute for E2 real-client delivery, E3 market/commercial proof or E4 repeated governed operations.
 
 ### Market observation
 
@@ -177,9 +181,13 @@ Actual delivery time, follow-up, evidence availability, review burden and custom
 
 Commercial observations arising during a controlled design partner, such as willingness-to-pay or proposal outcome, are E3 only when separately attributable commercial evidence supports that conclusion. A record may cite both E2 and E3 only when it preserves the distinct underlying observations; E2 workload cannot substitute for E3 market proof.
 
+### Repeated governed operations
+
+Repeated governed delivery cycles may support `mission_evidence_class: E4_REPEATED_OPERATIONAL` for recurring workload, capacity, reliability and margin behavior when the repeated-operation criteria are actually met. E4 strengthens operational confidence; it does not itself prove market demand or willingness-to-pay, which remain E3 claims.
+
 ### Validated bounded commercial assumption
 
-A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the supporting Mission evidence class(es), sample and scope are stated and the conclusion does not generalize beyond what the evidence supports.
+A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the supporting Mission evidence class(es), sample and scope are stated and the conclusion does not generalize beyond what the evidence supports. The retained class must describe the proof actually obtained; E1, E2, E3 and E4 are not interchangeable.
 
 ## Storage and source-of-truth boundary
 
@@ -200,7 +208,7 @@ The private operations/IP economics ledger may retain only non-client-confidenti
 
 Identifiable client measurements are never copied into that ledger: they remain `CLIENT_CONFIDENTIAL` in the approved client data plane. Only a deliberately de-identified/aggregated derived value may enter the private operations/IP economics ledger when its source boundary and evidence class remain reconstructable without exposing the client record.
 
-Do not store the restricted ledger, detailed internal rates, price hypotheses, margins, identifiable client/prospect measurements or other commercially sensitive operating intelligence in this public repository. Public-safe synthetic E0 examples remain permitted under `PUBLIC_REPO_POLICY.md` and do not become restricted merely because they contain a minute estimate.
+Do not store the restricted ledger, detailed internal rates, price hypotheses, margins, identifiable client/prospect measurements or other commercially sensitive operating intelligence in this public repository. Public-safe synthetic E0/E1 examples remain permitted under `PUBLIC_REPO_POLICY.md` and do not become restricted merely because they contain a minute estimate.
 
 ## Commercial optimization order
 
@@ -234,11 +242,11 @@ Track at minimum:
 
 Before any new price list is treated as commercial source of truth:
 
-1. the bottom-up model is populated with identified evidence status and Mission evidence class;
+1. the bottom-up model is populated with identified evidence status and canonical Mission evidence class;
 2. professional trust/cost assumptions are explicit;
 3. at least one bounded real engagement supplies measured E2 workload evidence;
-4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E2 workload;
-5. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
+4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E1/E2/E4 workload;
+5. hypothesis, observed-market, measured-pilot, repeated-operational and validated-bounded values remain distinguishable by their retained evidence metadata;
 6. the declared revenue mode satisfies its mutually exclusive price invariants **and** its workflow-phase shape; all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
 7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
 8. pricing has an identified ICP/scope boundary;
