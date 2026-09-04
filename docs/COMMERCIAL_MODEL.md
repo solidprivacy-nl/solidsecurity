@@ -57,6 +57,15 @@ Required fields per workflow step:
 - `evidence_status` (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`);
 - `mission_evidence_class` (`E0_DESIGN`, `E2_CONTROLLED_REAL_CLIENT`, `E3_MARKET_COMMERCIAL`, or an explicitly justified combination).
 
+Required package-level revenue fields:
+
+- `revenue_mode`: `ONE_TIME`, `RECURRING`, or `UPFRONT_PLUS_RECURRING`;
+- `upfront_price_hypothesis`: the one-time package price or onboarding/upfront fee; `0` when no upfront revenue is assumed;
+- `recurring_price_hypothesis`: required only when recurring revenue exists;
+- `recurring_price_period_months`: positive whenever recurring revenue exists.
+
+For `ONE_TIME`, the full package price is represented by `upfront_price_hypothesis` and no recurring revenue/margin/payback output is calculated. For `RECURRING`, `upfront_price_hypothesis` may be `0`; onboarding cost is then recovered, if at all, from recurring contribution. `UPFRONT_PLUS_RECURRING` keeps both revenue streams explicit.
+
 `evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence.
 
 ### Calculation contract
@@ -77,6 +86,12 @@ Onboarding rows are one-time work units; repeated onboarding actions are represe
 
 `onboarding_delivery_cost = sum(onboarding unit_step_cost)`
 
+`upfront_contribution_before_overhead = upfront_price_hypothesis - onboarding_delivery_cost`
+
+`upfront_gross_margin_sensitivity = upfront_contribution_before_overhead / upfront_price_hypothesis` when `upfront_price_hypothesis > 0`.
+
+`unrecovered_onboarding_cost = max(0, onboarding_delivery_cost - upfront_price_hypothesis)`
+
 For each recurring row:
 
 `monthly_frequency = expected_occurrences / cadence_period_months`
@@ -87,32 +102,35 @@ For each recurring row:
 
 `recurring_customer_minutes_per_month = sum(customer_minutes * monthly_frequency)`
 
-Every package-price hypothesis must declare its price period in months:
+For a package with recurring revenue:
 
-`P_month = package_price_hypothesis / package_price_period_months`
+`recurring_price_month = recurring_price_hypothesis / recurring_price_period_months`
 
-`monthly_contribution_before_overhead = P_month - recurring_monthly_delivery_cost`
+`monthly_recurring_contribution_before_overhead = recurring_price_month - recurring_monthly_delivery_cost`
 
-`gross_margin_sensitivity = monthly_contribution_before_overhead / P_month`
+`recurring_gross_margin_sensitivity = monthly_recurring_contribution_before_overhead / recurring_price_month`
 
-`onboarding_payback_months = onboarding_delivery_cost / positive monthly_contribution_before_overhead`
+`onboarding_payback_months = unrecovered_onboarding_cost / positive monthly_recurring_contribution_before_overhead`
+
+For a `ONE_TIME` package, recurring margin and onboarding-payback-in-months are `NOT_APPLICABLE`; its economics are represented by the upfront contribution/margin against the actual onboarding/one-time delivery cost.
 
 `recurring_professional_minutes_per_client_month = sum(professional_review_minutes * monthly_frequency)`
 
 `professional_client_capacity = available_professional_minutes_per_month / recurring_professional_minutes_per_client_month`
 
-`expected_occurrences`, `cadence_period_months` and `package_price_period_months` must be positive. This prevents monthly, quarterly and annual amounts from being added without normalization.
+`expected_occurrences`, `cadence_period_months` and `recurring_price_period_months` must be positive whenever their recurring terms apply. Price hypotheses are non-negative. This prevents one-time revenue from being treated as recurring revenue and prevents monthly, quarterly and annual amounts from being added without normalization.
 
 These are calculation definitions, not published commercial values. Real-client/prospect minutes, internal loaded rates, package-price hypotheses, margins, named provider costs and identifiable measured commercial observations are `PROPRIETARY_RESTRICTED`. Public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and do not disclose restricted pricing or margin assumptions.
 
 Derived outputs:
 
-- onboarding delivery cost;
-- recurring monthly delivery cost;
+- onboarding/one-time delivery cost;
+- upfront contribution and upfront gross-margin sensitivity where an upfront/one-time price exists;
+- recurring monthly delivery cost where recurring service exists;
+- recurring monthly contribution and gross-margin sensitivity where recurring revenue exists;
+- unrecovered onboarding cost and recurring-payback months where applicable;
 - professional minutes per client/month;
 - customer minutes per onboarding and recurring month;
-- gross-margin sensitivity by monthly-normalized package-price hypothesis;
-- onboarding payback in months;
 - client capacity per professional monthly minute envelope;
 - margin impact of external review/assurance requirements.
 
@@ -145,6 +163,7 @@ The restricted economics ledger must retain, for every value:
 - value and unit;
 - workflow/package context;
 - normalized model period where applicable;
+- revenue mode and whether price is upfront or recurring;
 - `evidence_status`;
 - `mission_evidence_class`;
 - source/date or measurement period;
@@ -191,8 +210,8 @@ Before any new price list is treated as commercial source of truth:
 3. at least one bounded real engagement supplies measured E2 workload evidence;
 4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E2 workload;
 5. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
-6. all recurring costs and package prices are normalized to the declared monthly model period before margin/payback calculations;
-7. onboarding payback and recurring capacity are visible;
+6. one-time/upfront revenue is separated from recurring revenue and all recurring costs/prices are normalized to the declared monthly model period before margin/payback calculations;
+7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback and recurring capacity are visible;
 8. pricing has an identified ICP/scope boundary;
 9. detailed internal economics are stored in the approved private/restricted location.
 
