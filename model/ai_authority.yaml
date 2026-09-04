@@ -83,7 +83,7 @@ customer_professional_review_classes:
     loaded_cost_assumption_required: true
     escalation: external_authority_certification_body_or_regulator
 professional_review_assumption_record_contract:
-  sensitive_values_storage: PROPRIETARY_RESTRICTED
+  value_data_classification: INTERNAL
   public_repo_values_prohibited: true
   required_fields:
     - review_class
@@ -110,9 +110,9 @@ professional_review_assumption_record_contract:
     - E3
   rule: >-
     R1-R4 capacity and loaded-cost prerequisites are satisfied only by an attributable record
-    using this shape. The numeric value remains in the approved restricted store and is referenced
-    by restricted_record_ref; public Git records only the schema, status/classification metadata,
-    unit and calculation reference.
+    using this shape. The numeric value is INTERNAL under canonical data classification and remains
+    outside public Git, referenced by restricted_record_ref; public Git records only the schema,
+    status/classification metadata, unit and calculation reference.
 trust_domain_separation:
   product_change_b1_is_customer_professional_review: false
   customer_professional_review_is_external_independent_assurance: false
