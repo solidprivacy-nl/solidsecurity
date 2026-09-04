@@ -89,8 +89,8 @@ The permitted claim classes below reuse the canonical identifiers from `model/cl
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | R0 | No human required; mechanical transformation only | Prohibited | C0, C1, C2 | Mechanical operation only; no professional judgment | N/A | No professional capacity/cost requirement | R1+ when work becomes non-mechanical/material |
 | R1 | Human operational/sample reviewer | Prohibited | C0, C1, C2 | Trained internal operator for the defined process; credentials documented if the process requires them | Not independent assurance | Capacity and loaded-cost assumption required | R2 for material professional judgment |
-| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence recorded; applicable credential expectation documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent/credential-satisfying reviewer, or escalate to R3 when competence, credentials, independence or material-conflict separation is insufficient |
-| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence and applicable credentials recorded | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent independent reviewer, or escalate to R4 when competence/credentials remain insufficient or external authority/certification is required |
+| R2 | Qualified human professional | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence must be sufficient; every applicable credential must be documented and satisfied | Internal qualified review only where no material conflict compromises the review | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent/credential-satisfying reviewer, or escalate to R3 when competence, credentials, independence or material-conflict separation is insufficient |
+| R3 | Qualified independent reviewer | Permitted only after the complete customer-`VERIFIED` gate passes | C0, C1, C2, C3 | Scope competence must be sufficient and every applicable credential satisfied | Independent internal or external reviewer, separated from material design/operation/decision being assured | Capacity confirmed; loaded-cost assumption recorded | Reassign to a competent independent reviewer, or escalate to R4 when competence/credentials remain insufficient or external authority/certification is required |
 | R4 | External authority/certification-body/regulator dependent routing | Internal authority is insufficient; external-authority outcome governs | C0, C1, C2, C3 | External authority's competence/credential rules | External authority | Capacity and loaded-cost assumptions are required | External authority/certification body/regulator |
 
 Insufficient competence or unmet applicable credentials are blockers, not softer review-quality concerns. They leave the prerequisite unresolved and require reassignment/escalation; they can never be waived merely because independence is otherwise acceptable.
@@ -118,7 +118,7 @@ Type-specific metadata is deliberately minimal:
 - `reviewer_capacity` uses `professional_minutes_per_month` and needs no additional public field;
 - `loaded_cost` uses `currency_per_professional_hour` and additionally requires `currency_code` using ISO 4217 so a rate is not ambiguous across currencies.
 
-The public-safe contract shape is exact. It contains no numeric assumption `value`, embedded assumption-record collection, or alternative public value field. Adding such a field is a validation failure. A missing restricted reference, unit, status/evidence classification, calculation reference or required currency code leaves the prerequisite unresolved; it does not default to satisfied.
+The public-safe contract shape is exact. It contains no numeric assumption `value`, embedded assumption-record collection, alternative public value field, or sibling top-level assumption-record container. Adding any such top-level container or changing the governed top-level shape is a validation failure. A missing restricted reference, unit, status/evidence classification, calculation reference or required currency code leaves the prerequisite unresolved; it does not default to satisfied.
 
 ## Customer `VERIFIED` fail-closed gate
 
@@ -127,8 +127,8 @@ WP03 defines readiness requirements but **does not enable customer-facing `VERIF
 Before a customer-facing `VERIFIED` state can ever be created, every applicable prerequisite must be recorded as satisfied:
 
 - required review class;
-- reviewer identity and scope competence;
-- applicable credential expectation;
+- reviewer identity **and sufficient scope competence**;
+- applicable credential **satisfied, or explicitly not applicable**;
 - independence requirement;
 - reviewer capacity;
 - loaded-cost assumption;
@@ -141,7 +141,7 @@ Before a customer-facing `VERIFIED` state can ever be created, every applicable 
 - subprocessor review;
 - retention/deletion schedule.
 
-Missing, unknown, expired or unresolved prerequisites fail closed to `NEEDS_REVIEW`; they never default to `VERIFIED`.
+Merely recording that competence is insufficient, or documenting an applicable but unmet credential, does not satisfy the gate. Missing, unknown, expired, insufficient or unresolved prerequisites fail closed to `NEEDS_REVIEW`; they never default to `VERIFIED`.
 
 The legal/insurance/contract prerequisites are readiness items for qualified external review. This workpackage does not approve legal terms, declare insurance coverage adequate, or create customer authority.
 
