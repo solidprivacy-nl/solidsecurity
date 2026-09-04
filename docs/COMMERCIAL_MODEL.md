@@ -54,7 +54,7 @@ Required fields per workflow step:
 - `fixed_provider_tooling_cost_allocation`;
 - `variable_provider_tooling_cost`;
 - `expected_frequency_per_month_or_year`;
-- evidence label (`HYPOTHESIS`, `MEASURED_PILOT`, or bounded `VALIDATED`).
+- evidence label (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`).
 
 ### Calculation contract
 
@@ -99,13 +99,17 @@ Derived outputs:
 
 Synthetic/model measurements may be used for scenario planning only and must be marked `HYPOTHESIS`.
 
+### Market observation
+
+Real market-interaction observations that are not controlled pilot measurements are labeled `OBSERVED_MARKET`; they do not become pricing facts merely because a prospect stated or accepted a number.
+
 ### Controlled real design partner
 
 Actual time, follow-up, evidence availability, review burden and customer effort are captured as `MEASURED_PILOT` for the bounded engagement.
 
-### Validated commercial assumption
+### Validated bounded commercial assumption
 
-A price, workload or capacity assumption may be labeled `VALIDATED` only when the evidence class and sample are stated and the conclusion does not generalize beyond what the measured data supports.
+A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the evidence class, sample and scope are stated and the conclusion does not generalize beyond what the measured data supports.
 
 ## Storage and source-of-truth boundary
 
@@ -158,7 +162,7 @@ Before any new price list is treated as commercial source of truth:
 1. the bottom-up model is populated with identified evidence labels;
 2. professional trust/cost assumptions are explicit;
 3. at least one bounded real engagement supplies measured workload evidence;
-4. hypothesis vs measured vs validated values are separated;
+4. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
 5. onboarding payback and recurring capacity are visible;
 6. pricing has an identified ICP/scope boundary;
 7. detailed internal economics are stored in the approved private/restricted location.
