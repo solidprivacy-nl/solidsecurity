@@ -55,7 +55,11 @@ proof_substitution_rules:
 
 professional_trust_domains:
   product_change_assurance:
-    mechanism: control_autonomy_v3_1_a1_b1_exact_candidate
+    mechanism: current_control_exact_candidate_review_contract
+    exact_candidate_binding_required: true
+    stale_review_after_candidate_movement_forbidden: true
+    external_independent_review_when_applicable_gate_requires: true
+    local_fixed_worker_topology_required: false
     customer_assurance_qualification: false
   customer_professional_review:
     requires:
