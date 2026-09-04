@@ -209,6 +209,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(item.get("source_framework_version") == source.get("version"), f"applicability {applicability_id} source framework version mismatch")
         require(isinstance(item.get("rationale"), str) and bool(item.get("rationale")), f"applicability {applicability_id} requires rationale")
         require(item.get("proposer_actor_type") in {"AI", "HUMAN"}, f"applicability {applicability_id} proposer actor type invalid")
+        require(isinstance(item.get("proposer_id"), str) and bool(item.get("proposer_id")), f"applicability {applicability_id} requires proposer identity")
         required_class = item.get("required_review_class")
         actual_class = item.get("review_class")
         require(required_class in review_classes, f"applicability {applicability_id} required review class invalid")
@@ -233,6 +234,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     for implementation_id, implementation in implementations.items():
         require(implementation.get("control_id") in controls, f"implementation {implementation_id} references control outside canonical control_scope")
         require(implementation.get("scope_id") in scopes, f"implementation {implementation_id} references unknown scope")
+        require(implementation.get("implementation_status") in {"DESIGNED", "OPERATING"}, f"implementation {implementation_id} has invalid implementation_status")
         if implementation.get("source_of_claim") == "generated_policy":
             require(implementation.get("implementation_status") == "DESIGNED", f"generated policy {implementation_id} must remain DESIGNED")
     for policy_id, policy in validity_policies.items():
@@ -413,6 +415,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             review = reviews[review_id]
             implementation = implementations.get(assessment.get("implementation_id"), {})
             require(implementation.get("source_of_claim") != "generated_policy", f"decision {decision_id} cannot promote generated-policy implementation")
+            require(implementation.get("implementation_status") == "OPERATING", f"VERIFIED decision {decision_id} requires OPERATING implementation")
             require(review.get("assessment_id") == assessment_id, f"decision {decision_id} review/assessment mismatch")
             require(review.get("decision") == "ACCEPT", f"decision {decision_id} requires an accepted professional review")
             require(review.get("reviewer_actor_type") == "HUMAN", f"decision {decision_id} requires human professional review")
@@ -429,6 +432,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             for evidence_id in _string_list(assessment.get("evidence_ids"), f"assessment {assessment_id} evidence_ids", errors):
                 item = evidence.get(evidence_id, {})
                 require(_evidence_valid_at(item, as_of), f"assurance decision {decision_id} relies on evidence {evidence_id} not valid at dossier as_of")
+                if review_time is not None:
+                    require(_evidence_valid_at(item, review_time.date()), f"professional review {review_id} relies on evidence {evidence_id} not valid at review time")
+                if effective_at is not None:
+                    require(_evidence_valid_at(item, effective_at.date()), f"decision {decision_id} relies on evidence {evidence_id} not valid at decision time")
                 capture_time = evidence_capture_times.get(evidence_id)
                 if capture_time is not None and review_time is not None:
                     require(capture_time <= review_time, f"professional review {review_id} predates relied-on evidence capture {evidence_id}")
@@ -565,7 +572,12 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].update({"review_class": "R1"}), "actual review class is below required review class")
     expect(lambda v: v["applicability_decisions"][0].update({"review_decision": "REJECT"}), "requires explicit accepted review decision")
     expect(lambda v: v["applicability_decisions"][0].update({"reviewer_actor_type": "AI"}), "requires human review authority")
+    expect(lambda v: v["applicability_decisions"][0].pop("proposer_id"), "requires proposer identity")
     expect(lambda v: v["applicability_decisions"][0].pop("reevaluation_trigger"), "requires reevaluation trigger")
+    expect(lambda v: v["client_implementations"][0].update({"implementation_status": "UNKNOWN"}), "invalid implementation_status")
+    expect(lambda v: v["client_implementations"][0].update({"implementation_status": "DESIGNED"}), "requires OPERATING implementation")
+    expect(lambda v: v["evidence"][0].update({"valid_from": "2026-09-02", "expires_at": "2026-12-31"}), "not valid at review time")
+    expect(lambda v: (v["evidence"][0].update({"expires_at": "2026-09-01"}), v["decisions"][0].update({"effective_at": "2026-09-02T10:05:00Z"})), "not valid at decision time")
     expect(lambda v: v["professional_reviews"][0].update({"reviewed_at": "not-a-timestamp"}), "reviewed_at must be a timezone-aware ISO timestamp")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-01T09:59:00Z"}), "must not precede its professional review")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}), "must not occur after dossier as_of")
