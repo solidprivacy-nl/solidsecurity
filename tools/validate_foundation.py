@@ -36,8 +36,9 @@ def require(condition: bool, message: str) -> None:
 
 
 def forbidden_public_assumption_paths(value: object, path: str = "ai_authority") -> list[str]:
-    """Find embedded assumption record/value payloads outside the one public-safe contract."""
+    """Find capacity/cost assumption payloads outside the one public-safe contract."""
     found: list[str] = []
+    allowed_boolean_flags = {"capacity_assumption_required", "loaded_cost_assumption_required"}
     if isinstance(value, dict):
         for key, child in value.items():
             child_path = f"{path}.{key}"
@@ -46,7 +47,11 @@ def forbidden_public_assumption_paths(value: object, path: str = "ai_authority")
                 # permitted public representation of professional capacity/cost assumptions.
                 continue
             normalized = str(key).lower()
-            if normalized == "value" or ("assumption" in normalized and ("record" in normalized or "value" in normalized)):
+            if (
+                normalized == "value"
+                or normalized in {"reviewer_capacity", "loaded_cost"}
+                or ("assumption" in normalized and normalized not in allowed_boolean_flags)
+            ):
                 found.append(child_path)
             found.extend(forbidden_public_assumption_paths(child, child_path))
     elif isinstance(value, list):
@@ -69,7 +74,7 @@ claim_doc = load_yaml("claim_vocabulary.yaml")
 mission_doc = load_yaml("mission_operating_model_r2.yaml")
 
 # The public AI-authority document has one exact top-level contract. In particular,
-# sibling assumption-record/value containers are forbidden: restricted numeric values
+# sibling assumption/capacity/cost payloads are forbidden: restricted numeric values
 # are referenced from the public-safe contract rather than embedded elsewhere in this file.
 expected_ai_top_level_keys = {
     "version",
@@ -85,7 +90,7 @@ require(isinstance(ai_doc, dict) and set(ai_doc) == expected_ai_top_level_keys,
         "ai_authority.yaml must use the exact public-safe top-level contract; embedded/sibling assumption records are prohibited")
 forbidden_assumption_paths = forbidden_public_assumption_paths(ai_doc) if isinstance(ai_doc, dict) else []
 require(not forbidden_assumption_paths,
-        f"ai_authority.yaml contains public assumption record/value payloads outside the exact contract: {forbidden_assumption_paths}")
+        f"ai_authority.yaml contains public assumption/capacity/cost payloads outside the exact contract: {forbidden_assumption_paths}")
 
 # Common controls.
 domains = domains_doc.get("domains", {}) if isinstance(domains_doc, dict) else {}
@@ -358,11 +363,14 @@ if isinstance(assumption_contract, dict):
             "professional review assumption record contract requires rule")
 
 separation = ai_doc.get("trust_domain_separation", {}) if isinstance(ai_doc, dict) else {}
-for boundary in (
+expected_separation_fields = {
     "product_change_b1_is_customer_professional_review",
     "customer_professional_review_is_external_independent_assurance",
     "internal_review_may_claim_certification",
-):
+}
+require(isinstance(separation, dict) and set(separation) == expected_separation_fields,
+        "trust-domain separation must use the exact governed field set")
+for boundary in expected_separation_fields:
     require(isinstance(separation, dict) and separation.get(boundary) is False,
             f"trust-domain separation weakened: {boundary}")
 
