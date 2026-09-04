@@ -202,8 +202,8 @@ if isinstance(customer_reviews, dict):
 assumption_contract = ai_doc.get("professional_review_assumption_record_contract", {}) if isinstance(ai_doc, dict) else {}
 require(isinstance(assumption_contract, dict), "professional review assumption record contract must be an object")
 if isinstance(assumption_contract, dict):
-    require(assumption_contract.get("sensitive_values_storage") == "PROPRIETARY_RESTRICTED",
-            "professional review assumption values must remain restricted")
+    require(assumption_contract.get("value_data_classification") == "INTERNAL",
+            "professional review assumption values must use canonical INTERNAL classification")
     require(assumption_contract.get("public_repo_values_prohibited") is True,
             "professional review assumption numeric values must be prohibited in public Git")
     required_assumption_fields = {
