@@ -15,6 +15,7 @@ CURRENT_FILES = [
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
     ROOT / "docs" / "DOMAIN_MODEL_V1.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
+    ROOT / "docs" / "PUBLIC_REPO_POLICY.md",
     ROOT / "docs" / "WORKPACKAGES_R2.md",
     ROOT / "ROADMAP.md",
     ROOT / "model" / "mission_operating_model_r2.yaml",
@@ -49,6 +50,7 @@ strategy = (ROOT / "STRATEGY.md").read_text(encoding="utf-8")
 architecture = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
 domain_model_doc = (ROOT / "docs" / "DOMAIN_MODEL_V1.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
+public_repo_policy = (ROOT / "docs" / "PUBLIC_REPO_POLICY.md").read_text(encoding="utf-8")
 workpackage_index = (ROOT / "docs" / "WORKPACKAGES_R2.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
 bootstrap = (ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md").read_text(encoding="utf-8")
@@ -103,6 +105,18 @@ required = {
             "candidate movement invalidates stale review",
         ],
     ),
+    "docs/PUBLIC_REPO_POLICY.md": (
+        public_repo_policy,
+        [
+            "public-safe product/model/schema/synthetic core with private/restricted operating IP by default",
+            "client data is never product-repository data",
+            "secrets are never stored in Git",
+            "`PROPRIETARY_RESTRICTED` by default",
+            "CLIENT_CONFIDENTIAL — prohibited",
+            "SECRET — prohibited in Git",
+            "publication of restricted material always requires an explicit release decision",
+        ],
+    ),
     "docs/WORKPACKAGES_R2.md": (
         workpackage_index,
         [
@@ -125,8 +139,19 @@ required = {
         [
             "adoption_status=MISSION_R2_CANONICAL_CONTROL_MANAGED",
             "central_control_authority=market-predictions/control-plane",
+            "production_action=NOT_AUTHORIZED",
+            "real_client_data=NOT_AUTHORIZED",
+            "customer_environment_write=NOT_AUTHORIZED",
             "current Control runtime version",
             "candidate movement invalidates stale review evidence",
+            "no project-local queue/state plane",
+            "project workers do not bypass central Control by writing canonical runtime state directly",
+            "no local intake/handover/retry runtime plane or provider fallback is authorized",
+            "Real client data is prohibited until the explicit real-client security/data/contract/professional gate is satisfied and principal authorization exists",
+            "Autonomous final legal, certification, statutory, risk-acceptance or compliance decisions are not authorized",
+            "Production deployment and customer-system write/remediation require separate governed authority",
+            "Only public-safe material under `docs/PUBLIC_REPO_POLICY.md` may be committed here",
+            "Client data, secrets and proprietary restricted operating intelligence must stay outside the public repository",
         ],
     ),
     "control/SOLIDSECURITY_MISSION_CONTRACT_R2.md": (
