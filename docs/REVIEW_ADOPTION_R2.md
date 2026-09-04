@@ -1,12 +1,14 @@
-# Critical Review Adoption — Mission R2
+# HISTORICAL — Critical Review Adoption — Mission R2
+
+Status: `HISTORICAL_PROVENANCE_ONLY`
 
 Source decision register: `model/review_source_r2.yaml`.
 
-The external review is treated as a snapshot critique of repository state `0300142`, not as an automatically authoritative specification.
+This file records how an external review of repository snapshot `0300142` influenced the Mission R2 design. It is **not current development routing, review, integration or execution authority**. Current project-change authority is read fresh from the current central Control authority and current SolidSecurity project contracts; this historical record does not pin a worker topology, lane model or Control protocol.
 
 ## Adopted direction
 
-R2 adopts the findings that materially improve mission correctness:
+R2 adopted findings that materially improved mission correctness:
 
 - design/synthetic evidence cannot substitute for real customer/market evidence;
 - one primary launch ICP, with Care first and Supplier secondary until evidence says otherwise;
@@ -20,16 +22,18 @@ R2 adopts the findings that materially improve mission correctness:
 - defensibility based on trust/distribution/history/operating learning rather than assuming crosswalks are a moat;
 - deliberate private/restricted handling for proprietary operating intelligence.
 
-## Not adopted wholesale
+## Historical non-adoptions
 
-R2 does not:
+At that snapshot, R2 did not adopt proposals to:
 
-- remove independent B1 governance for consequential changes;
-- equate a single GitHub account with absence of independent project assurance;
+- remove risk-proportionate fresh exact-candidate review for consequential changes where the applicable project/Control gate requires it;
+- infer absence of legitimate project-change review merely from a single GitHub account;
 - choose Supplier as primary launch segment without market evidence;
 - bypass client-data/security gates to accelerate customer contact;
-- rewrite frozen exact-head M1 candidates in place.
+- rewrite frozen exact-candidate M1 work in place.
 
-## Current-state corrections to the review
+These entries explain historical design choices only. They do not define today’s review mechanism or imply a permanent implementation/assurance lane split.
 
-Since snapshot `0300142`, SolidSecurity has added executable model validation, CI, a domain/schema contract and recorded independent Foundation exact-head assurance. These later facts do not invalidate the review's central strategic warning; they change which remediation is still necessary.
+## Current-authority boundary
+
+Later repository state may supersede facts that were true at snapshot `0300142`. Current Mission, repository, runtime, review and integration authority must therefore be reconstructed from current canonical sources. Git history preserves the detailed adoption lineage; this file remains provenance only.
