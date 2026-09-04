@@ -73,6 +73,8 @@ Outcome is mechanical:
 
 An `INCONCLUSIVE` result may guide another experiment but cannot be used as evidence that a channel or segment won.
 
+Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second metric) with its own comparator, commercial metric, observation window, minimum sample and support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
+
 ## First-10 acquisition hypotheses
 
 The “first 10” is a learning target, not a forecast or commitment. The initial comparisons are:
@@ -82,11 +84,11 @@ The “first 10” is a learning target, not a forecast or commitment. The initi
 | Warm domain introductions produce more qualified substantive conversations | Problem-triggered direct outreach | qualified substantive conversations / approached organizations |
 | Applicability-grounded, problem-triggered outreach produces more qualified substantive conversations | Generic outcome-led outreach that makes no unsupported regulatory claim | qualified substantive conversations / approached organizations |
 | Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | qualified next steps / substantive conversations |
-| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | qualified next steps / substantive conversations, with separate E3 commercial evidence required for any track-promotion decision |
+| Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | qualified next steps / substantive conversations, with a separate pre-registered E3 commercial-value decision rule required for any track-promotion decision |
 
 These comparisons do not have universal hard-coded thresholds because the threshold is part of each pre-registered experiment and must be frozen before observations. A missing threshold makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
 
-Supplier remains secondary while tested. It is promoted only when a pre-registered supplier-versus-Care experiment is `SUPPORTED` **and** separately attributable E3 evidence supports the commercial-value conclusion; delivery-effort E2 evidence alone can never promote the track.
+Supplier remains secondary while tested. It is promoted only when the pre-registered supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately pre-registered E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence or anecdotal commercial observations can never promote the track.
 
 Do not scale a channel because it produces conversations; compare the pre-registered metric, ICP fit, burden, commercial evidence and learning quality.
 
@@ -154,7 +156,7 @@ Do not create a new category for every anecdote; use notes for nuance and change
 ## Promotion rules
 
 - Care remains the primary launch track until a pre-registered E3 comparison supports a change.
-- Supplier remains secondary until the supplier-versus-Care experiment is `SUPPORTED` and the required separate E3 commercial evidence exists.
+- Supplier remains secondary until both the pre-registered supplier-versus-Care acquisition experiment and its separately pre-registered E3 commercial-value gate are `SUPPORTED`.
 - Direct Cyberbeveiligingswet/NIS2 positioning requires explicit applicability basis; generic market urgency is insufficient.
 - A channel, ICP rule, objection response or offer becomes current strategy only after evidence is summarized and the bounded conclusion is intentionally adopted into `STRATEGY.md` / `POSITIONING.md`.
 - Detailed market records stay private; only deliberately public-safe aggregate learnings may flow back into this repository.
