@@ -7,11 +7,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 CURRENT_FILES = [
     ROOT / "README.md",
+    ROOT / "STRATEGY.md",
     ROOT / "control" / "CURRENT_STATE.md",
     ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md",
     ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md",
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
+    ROOT / "docs" / "WORKPACKAGES_R2.md",
     ROOT / "ROADMAP.md",
     ROOT / "model" / "mission_operating_model_r2.yaml",
     ROOT / "model" / "workpackages_r2.yaml",
@@ -28,6 +30,9 @@ BANNED_EXACT = [
     "assurance_role=governance_release_assurance/B1",
     "independent_b1_pass",
     "PROJECT_INTEGRATION successor",
+    "product/change B1 assurance",
+    "E0/E1 + B1",
+    "independent B1",
 ]
 
 errors = []
@@ -38,7 +43,9 @@ for path in CURRENT_FILES:
             errors.append(f"{path.relative_to(ROOT)} contains superseded/duplicated authority phrase: {banned!r}")
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
+strategy = (ROOT / "STRATEGY.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
+workpackage_index = (ROOT / "docs" / "WORKPACKAGES_R2.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
 bootstrap = (ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md").read_text(encoding="utf-8")
 mission = (ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md").read_text(encoding="utf-8")
@@ -56,6 +63,14 @@ required = {
             "fresh critical exact-candidate review",
         ],
     ),
+    "STRATEGY.md": (
+        strategy,
+        [
+            "current-Control exact-candidate project/change review",
+            "candidate movement invalidates stale review evidence",
+            "does not encode a fixed worker lane or role topology",
+        ],
+    ),
     "docs/MISSION_DRIVEN_WORKFLOW.md": (
         workflow,
         [
@@ -63,6 +78,14 @@ required = {
             "Fresh exact-candidate review",
             "project_local_runtime_state_plane=false",
             "candidate movement invalidates stale review",
+        ],
+    ),
+    "docs/WORKPACKAGES_R2.md": (
+        workpackage_index,
+        [
+            "fresh exact-candidate project-change review under current Control",
+            "candidate movement invalidates stale review evidence",
+            "does not encode a fixed Control worker lane count",
         ],
     ),
     "control/CURRENT_STATE.md": (
