@@ -13,6 +13,7 @@ CURRENT_FILES = [
     ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md",
     ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md",
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
+    ROOT / "docs" / "DOMAIN_MODEL_V1.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
     ROOT / "docs" / "WORKPACKAGES_R2.md",
     ROOT / "ROADMAP.md",
@@ -46,6 +47,7 @@ for path in CURRENT_FILES:
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 strategy = (ROOT / "STRATEGY.md").read_text(encoding="utf-8")
 architecture = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
+domain_model_doc = (ROOT / "docs" / "DOMAIN_MODEL_V1.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
 workpackage_index = (ROOT / "docs" / "WORKPACKAGES_R2.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
@@ -80,6 +82,16 @@ required = {
             "does not encode a fixed Control runtime version or worker topology",
             "fresh exact-candidate project-change review",
             "Candidate movement invalidates stale review evidence",
+            "not a real-client-data authorization",
+            "explicit principal authorization are satisfied",
+        ],
+    ),
+    "docs/DOMAIN_MODEL_V1.md": (
+        domain_model_doc,
+        [
+            "Status: **M1 canonical / schema contract only**",
+            "not a production migration and does not authorize real-client processing",
+            "Machine-readable authority: `model/domain_model_v1.yaml`",
         ],
     ),
     "docs/MISSION_DRIVEN_WORKFLOW.md": (
