@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed if current SolidSecurity authority regresses to superseded Control/Mission doctrine."""
+"""Fail closed if current SolidSecurity authority regresses to stale Mission or duplicated Control-runtime doctrine."""
 from pathlib import Path
 import sys
 
@@ -13,13 +13,20 @@ CURRENT_FILES = [
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
     ROOT / "ROADMAP.md",
+    ROOT / "model" / "mission_operating_model_r2.yaml",
+    ROOT / "model" / "workpackages_r2.yaml",
 ]
 
 BANNED_EXACT = [
     "MISSION_SYSTEM_V1 / CANDIDATE",
     "Control Minimal Core V1",
     "agent/mission-system-v1",
-    "A1/A2 perform implementation",
+    "Control Autonomy V3.1",
+    "CONTROL_AUTONOMY_V3_1",
+    "semantic_workers=A1,B1",
+    "implementation_role=implementation_operations/A1",
+    "assurance_role=governance_release_assurance/B1",
+    "independent_b1_pass",
     "PROJECT_INTEGRATION successor",
 ]
 
@@ -28,20 +35,84 @@ for path in CURRENT_FILES:
     text = path.read_text(encoding="utf-8")
     for banned in BANNED_EXACT:
         if banned in text:
-            errors.append(f"{path.relative_to(ROOT)} contains superseded authority phrase: {banned!r}")
+            errors.append(f"{path.relative_to(ROOT)} contains superseded/duplicated authority phrase: {banned!r}")
 
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
+bootstrap = (ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md").read_text(encoding="utf-8")
 mission = (ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md").read_text(encoding="utf-8")
 assurance = (ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md").read_text(encoding="utf-8")
+roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+workpackages = (ROOT / "model" / "workpackages_r2.yaml").read_text(encoding="utf-8")
 
 required = {
-    "README.md": (readme, ["Mission R2 / canonical", "Control Autonomy V3.1", "no A2"]),
-    "docs/MISSION_DRIVEN_WORKFLOW.md": (workflow, ["Control Autonomy V3.1", "Exactly one semantic implementation worker exists", "There is **no semantic `PROJECT_INTEGRATION` task**"]),
-    "control/CURRENT_STATE.md": (current, ["Snapshot only", "CONTROL_AUTONOMY_V3_1", "no A2"]),
-    "control/SOLIDSECURITY_MISSION_CONTRACT_R2.md": (mission, ["MISSION R2 / CANONICAL", "CONTROL_AUTONOMY_V3_1", "no A2"]),
-    "control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md": (assurance, ["Mission R2", "Control Autonomy V3.1"]),
+    "README.md": (
+        readme,
+        [
+            "Mission R2 / canonical",
+            "central Control-managed",
+            "does **not** duplicate Control runtime versions",
+            "fresh critical exact-candidate review",
+        ],
+    ),
+    "docs/MISSION_DRIVEN_WORKFLOW.md": (
+        workflow,
+        [
+            "Central Control development boundary",
+            "Fresh exact-candidate review",
+            "project_local_runtime_state_plane=false",
+            "candidate movement invalidates stale review",
+        ],
+    ),
+    "control/CURRENT_STATE.md": (
+        current,
+        [
+            "Snapshot only",
+            "owned centrally; read fresh from current Control authority",
+            "Central Control boundary",
+            "candidate movement invalidates stale review",
+        ],
+    ),
+    "control/PROJECT_GOVERNANCE_BOOTSTRAP.md": (
+        bootstrap,
+        [
+            "adoption_status=MISSION_R2_CANONICAL_CONTROL_MANAGED",
+            "central_control_authority=market-predictions/control-plane",
+            "current Control runtime version",
+            "candidate movement invalidates stale review evidence",
+        ],
+    ),
+    "control/SOLIDSECURITY_MISSION_CONTRACT_R2.md": (
+        mission,
+        [
+            "MISSION R2 / CANONICAL / CONTROL-MANAGED",
+            "current governed Control architecture",
+            "does not require or own a particular Control worker topology",
+            "fresh exact-candidate critical review",
+        ],
+    ),
+    "control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md": (
+        assurance,
+        [
+            "Mission R2",
+            "Central Control boundary",
+            "exact candidate/head/base",
+            "Candidate movement invalidates stale review",
+        ],
+    ),
+    "ROADMAP.md": (
+        roadmap,
+        [
+            "current central Control authority",
+            "fresh exact-candidate project-change review",
+            "does not encode a fixed lane count or worker-role topology locally",
+        ],
+    ),
+    "model/workpackages_r2.yaml": (
+        workpackages,
+        ["fresh_exact_candidate_project_change_review_pass"],
+    ),
 }
 
 for name, (text, markers) in required.items():
