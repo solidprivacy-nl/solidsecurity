@@ -57,11 +57,12 @@ Required fields per workflow step:
 - `evidence_status` (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`);
 - `mission_evidence_class`: one or more canonical Mission classes from `E0_DESIGN`, `E1_SYNTHETIC`, `E2_CONTROLLED_REAL_CLIENT`, `E3_MARKET_COMMERCIAL`, `E4_REPEATED_OPERATIONAL`, but only where the underlying observation actually proves that class.
 
-Required package-level revenue fields:
+Required package-level fields:
 
+- `calculation_currency`: one ISO 4217 currency code used for **all** monetary calculations in that package;
 - `revenue_mode`: exactly one of `ONE_TIME`, `RECURRING`, or `UPFRONT_PLUS_RECURRING`;
-- `upfront_price_hypothesis`: the one-time package price or onboarding/upfront fee;
-- `recurring_price_hypothesis`: the recurring package price for its declared period;
+- `upfront_price_hypothesis`: the one-time package price or onboarding/upfront fee, normalized to `calculation_currency`;
+- `recurring_price_hypothesis`: the recurring package price for its declared period, normalized to `calculation_currency`;
 - `recurring_price_period_months`: the recurring price period in months when recurring revenue exists.
 
 The three revenue modes are mutually exclusive and have fail-closed invariants:
@@ -84,11 +85,36 @@ A package with a mismatched revenue mode/workflow shape is invalid. Recurring wo
 
 `evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence, and repeated operational evidence is not automatically market evidence.
 
+### Currency normalization
+
+**Cross-currency arithmetic is prohibited.** Before any cost, contribution, margin or payback formula is evaluated, every monetary input must be expressed in the package's single `calculation_currency`.
+
+This applies to at least:
+
+- loaded operator and professional rates;
+- external-specialist costs;
+- fixed and variable provider/tooling costs;
+- upfront and recurring price hypotheses;
+- any other monetary amount entering a derived package result.
+
+When a source value is denominated in another currency, the restricted economics record preserves:
+
+- original amount and ISO 4217 source currency;
+- `calculation_currency`;
+- conversion rate;
+- attributable exchange-rate source;
+- `fx_as_of` date/time or applicable conversion period;
+- resulting normalized amount used by the calculation.
+
+Only the normalized amount may enter the formulas below. A missing source currency, conversion rate/source/as-of, or normalized package-currency amount makes the affected calculation unresolved rather than permitting raw amounts in different currencies to be added.
+
 ### Calculation contract
 
 The calculation method is intentionally conventional and auditable. **Month is the common recurring model period.** Mixed cadences are normalized before they are summed.
 
 `operator_minutes`, `professional_review_minutes`, `customer_minutes`, `external_specialist_cost` and `variable_provider_tooling_cost` are **expected per-occurrence values inclusive of the ordinary rework/exception burden represented by that row**. `rework_or_exception_rate` is retained as a diagnostic/segmentation driver explaining those expected values; it is not multiplied into them a second time. If source measurements exclude rework or exception effort, that effort must first be added as separate work rows or converted into inclusive expected per-occurrence values before package economics are calculated. This keeps exceptions economically visible without double-counting them.
+
+All monetary terms below mean their already-normalized amount in `calculation_currency`.
 
 `operator_cost = operator_minutes / 60 * loaded_operator_rate`
 
@@ -187,7 +213,11 @@ Repeated governed delivery cycles may support `mission_evidence_class: E4_REPEAT
 
 ### Validated bounded commercial assumption
 
-A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the supporting Mission evidence class(es), sample and scope are stated and the conclusion does not generalize beyond what the evidence supports. The retained class must describe the proof actually obtained; E1, E2, E3 and E4 are not interchangeable.
+A workload, capacity, cost or margin assumption may be labeled `VALIDATED_BOUNDED` only when the supporting Mission evidence class(es), sample and scope are stated and the conclusion does not generalize beyond what the evidence supports.
+
+A **sell-price assumption** (`upfront_price_hypothesis`, `recurring_price_hypothesis`, package price or equivalent) may be labeled `VALIDATED_BOUNDED` only when relevant bounded **E3_MARKET_COMMERCIAL pricing/value evidence** supports that price or price boundary. E1 synthetic cost, E2 delivery workload or E4 repeated operating evidence can support cost, capacity and margin claims but **cannot by themselves validate what the market will pay**. A cost-derived price without relevant E3 evidence remains a hypothesis even when its underlying cost model is well measured.
+
+Conversely, E3 willingness-to-pay evidence does not by itself validate workload, capacity or margin; those retain the evidence classes that actually support them. E1, E2, E3 and E4 are not interchangeable.
 
 ## Storage and source-of-truth boundary
 
@@ -196,6 +226,8 @@ This public document is the **calculation and evidence-class contract**, not the
 The private operations/IP economics ledger may retain only non-client-confidential operating/commercial values. For every retained value it records:
 
 - value and unit;
+- source currency and `calculation_currency` for monetary values;
+- FX conversion rate/source/as-of and normalized amount when currencies differ;
 - workflow/package context;
 - normalized model period where applicable;
 - revenue mode and whether price is upfront or recurring;
@@ -245,12 +277,15 @@ Before any new price list is treated as commercial source of truth:
 1. the bottom-up model is populated with identified evidence status and canonical Mission evidence class;
 2. professional trust/cost assumptions are explicit;
 3. at least one bounded real engagement supplies measured E2 workload evidence;
-4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E1/E2/E4 workload;
-5. hypothesis, observed-market, measured-pilot, repeated-operational and validated-bounded values remain distinguishable by their retained evidence metadata;
-6. the declared revenue mode satisfies its mutually exclusive price invariants **and** its workflow-phase shape; all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
-7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
-8. pricing has an identified ICP/scope boundary;
-9. identifiable client measurements remain in the approved client data plane while only de-identified/aggregated commercial economics enter the private operations/IP ledger;
-10. detailed internal economics are stored in the approved private/restricted location.
+4. every price treated as `VALIDATED_BOUNDED` has relevant bounded E3 pricing/value/willingness-to-pay evidence; E1/E2/E4 cost/workload evidence alone cannot validate a sell price;
+5. ICP/channel conclusions use separate E3 evidence rather than inferred E1/E2/E4 workload;
+6. hypothesis, observed-market, measured-pilot, repeated-operational and validated-bounded values remain distinguishable by their retained evidence metadata;
+7. the declared revenue mode satisfies its mutually exclusive price invariants **and** its workflow-phase shape;
+8. every monetary input is normalized to one declared ISO-4217 `calculation_currency` before cost/contribution/margin/payback arithmetic, with attributable FX provenance where conversion is required;
+9. all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
+10. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
+11. pricing has an identified ICP/scope boundary;
+12. identifiable client measurements remain in the approved client data plane while only de-identified/aggregated commercial economics enter the private operations/IP ledger;
+13. detailed internal economics are stored in the approved private/restricted location.
 
 A public-safe formula or empty template does not satisfy this gate by itself.
