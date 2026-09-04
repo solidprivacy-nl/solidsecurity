@@ -10,11 +10,11 @@ SolidSecurity is an AI-enabled managed security & compliance service for healthc
 
 - project mission: **Mission R2 / canonical**;
 - domain model: **M1 / canonical schema contract**;
-- central execution protocol: **Control Autonomy V3.1**;
+- development governance: **central Control-managed**;
 - current active product sequence starts with **R2-WP01 — Executable assurance kernel**;
 - production deployment and real-client data remain separately gated.
 
-The local mission doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`](control/SOLIDSECURITY_MISSION_CONTRACT_R2.md). The canonical machine-readable mission and execution authority live in `market-predictions/control-plane`.
+The local mission doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`](control/SOLIDSECURITY_MISSION_CONTRACT_R2.md). The canonical machine-readable mission and current execution authority live in `market-predictions/control-plane`. SolidSecurity deliberately does **not** duplicate Control runtime versions, worker topology, queue mechanics or cutover state locally; those facts must be read fresh from Control's current canonical authority.
 
 Development is deliberately **mission-first, service-first, evidence-first and simplest-safe-architecture-first**. Software is built only where it advances a measurable customer, service or assurance outcome.
 
@@ -53,28 +53,30 @@ The designed V1 data plane is deliberately conventional and is **not yet a real-
 
 Database-per-client, custom KMS/envelope encryption and active-active multi-cloud are not V1 defaults.
 
-## Control Autonomy V3.1 development loop
+## Mission-driven development boundary
 
-The development authority is intentionally small:
+SolidSecurity defines **what must be achieved and proved**; central Control owns **how governed development is scheduled, locked, reviewed and integrated**.
 
-`Mission -> deterministic Feed/TICK -> one canonical V3.1 task -> A1 CLAIM -> bounded implementation/repair -> kernel RECORD -> direct B1 successor -> B1 CLAIM -> independent assurance -> kernel RECORD -> HOLD_AFTER_PASS or separately authorized next action`
+Project-level invariants:
 
-Hard execution rules:
+- one canonical central Control authority; no SolidSecurity-specific queue, scheduler, claim store or handover state plane;
+- exact candidate/head/base binding for consequential repository changes;
+- deterministic tests/CI where checks are mechanical;
+- fresh critical exact-candidate review for consequential changes, with external/independent exact-candidate review when the current project/Control gate requires it;
+- candidate movement invalidates stale review evidence;
+- integration requires current live repository/Control authority in addition to review PASS;
+- no direct worker mutation of canonical Control runtime state outside the current Control contract;
+- no provider fallback or duplicate runtime architecture introduced by SolidSecurity;
+- `principal_manual_relay_count=0` remains the operating target;
+- chat memory is never execution, completion or assurance authority.
 
-- one canonical private runtime queue in `market-predictions/control-plane@control-runtime-state`;
-- one deterministic Control Kernel writer;
-- semantic workers are exactly **A1** and **B1**;
-- no A2;
-- no semantic `PROJECT_INTEGRATION` task;
-- no direct worker writes to the queue or canonical worker-result store;
-- no provider fallback or SolidSecurity-specific scheduler/state plane;
-- chat memory is never execution or assurance authority.
+The current Control implementation may evolve. That evolution does not change SolidSecurity Mission R2 unless a governed Mission revision changes the project outcome, evidence or authority requirements.
 
 ## Repository map
 
 - [`control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`](control/SOLIDSECURITY_MISSION_CONTRACT_R2.md) — canonical local project mission doctrine
 - [`ROADMAP.md`](ROADMAP.md) — active R2 roadmap and evidence gates
-- [`docs/MISSION_DRIVEN_WORKFLOW.md`](docs/MISSION_DRIVEN_WORKFLOW.md) — customer, product/runtime and Control V3.1 workflows
+- [`docs/MISSION_DRIVEN_WORKFLOW.md`](docs/MISSION_DRIVEN_WORKFLOW.md) — customer, product/runtime and central-Control development boundaries
 - [`STRATEGY.md`](STRATEGY.md) — market, product and differentiation doctrine
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — target architecture and trust boundaries
 - [`docs/OPERATING_MODEL.md`](docs/OPERATING_MODEL.md) — managed-service operating system
