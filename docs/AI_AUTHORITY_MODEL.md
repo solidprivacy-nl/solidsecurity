@@ -93,6 +93,22 @@ The public model defines the minimum authority contract; actual reviewer identit
 
 A control/workflow may require a stronger class. A weaker actual class never substitutes for a stronger required class.
 
+### Capacity and loaded-cost assumption record
+
+R1–R4 capacity/cost prerequisites use one public-safe reference shape defined in `model/ai_authority.yaml`; the sensitive numeric assumptions themselves remain outside public Git in the approved restricted store.
+
+Each assumption record must carry:
+
+- `review_class`;
+- `assumption_type` (`reviewer_capacity` or `loaded_cost`);
+- the canonical unit (`professional_minutes_per_month` or `currency_per_professional_hour`);
+- `evidence_status`;
+- Mission `mission_evidence_class`;
+- an attributable `calculation_reference`;
+- `restricted_record_ref` pointing to the restricted value/evidence record.
+
+The public repository must not contain the actual capacity or loaded-cost value merely to satisfy this gate. A missing reference, unit, evidence/status classification or calculation reference leaves the prerequisite unresolved; it does not default to satisfied.
+
 ## Customer `VERIFIED` fail-closed gate
 
 WP03 defines readiness requirements but **does not enable customer-facing `VERIFIED` claims**. The machine-readable gate remains `DESIGN_ONLY` and `customer_verified_currently_enabled: false`.
