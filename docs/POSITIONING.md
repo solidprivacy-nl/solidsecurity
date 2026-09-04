@@ -31,6 +31,7 @@ The primary R2 launch hypothesis is a Dutch healthcare organization that:
 - has material security/privacy/compliance obligations and recurring evidence requests;
 - lacks a proportionate internal security/compliance function able to maintain the work continuously;
 - has enough operational complexity that spreadsheets, one-off consultancy and ad-hoc policy work create recurring friction;
+- has a credible budget/ability to buy a managed professional service if the value hypothesis is confirmed;
 - can nominate an accountable internal sponsor and provide the minimum facts/evidence needed for a managed workflow;
 - values an evidence-backed managed outcome rather than another self-service GRC tool.
 
