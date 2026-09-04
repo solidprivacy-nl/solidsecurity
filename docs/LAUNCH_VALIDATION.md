@@ -58,22 +58,30 @@ Comparative acquisition hypotheses are not judged retrospectively from whatever 
 - primary metric and exact numerator/denominator or duration definition;
 - observation window;
 - minimum denominator/sample required for a decision;
-- `support_threshold`;
-- `reject_threshold`;
+- `decision_direction`: exactly `HIGHER_IS_BETTER` or `LOWER_IS_BETTER`;
+- numeric `support_threshold`;
+- numeric `reject_threshold`;
 - confounders/exclusions known at start;
 - `registered_at` timestamp.
 
-After the first observation, changing comparator, metric, window or thresholds requires a new `experiment_id`; the old experiment remains intact.
+Thresholds must be mutually exclusive by construction:
 
-Outcome is mechanical:
+- for `HIGHER_IS_BETTER`, `support_threshold > reject_threshold`;
+- for `LOWER_IS_BETTER`, `support_threshold < reject_threshold`.
 
-- `SUPPORTED` — minimum sample reached and the pre-registered support threshold is met;
-- `NOT_SUPPORTED` — minimum sample reached and the pre-registered reject threshold is met;
-- `INCONCLUSIVE` — neither condition is met, the window ends below minimum sample, or the decision rule was not pre-registered.
+A registration with equal or overlapping/contradictory outcome predicates is invalid and cannot yield a directional result. After the first observation, changing comparator, metric, window, direction or thresholds requires a new `experiment_id`; the old experiment remains intact.
+
+Outcome is mechanical after the minimum sample is reached:
+
+- `HIGHER_IS_BETTER`: `SUPPORTED` when metric `>= support_threshold`; `NOT_SUPPORTED` when metric `<= reject_threshold`; otherwise `INCONCLUSIVE`;
+- `LOWER_IS_BETTER`: `SUPPORTED` when metric `<= support_threshold`; `NOT_SUPPORTED` when metric `>= reject_threshold`; otherwise `INCONCLUSIVE`;
+- if the window ends below minimum sample, or a complete valid decision rule was not pre-registered: `INCONCLUSIVE`.
+
+Because the threshold ordering is part of registration validity, one observation can never satisfy both `SUPPORTED` and `NOT_SUPPORTED`.
 
 An `INCONCLUSIVE` result may guide another experiment but cannot be used as evidence that a channel or segment won.
 
-Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second metric) with its own comparator, commercial metric, observation window, minimum sample and support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
+Any **additional commercial-value condition used for a track-promotion decision** is governed by the same rule. It must be a separately identifiable pre-registered E3 experiment (or explicitly pre-registered second metric) with its own comparator, commercial metric, observation window, minimum sample, direction and mutually exclusive support/reject thresholds. An anecdotal willingness-to-pay statement, one proposal outcome or an unregistered qualitative judgment cannot satisfy that promotion gate.
 
 ## First-10 acquisition hypotheses
 
@@ -86,7 +94,7 @@ The “first 10” is a learning target, not a forecast or commitment. The initi
 | Trusted advisor/referral outreach produces more qualified next steps | Direct outreach | qualified next steps / substantive conversations |
 | Supplier/questionnaire-trigger outreach may be a stronger acquisition wedge than the Care primary track | Care primary-track outreach | qualified next steps / substantive conversations, with a separate pre-registered E3 commercial-value decision rule required for any track-promotion decision |
 
-These comparisons do not have universal hard-coded thresholds because the threshold is part of each pre-registered experiment and must be frozen before observations. A missing threshold makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
+These comparisons do not have universal hard-coded thresholds because direction and thresholds are part of each pre-registered experiment and must be frozen before observations. A missing/invalid rule makes the result `INCONCLUSIVE`; it does not permit narrative interpretation after the fact.
 
 Supplier remains secondary while tested. It is promoted only when the pre-registered supplier-versus-Care acquisition experiment is `SUPPORTED` **and** the separately pre-registered E3 commercial-value gate is also `SUPPORTED`; delivery-effort E2 evidence or anecdotal commercial observations can never promote the track.
 
@@ -106,7 +114,7 @@ For each channel/experiment, capture at minimum:
 - next-step/proposal count;
 - outcome count;
 - primary-metric numerator, denominator and resulting value;
-- pre-registered threshold/window reference;
+- pre-registered direction/threshold/window reference;
 - mechanical experiment outcome (`SUPPORTED`, `NOT_SUPPORTED`, `INCONCLUSIVE`);
 - dominant objection categories;
 - median/typical sales-cycle observations when enough data exists;
