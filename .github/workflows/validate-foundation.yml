@@ -23,6 +23,9 @@ on:
       - 'control/SOLIDSECURITY_MISSION_CONTRACT_V1.md'
       - 'docs/MISSION_DRIVEN_WORKFLOW.md'
       - 'docs/DOMAIN_MODEL_V1.md'
+      - 'docs/COMMERCIAL_MODEL.md'
+      - 'docs/AI_AUTHORITY_MODEL.md'
+      - 'docs/ENGAGEMENT_BOUNDARY.md'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
 
