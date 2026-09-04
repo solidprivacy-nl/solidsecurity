@@ -97,16 +97,23 @@ This applies to at least:
 - upfront and recurring price hypotheses;
 - any other monetary amount entering a derived package result.
 
-When a source value is denominated in another currency, the restricted economics record preserves:
+When a source value is denominated in another currency, the restricted economics record preserves an unambiguous base/quote conversion contract:
 
-- original amount and ISO 4217 source currency;
-- `calculation_currency`;
-- conversion rate;
+- original amount and ISO 4217 `source_currency`;
+- `fx_base_currency`, which **must equal** `source_currency`;
+- `fx_quote_currency`, which **must equal** the package `calculation_currency`;
+- `fx_quote_per_base_unit`, defined as units of `fx_quote_currency` for exactly one unit of `fx_base_currency`;
 - attributable exchange-rate source;
 - `fx_as_of` date/time or applicable conversion period;
 - resulting normalized amount used by the calculation.
 
-Only the normalized amount may enter the formulas below. A missing source currency, conversion rate/source/as-of, or normalized package-currency amount makes the affected calculation unresolved rather than permitting raw amounts in different currencies to be added.
+The only permitted conversion formula is:
+
+`normalized_amount = original_amount * fx_quote_per_base_unit`
+
+No implicit reciprocal/inversion is allowed. If the available market quote is in the reverse direction, the record must first store an attributable rate in the required `source_currency -> calculation_currency` base/quote direction. For example, if the source amount is USD and the package currency is EUR, `fx_base_currency=USD`, `fx_quote_currency=EUR`, and `fx_quote_per_base_unit` means EUR per USD.
+
+Only the normalized amount may enter the formulas below. A missing/mismatched base or quote currency, rate/source/as-of, or normalized package-currency amount makes the affected calculation unresolved. A normalized amount inconsistent with `original_amount * fx_quote_per_base_unit` is invalid rather than accepted as a second interpretation.
 
 ### Calculation contract
 
@@ -227,7 +234,7 @@ The private operations/IP economics ledger may retain only non-client-confidenti
 
 - value and unit;
 - source currency and `calculation_currency` for monetary values;
-- FX conversion rate/source/as-of and normalized amount when currencies differ;
+- when currencies differ: `fx_base_currency`, `fx_quote_currency`, `fx_quote_per_base_unit`, exchange-rate source/as-of and normalized amount;
 - workflow/package context;
 - normalized model period where applicable;
 - revenue mode and whether price is upfront or recurring;
@@ -281,7 +288,7 @@ Before any new price list is treated as commercial source of truth:
 5. ICP/channel conclusions use separate E3 evidence rather than inferred E1/E2/E4 workload;
 6. hypothesis, observed-market, measured-pilot, repeated-operational and validated-bounded values remain distinguishable by their retained evidence metadata;
 7. the declared revenue mode satisfies its mutually exclusive price invariants **and** its workflow-phase shape;
-8. every monetary input is normalized to one declared ISO-4217 `calculation_currency` before cost/contribution/margin/payback arithmetic, with attributable FX provenance where conversion is required;
+8. every monetary input is normalized to one declared ISO-4217 `calculation_currency` before cost/contribution/margin/payback arithmetic; any FX conversion has explicit source→calculation base/quote direction and the normalized amount equals `original_amount * fx_quote_per_base_unit`;
 9. all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
 10. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
 11. pricing has an identified ICP/scope boundary;
