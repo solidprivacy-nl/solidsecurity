@@ -220,6 +220,13 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(review_classes[actual_class] >= review_classes[required_class], f"applicability {applicability_id} actual review class is below required review class")
         require(bool(item.get("reviewer_id")), f"applicability {applicability_id} requires reviewer identity")
         require(item.get("reviewer_actor_type") == "HUMAN", f"applicability {applicability_id} requires human review authority")
+        independence_class = item.get("independence_class")
+        require(independence_class in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"applicability {applicability_id} independence class invalid")
+        if actual_class in review_classes and review_classes[actual_class] >= review_classes["R3"]:
+            require(independence_class != "INTERNAL_QUALIFIED", f"applicability {applicability_id} R3+ review requires independence")
+        if actual_class in review_classes and review_classes[actual_class] >= review_classes["R4"]:
+            require(independence_class == "INDEPENDENT_EXTERNAL", f"applicability {applicability_id} R4 review requires external independence")
+            require(isinstance(item.get("external_authority_ref"), str) and bool(item.get("external_authority_ref")), f"applicability {applicability_id} R4 review requires external authority provenance")
         require(item.get("review_decision") == "ACCEPT", f"applicability {applicability_id} requires explicit accepted review decision")
         reviewed_at = _as_datetime(item.get("reviewed_at"))
         effective = _as_date(item.get("effective_date"))
@@ -231,11 +238,22 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(isinstance(item.get("reevaluation_trigger"), str) and bool(item.get("reevaluation_trigger")), f"applicability {applicability_id} requires reevaluation trigger")
     for requirement_id, items in applicability_by_requirement.items():
         require(len(items) == 1, f"requirement {requirement_id} must have exactly one applicability decision")
+    implementation_declared_times: dict[str, datetime] = {}
     for implementation_id, implementation in implementations.items():
         require(implementation.get("control_id") in controls, f"implementation {implementation_id} references control outside canonical control_scope")
         require(implementation.get("scope_id") in scopes, f"implementation {implementation_id} references unknown scope")
         require(implementation.get("implementation_status") in {"DESIGNED", "OPERATING"}, f"implementation {implementation_id} has invalid implementation_status")
         require(implementation.get("source_of_claim") in {"accepted_human_statement", "generated_policy"}, f"implementation {implementation_id} has invalid source_of_claim")
+        if implementation.get("source_of_claim") == "accepted_human_statement":
+            require(isinstance(implementation.get("owner_membership_id"), str) and bool(implementation.get("owner_membership_id")), f"accepted implementation claim {implementation_id} requires owner membership identity")
+            require(implementation.get("declared_by_actor_type") == "HUMAN", f"accepted implementation claim {implementation_id} requires human declarer")
+            require(isinstance(implementation.get("declared_by"), str) and bool(implementation.get("declared_by")), f"accepted implementation claim {implementation_id} requires declarer identity")
+            require(isinstance(implementation.get("acceptance_ref"), str) and bool(implementation.get("acceptance_ref")), f"accepted implementation claim {implementation_id} requires acceptance provenance")
+            declared_at = _as_datetime(implementation.get("declared_at"))
+            require(declared_at is not None, f"accepted implementation claim {implementation_id} declared_at must be a timezone-aware ISO timestamp")
+            if declared_at is not None:
+                implementation_declared_times[implementation_id] = declared_at
+                require(declared_at.date() <= as_of, f"accepted implementation claim {implementation_id} must not be declared after dossier as_of")
         if implementation.get("source_of_claim") == "generated_policy":
             require(implementation.get("implementation_status") == "DESIGNED", f"generated policy {implementation_id} must remain DESIGNED")
     for policy_id, policy in validity_policies.items():
@@ -265,6 +283,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     assessments_by_requirement: dict[str, list[dict[str, Any]]] = {rid: [] for rid in requirements}
     assessments_by_requirement_control: dict[tuple[str, str], list[dict[str, Any]]] = {}
     assessment_evidence_users: dict[str, set[str]] = {eid: set() for eid in evidence}
+    assessment_times: dict[str, datetime] = {}
     for assessment_id, assessment in assessments.items():
         requirement_id = assessment.get("requirement_id")
         control_id = assessment.get("control_id")
@@ -274,6 +293,17 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(implementation_id in implementations, f"assessment {assessment_id} references unknown implementation")
         require(assessment.get("result") in assessment_results, f"assessment {assessment_id} result is outside canonical assessment_result enum")
         require(assessment.get("assessor_actor_type") in {"AI", "HUMAN"}, f"assessment {assessment_id} assessor actor type invalid")
+        require(isinstance(assessment.get("assessor_id"), str) and bool(assessment.get("assessor_id")), f"assessment {assessment_id} requires assessor identity")
+        version = assessment.get("assessment_version")
+        require(isinstance(version, int) and not isinstance(version, bool) and version > 0, f"assessment {assessment_id} requires positive assessment_version")
+        assessed_at = _as_datetime(assessment.get("assessed_at"))
+        require(assessed_at is not None, f"assessment {assessment_id} assessed_at must be a timezone-aware ISO timestamp")
+        if assessed_at is not None:
+            assessment_times[assessment_id] = assessed_at
+            require(assessed_at.date() <= as_of, f"assessment {assessment_id} must not occur after dossier as_of")
+            declared_at = implementation_declared_times.get(str(implementation_id))
+            if declared_at is not None:
+                require(assessed_at >= declared_at, f"assessment {assessment_id} predates accepted implementation declaration")
         apps = applicability_by_requirement.get(requirement_id, [])
         assessed_scope = apps[0].get("scope_id") if len(apps) == 1 else None
         if implementation_id in implementations:
@@ -298,6 +328,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
                 if assessed_scope is not None:
                     require(item.get("scope_id") == assessed_scope, f"assessment {assessment_id} evidence {evidence_id} scope does not match assessed scope")
                     require(item.get("coverage_scope") == assessed_scope, f"assessment {assessment_id} evidence {evidence_id} coverage_scope does not match assessed scope")
+                capture_time = evidence_capture_times.get(evidence_id)
+                if assessed_at is not None and capture_time is not None:
+                    require(capture_time <= assessed_at, f"assessment {assessment_id} predates relied-on evidence capture {evidence_id}")
         proof_level = assessment.get("proposed_proof_level")
         require(proof_level in proof_levels, f"assessment {assessment_id} has invalid proof level")
         require(assessment.get("state") in {"REVIEWED", "REOPENED", "CONFLICT_DETECTED"}, f"assessment {assessment_id} has invalid state")
@@ -391,6 +424,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         if reviewed_at is not None:
             require(reviewed_at.date() <= as_of, f"professional review {review_id} must not occur after dossier as_of")
             review_times[review_id] = reviewed_at
+            assessed_at = assessment_times.get(str(assessment_id))
+            if assessed_at is not None:
+                require(reviewed_at >= assessed_at, f"professional review {review_id} must not precede assessment {assessment_id} latest state")
         if assessment_id in assessments:
             required_class = assessments[assessment_id].get("required_review_class")
             if actual_class in review_classes and required_class in review_classes:
@@ -504,22 +540,29 @@ def _assurance_state(requirement_id: str, derived: dict[str, Any]) -> str:
     if coverage == "PARTIAL":
         return "PARTIAL_COVERAGE"
     return "VERIFIED"
+def _applicability_token(requirement_id: str, derived: dict[str, Any]) -> str:
+    items = derived["applicability_by_requirement"].get(requirement_id, [])
+    if len(items) != 1:
+        return "MISSING_APPLICABILITY"
+    item = items[0]
+    return f"{item['applicability_id']}@{item['scope_id']}"
 def _traces(requirement_id: str, derived: dict[str, Any]) -> list[str]:
     requirement = derived["requirements"][requirement_id]
     source_id = requirement["source_id"]
+    applicability_token = _applicability_token(requirement_id, derived)
     if derived["coverage"][requirement_id] == "GAP":
-        return [f"{source_id} -> {requirement_id} -> GAP(no control mapping)"]
+        return [f"{source_id} -> {requirement_id} -> {applicability_token} -> GAP(no control mapping)"]
     traces: list[str] = []
     mapped_controls = sorted({item["control_id"] for item in derived["maps_by_requirement"].get(requirement_id, [])})
     for control_id in mapped_controls:
         assessments = sorted(derived["assessments_by_requirement_control"].get((requirement_id, control_id), []), key=lambda item: item["assessment_id"])
         if not assessments:
-            traces.append(f"{source_id} -> {requirement_id} -> {control_id} -> PENDING_ASSESSMENT")
+            traces.append(f"{source_id} -> {requirement_id} -> {applicability_token} -> {control_id} -> PENDING_ASSESSMENT")
             continue
         for assessment in assessments:
             assessment_id = assessment["assessment_id"]
             implementation = derived["implementations"][assessment["implementation_id"]]
-            chain = [source_id, requirement_id, control_id, implementation["implementation_id"], ",".join(sorted(assessment["evidence_ids"])), assessment_id, f"RESULT={assessment['result']}"]
+            chain = [source_id, requirement_id, applicability_token, control_id, implementation["implementation_id"], ",".join(sorted(assessment["evidence_ids"])), assessment_id, f"RESULT={assessment['result']}"]
             conflict_records = sorted(derived["conflicts_by_assessment"].get(assessment_id, []), key=lambda item: item["conflict_id"])
             if conflict_records:
                 chain.append(",".join(f"{item['conflict_id']}:{item['status']}" for item in conflict_records))
@@ -538,11 +581,12 @@ def _traces(requirement_id: str, derived: dict[str, Any]) -> list[str]:
             traces.append(" -> ".join(chain))
     return traces
 def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
-    lines = ["# SolidSecurity Synthetic Assurance Kernel Dossier", "", "Source: `model/assurance_kernel_v1.yaml`", "Canonical control catalog: `model/sample_controls.yaml`", "Canonical assessment results: `model/foundation_enums.yaml`", f"As-of: {(_as_date(model.get('as_of')) or date.min).isoformat()}", "Data class: synthetic only; no real client data.", "", "## Coverage", "", "| Requirement | Applicability | Coverage | Controls | Assurance state |", "| --- | --- | --- | --- | --- |"]
+    lines = ["# SolidSecurity Synthetic Assurance Kernel Dossier", "", "Source: `model/assurance_kernel_v1.yaml`", "Canonical control catalog: `model/sample_controls.yaml`", "Canonical assessment results: `model/foundation_enums.yaml`", f"As-of: {(_as_date(model.get('as_of')) or date.min).isoformat()}", "Data class: synthetic only; no real client data.", "", "## Coverage", "", "| Requirement | Applicability decision | Scope | Status | Coverage | Controls | Assurance state |", "| --- | --- | --- | --- | --- | --- | --- |"]
     for requirement_id in sorted(derived["requirements"]):
         controls = sorted({item["control_id"] for item in derived["maps_by_requirement"].get(requirement_id, [])})
         applicability = derived["applicability_by_requirement"].get(requirement_id, [])
-        lines.append(f"| {requirement_id} | {applicability[0]['status'] if applicability else 'MISSING'} | {derived['coverage'][requirement_id]} | {', '.join(controls) if controls else 'none'} | {_assurance_state(requirement_id, derived)} |")
+        app = applicability[0] if len(applicability) == 1 else None
+        lines.append(f"| {requirement_id} | {app['applicability_id'] if app else 'MISSING'} | {app['scope_id'] if app else 'MISSING'} | {app['status'] if app else 'MISSING'} | {derived['coverage'][requirement_id]} | {', '.join(controls) if controls else 'none'} | {_assurance_state(requirement_id, derived)} |")
     lines.extend(["", "## Traceability", ""])
     for requirement_id in sorted(derived["requirements"]):
         for trace in _traces(requirement_id, derived):
@@ -579,12 +623,20 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].update({"reviewer_actor_type": "AI"}), "requires human review authority")
     expect(lambda v: v["applicability_decisions"][0].pop("proposer_id"), "requires proposer identity")
     expect(lambda v: v["applicability_decisions"][0].pop("reevaluation_trigger"), "requires reevaluation trigger")
+    expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R3", "review_class": "R3", "independence_class": "INTERNAL_QUALIFIED"}), "R3+ review requires independence")
+    expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R4", "review_class": "R4", "independence_class": "INDEPENDENT_EXTERNAL"}), "R4 review requires external authority provenance")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "UNKNOWN"}), "invalid implementation_status")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "DESIGNED"}), "requires OPERATING implementation")
     expect(lambda v: v["client_implementations"][0].update({"source_of_claim": "generated_polcy"}), "invalid source_of_claim")
+    expect(lambda v: v["client_implementations"][0].pop("owner_membership_id"), "requires owner membership identity")
+    expect(lambda v: v["client_implementations"][0].update({"declared_by_actor_type": "AI"}), "requires human declarer")
+    expect(lambda v: v["client_implementations"][0].pop("acceptance_ref"), "requires acceptance provenance")
     expect(lambda v: v["evidence"][0].update({"valid_from": "2026-09-02", "expires_at": "2026-12-31"}), "not valid at review time")
     expect(lambda v: (v["evidence"][0].update({"expires_at": "2026-09-01"}), v["decisions"][0].update({"effective_at": "2026-09-02T10:05:00Z"})), "not valid at decision time")
     expect(lambda v: v["professional_reviews"][0].update({"reviewed_at": "not-a-timestamp"}), "reviewed_at must be a timezone-aware ISO timestamp")
+    expect(lambda v: v["assessments"][0].update({"assessed_at": "2026-09-01T10:01:00Z"}), "must not precede assessment ASM-ACCESS latest state")
+    expect(lambda v: v["assessments"][0].pop("assessor_id"), "requires assessor identity")
+    expect(lambda v: v["assessments"][0].update({"assessment_version": 0}), "requires positive assessment_version")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-01T09:59:00Z"}), "must not precede its professional review")
     expect(lambda v: v["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}), "must not occur after dossier as_of")
     expect(lambda v: v["decisions"][0].update({"assurance_state": "INDEPENDENTLY_ASSURED"}), "outside R2-WP01 authority")
@@ -656,8 +708,22 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     base_errors, base_derived = validate_model(model, *authorities)
     traces = _traces("REQ-ACCESS-LIFECYCLE", base_derived) if not base_errors else []
     joined = "\n".join(traces)
-    if len(traces) != 2 or not all(marker in joined for marker in ("ASM-ACCESS", "ASM-ACCESS-SUPPLIER", "RESULT=SATISFACTORY", "REV-ACCESS -> DEC-ACCESS")):
-        failures.append("multi-control requirement trace does not render every assessment path/result/review")
+    if len(traces) != 2 or not all(marker in joined for marker in ("APP-ACCESS@SCOPE-SYNTH-CARE", "ASM-ACCESS", "ASM-ACCESS-SUPPLIER", "RESULT=SATISFACTORY", "REV-ACCESS -> DEC-ACCESS")):
+        failures.append("multi-control requirement trace does not render governed scope and every assessment path/result/review")
+    scope_variant = deepcopy(model)
+    scope_variant["scopes"].append({"scope_id": "SCOPE-SYNTH-OTHER", "name": "Synthetic other scope"})
+    for item in scope_variant["applicability_decisions"]:
+        item["scope_id"] = "SCOPE-SYNTH-OTHER"
+    for item in scope_variant["client_implementations"]:
+        item["scope_id"] = "SCOPE-SYNTH-OTHER"
+    for item in scope_variant["evidence"]:
+        item["scope_id"] = "SCOPE-SYNTH-OTHER"
+        item["coverage_scope"] = "SCOPE-SYNTH-OTHER"
+    scope_errors, scope_derived = validate_model(scope_variant, *authorities)
+    if scope_errors:
+        failures.append("governed-scope rendering regression fixture did not validate")
+    elif render_dossier(scope_variant, scope_derived) == render_dossier(model, base_derived) or "APP-ACCESS@SCOPE-SYNTH-OTHER" not in "\n".join(_traces("REQ-ACCESS-LIFECYCLE", scope_derived)):
+        failures.append("governed scope/applicability identity is not visible in dossier output")
     try:
         _load_yaml_text("a: 1\na: 2\n", "duplicate-key-regression")
         failures.append("duplicate YAML key regression did not fail closed")
