@@ -45,6 +45,8 @@ classification_doc = load_yaml("data_classification.yaml")
 roles_doc = load_yaml("roles.yaml")
 pilot_gate_doc = load_yaml("pilot_gate.yaml")
 entities_doc = load_yaml("entities.yaml")
+claim_doc = load_yaml("claim_vocabulary.yaml")
+mission_doc = load_yaml("mission_operating_model_r2.yaml")
 
 # Common controls.
 domains = domains_doc.get("domains", {}) if isinstance(domains_doc, dict) else {}
@@ -125,6 +127,25 @@ prohibited = set(ai_doc.get("prohibited_ai_state_transitions", [])) if isinstanc
 required_prohibited = {"VERIFIED", "INDEPENDENTLY_ASSURED", "RISK_ACCEPTED", "EXCEPTION_APPROVED", "CERTIFIED"}
 require(required_prohibited.issubset(prohibited), f"AI transition deny-list missing: {sorted(required_prohibited - prohibited)}")
 
+# Canonical customer claim vocabulary is referenced, not copied into a second enum family.
+claim_classes = claim_doc.get("claim_classes", {}) if isinstance(claim_doc, dict) else {}
+required_claim_classes = {
+    "C0_DESCRIPTIVE_FACT",
+    "C1_PROPOSED_ASSESSMENT",
+    "C2_EVIDENCE_LINKED",
+    "C3_PROFESSIONALLY_REVIEWED",
+    "C4_INDEPENDENTLY_ASSURED",
+    "C5_CERTIFIED",
+}
+require(isinstance(claim_classes, dict) and set(claim_classes) == required_claim_classes,
+        "claim_vocabulary.yaml claim classes must remain canonical C0..C5")
+
+mission_evidence_classes = mission_doc.get("evidence_classes", {}) if isinstance(mission_doc, dict) else {}
+require(mission_doc.get("status") == "MISSION_R2_CANONICAL" if isinstance(mission_doc, dict) else False,
+        "Mission R2 operating model must remain canonical")
+require(isinstance(mission_evidence_classes, dict) and bool(mission_evidence_classes),
+        "Mission R2 must define canonical evidence classes")
+
 # Customer professional trust remains explicit and fail-closed.
 review_descriptions = ai_doc.get("review_classes", {}) if isinstance(ai_doc, dict) else {}
 require(isinstance(review_descriptions, dict) and set(review_descriptions) == valid_review_classes,
@@ -134,14 +155,17 @@ require(isinstance(customer_reviews, dict) and set(customer_reviews) == valid_re
         "ai_authority.yaml customer_professional_review_classes must define R0..R4 exactly")
 if isinstance(customer_reviews, dict):
     required_fields = {
-        "human_reviewer_required", "customer_verified_authority", "competence_expectation",
-        "credential_expectation", "independence_requirement", "capacity_assumption_required",
-        "loaded_cost_assumption_required", "escalation",
+        "human_reviewer_required", "customer_verified_authority", "permitted_claim_classes",
+        "competence_expectation", "credential_expectation", "independence_requirement",
+        "capacity_assumption_required", "loaded_cost_assumption_required", "escalation",
     }
+    lower_claims = ["C0_DESCRIPTIVE_FACT", "C1_PROPOSED_ASSESSMENT", "C2_EVIDENCE_LINKED"]
+    professionally_reviewed_claims = lower_claims + ["C3_PROFESSIONALLY_REVIEWED"]
     expected_review_contract = {
         "R0": {
             "human_reviewer_required": False,
             "customer_verified_authority": "prohibited",
+            "permitted_claim_classes": lower_claims,
             "competence_expectation": "mechanical_transformation_only",
             "credential_expectation": "none",
             "independence_requirement": "not_applicable",
@@ -152,6 +176,7 @@ if isinstance(customer_reviews, dict):
         "R1": {
             "human_reviewer_required": True,
             "customer_verified_authority": "prohibited",
+            "permitted_claim_classes": lower_claims,
             "competence_expectation": "trained_internal_operator_for_defined_process",
             "credential_expectation": "documented_if_process_requires_it",
             "independence_requirement": "not_independent_assurance",
@@ -162,6 +187,7 @@ if isinstance(customer_reviews, dict):
         "R2": {
             "human_reviewer_required": True,
             "customer_verified_authority": "permitted_only_when_customer_verified_gate_passes",
+            "permitted_claim_classes": professionally_reviewed_claims,
             "competence_expectation": "qualified_professional_for_scope",
             "credential_expectation": "documented_and_satisfied_where_applicable",
             "independence_requirement": "internal_qualified_allowed_only_without_material_conflict",
@@ -172,6 +198,7 @@ if isinstance(customer_reviews, dict):
         "R3": {
             "human_reviewer_required": True,
             "customer_verified_authority": "permitted_only_when_customer_verified_gate_passes",
+            "permitted_claim_classes": professionally_reviewed_claims,
             "competence_expectation": "qualified_professional_for_scope",
             "credential_expectation": "documented_and_satisfied_where_applicable",
             "independence_requirement": "independent_internal_or_external",
@@ -182,6 +209,7 @@ if isinstance(customer_reviews, dict):
         "R4": {
             "human_reviewer_required": True,
             "customer_verified_authority": "external_authority_dependent",
+            "permitted_claim_classes": professionally_reviewed_claims,
             "competence_expectation": "external_authority_or_certification_body_requirements",
             "credential_expectation": "external_authority_requirements_apply",
             "independence_requirement": "external_authority",
@@ -195,36 +223,68 @@ if isinstance(customer_reviews, dict):
         require(isinstance(item, dict), f"customer professional review {review_class} must be an object")
         if not isinstance(item, dict):
             continue
-        require(required_fields.issubset(item), f"customer professional review {review_class} missing required fields")
+        require(set(item) == required_fields,
+                f"customer professional review {review_class} must use the exact governed field set")
         require({field: item.get(field) for field in required_fields} == expected_review_contract[review_class],
                 f"customer professional review {review_class} semantics drifted from the governed contract")
+        permitted = item.get("permitted_claim_classes", [])
+        require(isinstance(permitted, list) and set(permitted).issubset(required_claim_classes),
+                f"customer professional review {review_class} references noncanonical claim class")
+        require("C4_INDEPENDENTLY_ASSURED" not in permitted and "C5_CERTIFIED" not in permitted,
+                f"customer professional review {review_class} must not itself authorize external assurance/certification claims")
 
+# Capacity/cost metadata has one exact public-safe shape; values remain outside public Git.
 assumption_contract = ai_doc.get("professional_review_assumption_record_contract", {}) if isinstance(ai_doc, dict) else {}
 require(isinstance(assumption_contract, dict), "professional review assumption record contract must be an object")
 if isinstance(assumption_contract, dict):
+    expected_contract_keys = {
+        "value_data_classification",
+        "public_repo_values_prohibited",
+        "public_safe_shape_exact",
+        "common_required_fields",
+        "vocabulary_sources",
+        "assumption_types",
+        "rule",
+    }
+    require(set(assumption_contract) == expected_contract_keys,
+            "professional review assumption contract must use the exact public-safe field set")
     require(assumption_contract.get("value_data_classification") == "INTERNAL",
             "professional review assumption values must use canonical INTERNAL classification")
     require(assumption_contract.get("public_repo_values_prohibited") is True,
             "professional review assumption numeric values must be prohibited in public Git")
+    require(assumption_contract.get("public_safe_shape_exact") is True,
+            "professional review assumption public shape must remain exact/fail-closed")
+
     required_assumption_fields = {
         "review_class", "assumption_type", "unit", "evidence_status", "mission_evidence_class",
         "calculation_reference", "restricted_record_ref",
     }
-    assumption_fields = set(assumption_contract.get("required_fields", [])) if isinstance(assumption_contract.get("required_fields"), list) else set()
+    assumption_fields = set(assumption_contract.get("common_required_fields", [])) if isinstance(assumption_contract.get("common_required_fields"), list) else set()
     require(assumption_fields == required_assumption_fields,
-            f"professional review assumption record fields drifted: {sorted(assumption_fields)}")
+            f"professional review assumption common fields drifted: {sorted(assumption_fields)}")
+
+    vocabulary_sources = assumption_contract.get("vocabulary_sources", {})
+    require(vocabulary_sources == {
+        "evidence_status": "docs/COMMERCIAL_MODEL.md",
+        "mission_evidence_class": "model/mission_operating_model_r2.yaml:evidence_classes",
+    }, "professional review assumption vocabularies must reference canonical sources")
+    require((ROOT / "docs" / "COMMERCIAL_MODEL.md").exists(),
+            "canonical commercial evidence-status contract is missing")
+
     assumption_types = assumption_contract.get("assumption_types", {})
     require(isinstance(assumption_types, dict) and set(assumption_types) == {"reviewer_capacity", "loaded_cost"},
             "professional review assumption types must be reviewer_capacity and loaded_cost")
     if isinstance(assumption_types, dict):
-        require(assumption_types.get("reviewer_capacity", {}).get("unit") == "professional_minutes_per_month",
-                "reviewer capacity unit must be professional_minutes_per_month")
-        require(assumption_types.get("loaded_cost", {}).get("unit") == "currency_per_professional_hour",
-                "loaded cost unit must be currency_per_professional_hour")
-    require(set(assumption_contract.get("evidence_status_values", [])) == {"HYPOTHESIS", "OBSERVED", "MEASURED", "VALIDATED_BOUNDED"},
-            "professional review assumption evidence status vocabulary drifted")
-    require(set(assumption_contract.get("mission_evidence_class_values", [])) == {"E0", "E1", "E2", "E3"},
-            "professional review assumption Mission evidence vocabulary drifted")
+        require(assumption_types.get("reviewer_capacity") == {
+            "unit": "professional_minutes_per_month",
+            "type_specific_required_fields": [],
+        }, "reviewer capacity assumption shape drifted")
+        require(assumption_types.get("loaded_cost") == {
+            "unit": "currency_per_professional_hour",
+            "type_specific_required_fields": ["currency_code"],
+            "currency_standard": "ISO_4217",
+        }, "loaded cost assumption shape/currency contract drifted")
+
     require(isinstance(assumption_contract.get("rule"), str) and bool(assumption_contract.get("rule", "").strip()),
             "professional review assumption record contract requires rule")
 
@@ -302,24 +362,34 @@ required_human_only = {
 }
 require(required_human_only.issubset(human_only), f"human-only actions missing: {sorted(required_human_only - human_only)}")
 
-# Real client data remains fail-closed during design.
+# Real client data remains fail-closed during design. Every current canonical gate is protected.
 require(pilot_gate_doc.get("real_client_data_allowed") is False, "pilot_gate must keep real_client_data_allowed=false")
 require(pilot_gate_doc.get("state") == "DESIGN_ONLY", "pilot_gate state must remain DESIGN_ONLY before separately authorized transition")
-required_gate_names = {
+expected_gate_names = {
     "foundation_assurance",
+    "public_private_boundary",
     "client_contract_and_dpa",
     "subprocessor_review",
     "retention_schedule",
     "tenant_isolation_test",
+    "rbac_mfa_test",
+    "encryption_secrets_test",
+    "evidence_integrity_test",
+    "audit_logging_test",
+    "backup_restore_test",
     "export_delete_test",
     "llm_processing_policy_test",
+    "agent_permission_test",
+    "incident_tabletop",
     "independent_security_data_governance_assurance",
     "principal_real_pilot_authorization",
 }
 gates = pilot_gate_doc.get("gates", {}) if isinstance(pilot_gate_doc, dict) else {}
-require(required_gate_names.issubset(set(gates)), f"pilot gate missing: {sorted(required_gate_names - set(gates))}")
-for gate_name in sorted(required_gate_names):
-    require(gates.get(gate_name) == "required", f"protected pilot gate {gate_name} must remain required")
+require(isinstance(gates, dict) and set(gates) == expected_gate_names,
+        f"pilot gate set drifted: expected {sorted(expected_gate_names)}, got {sorted(gates) if isinstance(gates, dict) else []}")
+if isinstance(gates, dict):
+    for gate_name in sorted(expected_gate_names):
+        require(gates.get(gate_name) == "required", f"protected pilot gate {gate_name} must remain required")
 
 # Foundation traceability entities must remain present.
 entities = entities_doc.get("entities", {}) if isinstance(entities_doc, dict) else {}
