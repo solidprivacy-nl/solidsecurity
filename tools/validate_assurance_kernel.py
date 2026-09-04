@@ -312,7 +312,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         if required_class in review_classes and actual_class in review_classes:
             require(review_classes[actual_class] >= review_classes[required_class], f"applicability {applicability_id} actual review class is below required review class")
         reviewer_id = item.get("reviewer_id")
-        require(bool(reviewer_id), f"applicability {applicability_id} requires reviewer identity")
+        require(isinstance(reviewer_id, str) and bool(reviewer_id.strip()), f"applicability {applicability_id} requires reviewer identity")
         require(item.get("reviewer_actor_type") == "HUMAN", f"applicability {applicability_id} requires human review authority")
         independence_class = item.get("independence_class")
         require(independence_class in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"applicability {applicability_id} independence class invalid")
@@ -505,7 +505,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             if isinstance(resolution, dict):
                 require(isinstance(resolution.get("rationale"), str) and bool(resolution.get("rationale")), f"resolved conflict {conflict_id} requires resolution rationale")
                 reviewer_id = resolution.get("reviewer_id")
-                require(bool(reviewer_id), f"resolved conflict {conflict_id} requires reviewer identity")
+                require(isinstance(reviewer_id, str) and bool(reviewer_id.strip()), f"resolved conflict {conflict_id} requires reviewer identity")
                 require(resolution.get("reviewer_actor_type") == "HUMAN", f"resolved conflict {conflict_id} requires human reviewer")
                 resolution_class = resolution.get("review_class")
                 require(resolution_class in review_classes, f"resolved conflict {conflict_id} review class invalid")
@@ -547,7 +547,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(assessment_id in assessments, f"professional review {review_id} references unknown assessment")
         require(review.get("reviewer_actor_type") == "HUMAN", f"professional review {review_id} requires human authority")
         reviewer_id = review.get("reviewer_id")
-        require(bool(reviewer_id), f"professional review {review_id} requires reviewer identity")
+        require(isinstance(reviewer_id, str) and bool(reviewer_id.strip()), f"professional review {review_id} requires reviewer identity")
         actual_class = review.get("review_class")
         require(actual_class in review_classes, f"professional review {review_id} actual review class invalid")
         require(review.get("independence_class") in {"INTERNAL_QUALIFIED", "INDEPENDENT_INTERNAL", "INDEPENDENT_EXTERNAL"}, f"professional review {review_id} independence class invalid")
@@ -773,6 +773,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].pop("source_framework_version"), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": ""}), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": "v2"}), "source framework version mismatch")
+    expect(lambda v: v["applicability_decisions"][0].update({"reviewer_id": True}), "requires reviewer identity")
     expect(lambda v: v["evidence"][0].update({"source_type": "real_client_export"}), "non-synthetic evidence source type")
     expect(lambda v: v["evidence"][0].update({"mission_evidence_class": "E2_CONTROLLED_REAL_CLIENT"}), "Mission evidence class mismatch for synthetic fixture")
     expect(lambda v: v["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
@@ -783,6 +784,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["evidence"][0].update({"expires_at": "2026-12-31-invalid"}), "validity window invalid")
     expect(lambda v: v["evidence"][0].update({"captured_at": "2026-09-03T08:00:00Z"}), "capture must not occur after dossier as_of")
     expect(lambda v: v["professional_reviews"][0].update({"review_class": "R1"}), "actual review class is below assessment requirement")
+    expect(lambda v: v["professional_reviews"][0].update({"reviewer_id": 1}), "requires reviewer identity")
     expect(lambda v: v["applicability_decisions"][0].update({"review_class": "R1"}), "actual review class is below required review class")
     expect(lambda v: v["applicability_decisions"][0].update({"review_decision": "REJECT"}), "requires explicit accepted review decision")
     expect(lambda v: v["applicability_decisions"][0].update({"reviewer_actor_type": "AI"}), "requires human review authority")
@@ -872,6 +874,14 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["evidence"][-1].update({"source_ref":"synthetic_internal_governance_review"}), "requires distinct evidence source provenance")
     expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-06-30T23:59:00Z"}), "detection precedes referenced evidence capture")
     expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-09-01T09:36:00Z"}), "detection must not occur after CONFLICT_DETECTED assessment state timestamp")
+
+    def non_string_conflict_reviewer(v: dict[str, Any]) -> None:
+        assessment = v["assessments"][-1]
+        assessment["state"] = "REVIEWED"
+        assessment["assessed_at"] = "2026-09-01T11:01:00Z"
+        v["evidence_conflicts"][0] = {**v["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic non-string reviewer regression","reviewer_id":True,"reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
+
+    expect(non_string_conflict_reviewer, "requires reviewer identity")
 
     def weak_r3_resolution(v: dict[str, Any]) -> None:
         assessment = v["assessments"][-1]
