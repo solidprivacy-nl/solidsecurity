@@ -277,7 +277,7 @@ require(required_applicability.issubset(applicability), "foundation_enums.yaml w
 
 # Client/secret material must remain impossible to classify as public-repo-safe.
 classes = classification_doc.get("classes", {}) if isinstance(classification_doc, dict) else {}
-for name in ("CLIENT_CONFIDENTIAL", "CLIENT_HIGH_SENSITIVITY", "SECRET"):
+for name in ("INTERNAL", "CLIENT_CONFIDENTIAL", "CLIENT_HIGH_SENSITIVITY", "SECRET"):
     require(name in classes, f"data classification missing {name}")
     if name in classes:
         require(classes[name].get("public_github") == "prohibited", f"{name} must be prohibited in public GitHub")
