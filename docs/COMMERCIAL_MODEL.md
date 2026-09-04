@@ -53,79 +53,100 @@ Required fields per workflow step:
 - `rework_or_exception_rate`;
 - `fixed_provider_tooling_cost_allocation`;
 - `variable_provider_tooling_cost`;
-- `expected_frequency_per_month_or_year`;
-- evidence label (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`).
+- for recurring rows, `expected_occurrences` and `cadence_period_months`;
+- `evidence_status` (`HYPOTHESIS`, `OBSERVED_MARKET`, `MEASURED_PILOT`, or `VALIDATED_BOUNDED`);
+- `mission_evidence_class` (`E0_DESIGN`, `E2_CONTROLLED_REAL_CLIENT`, `E3_MARKET_COMMERCIAL`, or an explicitly justified combination).
+
+`evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence.
 
 ### Calculation contract
 
-The calculation method is intentionally conventional and auditable:
+The calculation method is intentionally conventional and auditable. **Month is the common recurring model period.** Mixed cadences are normalized before they are summed.
 
 `operator_cost = operator_minutes / 60 * loaded_operator_rate`
 
 `professional_cost = professional_review_minutes / 60 * loaded_professional_rate`
 
-`step_delivery_cost = (operator_cost + professional_cost + external_specialist_cost + fixed_provider_tooling_cost_allocation + variable_provider_tooling_cost) * expected_frequency`
+`unit_step_cost = operator_cost + professional_cost + external_specialist_cost + fixed_provider_tooling_cost_allocation + variable_provider_tooling_cost`
 
-`onboarding_delivery_cost = sum(onboarding step_delivery_cost)`
+Onboarding rows are one-time work units; repeated onboarding actions are represented as separate rows rather than hidden in a cadence multiplier:
 
-`recurring_period_delivery_cost = sum(recurring step_delivery_cost)`
+`onboarding_delivery_cost = sum(onboarding unit_step_cost)`
 
-For a package-price hypothesis `P`:
+For each recurring row:
 
-`contribution_before_overhead = P - recurring_period_delivery_cost`
+`monthly_frequency = expected_occurrences / cadence_period_months`
 
-`gross_margin_sensitivity = contribution_before_overhead / P`
+`recurring_monthly_step_cost = unit_step_cost * monthly_frequency`
 
-`onboarding_payback_period = onboarding_delivery_cost / positive recurring contribution per equivalent period`
+`recurring_monthly_delivery_cost = sum(recurring recurring_monthly_step_cost)`
 
-`professional_client_capacity = available professional minutes per period / professional minutes required per client per period`
+Every package-price hypothesis must declare its price period in months:
 
-These are calculation definitions, not published commercial values. Rates, minutes, package-price hypotheses, margins, named provider costs and measured client observations are `PROPRIETARY_RESTRICTED`.
+`P_month = package_price_hypothesis / package_price_period_months`
+
+`monthly_contribution_before_overhead = P_month - recurring_monthly_delivery_cost`
+
+`gross_margin_sensitivity = monthly_contribution_before_overhead / P_month`
+
+`onboarding_payback_months = onboarding_delivery_cost / positive monthly_contribution_before_overhead`
+
+`recurring_professional_minutes_per_client_month = sum(professional_review_minutes * monthly_frequency)`
+
+`professional_client_capacity = available_professional_minutes_per_month / recurring_professional_minutes_per_client_month`
+
+`expected_occurrences`, `cadence_period_months` and `package_price_period_months` must be positive. This prevents monthly, quarterly and annual amounts from being added without normalization.
+
+These are calculation definitions, not published commercial values. Real-client/prospect minutes, internal loaded rates, package-price hypotheses, margins, named provider costs and identifiable measured commercial observations are `PROPRIETARY_RESTRICTED`. Public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and do not disclose restricted pricing or margin assumptions.
 
 Derived outputs:
 
 - onboarding delivery cost;
-- recurring monthly/annual delivery cost;
+- recurring monthly delivery cost;
 - professional minutes per client/month;
 - customer minutes per onboarding/recurring cycle;
-- gross-margin sensitivity by package-price hypothesis;
-- onboarding payback period;
-- client capacity per professional FTE/minute envelope;
+- gross-margin sensitivity by monthly-normalized package-price hypothesis;
+- onboarding payback in months;
+- client capacity per professional monthly minute envelope;
 - margin impact of external review/assurance requirements.
 
 ## Evidence rules
 
 ### Before real delivery
 
-Synthetic/model measurements may be used for scenario planning only and must be marked `HYPOTHESIS`.
+Synthetic/model measurements may be used for scenario planning only and must be marked `HYPOTHESIS` with `mission_evidence_class: E0_DESIGN`.
 
 ### Market observation
 
-Real market-interaction observations that are not controlled pilot measurements are labeled `OBSERVED_MARKET`; they do not become pricing facts merely because a prospect stated or accepted a number.
+Real market-interaction observations that are not controlled pilot measurements are labeled `OBSERVED_MARKET` with `mission_evidence_class: E3_MARKET_COMMERCIAL`; they do not become pricing facts merely because a prospect stated or accepted a number.
 
 ### Controlled real design partner
 
-Actual time, follow-up, evidence availability, review burden and customer effort are captured as `MEASURED_PILOT` for the bounded engagement.
+Actual delivery time, follow-up, evidence availability, review burden and customer effort are captured as `MEASURED_PILOT` with `mission_evidence_class: E2_CONTROLLED_REAL_CLIENT`.
+
+Commercial observations arising during a controlled design partner, such as willingness-to-pay or proposal outcome, are E3 only when separately attributable commercial evidence supports that conclusion. A record may cite both E2 and E3 only when it preserves the distinct underlying observations; E2 workload cannot substitute for E3 market proof.
 
 ### Validated bounded commercial assumption
 
-A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the evidence class, sample and scope are stated and the conclusion does not generalize beyond what the measured data supports.
+A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only when the supporting Mission evidence class(es), sample and scope are stated and the conclusion does not generalize beyond what the evidence supports.
 
 ## Storage and source-of-truth boundary
 
-This public document is the **calculation and evidence-label contract**, not the confidential value ledger.
+This public document is the **calculation and evidence-class contract**, not the confidential value ledger.
 
 The restricted economics ledger must retain, for every value:
 
 - value and unit;
 - workflow/package context;
-- evidence label;
+- normalized model period where applicable;
+- `evidence_status`;
+- `mission_evidence_class`;
 - source/date or measurement period;
 - sample/boundary;
 - last review date;
 - supersession history where the assumption changes.
 
-Do not store the restricted ledger, detailed rates, prices, margins or identifiable customer/prospect economics in this public repository. Until the approved private operations/IP location exists, those values remain unrecorded here rather than being leaked for convenience.
+Do not store the restricted ledger, detailed internal rates, price hypotheses, margins, identifiable client/prospect measurements or other commercially sensitive operating intelligence in this public repository. Public-safe synthetic E0 examples remain permitted under `PUBLIC_REPO_POLICY.md` and do not become restricted merely because they contain a minute estimate.
 
 ## Commercial optimization order
 
@@ -159,12 +180,14 @@ Track at minimum:
 
 Before any new price list is treated as commercial source of truth:
 
-1. the bottom-up model is populated with identified evidence labels;
+1. the bottom-up model is populated with identified evidence status and Mission evidence class;
 2. professional trust/cost assumptions are explicit;
-3. at least one bounded real engagement supplies measured workload evidence;
-4. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
-5. onboarding payback and recurring capacity are visible;
-6. pricing has an identified ICP/scope boundary;
-7. detailed internal economics are stored in the approved private/restricted location.
+3. at least one bounded real engagement supplies measured E2 workload evidence;
+4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E2 workload;
+5. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
+6. all recurring costs and package prices are normalized to the declared monthly model period before margin/payback calculations;
+7. onboarding payback and recurring capacity are visible;
+8. pricing has an identified ICP/scope boundary;
+9. detailed internal economics are stored in the approved private/restricted location.
 
 A public-safe formula or empty template does not satisfy this gate by itself.
