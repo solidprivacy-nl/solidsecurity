@@ -210,6 +210,8 @@ evidence:
   scope_id: SCOPE-SYNTH-CARE
   coverage_scope: SCOPE-SYNTH-CARE
   source_ref: synthetic_access_recertification_record
+  source_type: internal_synthetic_evidence
+  mission_evidence_class: E1_SYNTHETIC
   captured_by_actor_type: HUMAN
   captured_by: operator-01
   captured_at: '2026-07-01T08:00:00Z'
@@ -222,6 +224,8 @@ evidence:
   scope_id: SCOPE-SYNTH-CARE
   coverage_scope: SCOPE-SYNTH-CARE
   source_ref: synthetic_restore_test_record
+  source_type: internal_synthetic_evidence
+  mission_evidence_class: E1_SYNTHETIC
   captured_by_actor_type: SYSTEM
   captured_by: backup-platform-01
   captured_at: '2026-03-01T08:00:00Z'
@@ -234,6 +238,8 @@ evidence:
   scope_id: SCOPE-SYNTH-CARE
   coverage_scope: SCOPE-SYNTH-CARE
   source_ref: synthetic_internal_governance_review
+  source_type: internal_synthetic_evidence
+  mission_evidence_class: E1_SYNTHETIC
   captured_by_actor_type: HUMAN
   captured_by: reviewer-01
   captured_at: '2026-07-01T09:00:00Z'
@@ -246,6 +252,8 @@ evidence:
   scope_id: SCOPE-SYNTH-CARE
   coverage_scope: SCOPE-SYNTH-CARE
   source_ref: synthetic_supplier_attestation
+  source_type: internal_synthetic_evidence
+  mission_evidence_class: E1_SYNTHETIC
   captured_by_actor_type: HUMAN
   captured_by: supplier-contact-01
   captured_at: '2026-07-01T10:00:00Z'
