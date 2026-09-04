@@ -317,6 +317,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(item.get("coverage_scope") in scopes, f"evidence {evidence_id} coverage_scope references unknown scope")
         require(item.get("coverage_scope") == item.get("scope_id"), f"evidence {evidence_id} coverage_scope must match evidence scope")
         require(isinstance(item.get("source_ref"), str) and bool(item.get("source_ref")), f"evidence {evidence_id} requires source provenance")
+        require(item.get("source_type") == "internal_synthetic_evidence", f"evidence {evidence_id} has non-synthetic evidence source type")
+        require(item.get("mission_evidence_class") == model.get("mission_evidence_class") == "E1_SYNTHETIC", f"evidence {evidence_id} Mission evidence class mismatch for synthetic fixture")
         require(item.get("captured_by_actor_type") in {"HUMAN", "SYSTEM"}, f"evidence {evidence_id} captured actor type invalid")
         require(bool(item.get("captured_by")), f"evidence {evidence_id} requires capture identity")
         captured_at = _as_datetime(item.get("captured_at"))
@@ -441,6 +443,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(conflict.get("resolution") is None, f"open conflict {conflict_id} must not contain resolution")
             if assessment_id in assessments:
                 require(assessments[assessment_id].get("state") == "CONFLICT_DETECTED", f"open conflict {conflict_id} requires CONFLICT_DETECTED assessment state")
+                assessment_time = assessment_times.get(str(assessment_id))
+                if detected_at is not None and assessment_time is not None:
+                    require(detected_at <= assessment_time, f"conflict {conflict_id} detection must not occur after CONFLICT_DETECTED assessment state timestamp")
                 open_conflicts_by_assessment[assessment_id].append(conflict)
         elif status == "RESOLVED":
             resolution = conflict.get("resolution")
@@ -470,6 +475,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
                     require(resolved_at >= detected_at, f"resolved conflict {conflict_id} resolution must not precede detection")
                     require(resolved_at.date() <= as_of, f"resolved conflict {conflict_id} resolution must not occur after dossier as_of")
                     if assessment_id in assessments:
+                        assessment_time = assessment_times.get(str(assessment_id))
+                        if assessment_time is not None:
+                            require(resolved_at <= assessment_time, f"resolved conflict {conflict_id} resolution must not occur after assessment latest-state timestamp")
                         previous = latest_resolution_by_assessment.get(assessment_id)
                         if previous is None or resolved_at > previous:
                             latest_resolution_by_assessment[assessment_id] = resolved_at
@@ -706,6 +714,8 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].pop("source_framework_version"), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": ""}), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": "v2"}), "source framework version mismatch")
+    expect(lambda v: v["evidence"][0].update({"source_type": "real_client_export"}), "non-synthetic evidence source type")
+    expect(lambda v: v["evidence"][0].update({"mission_evidence_class": "E2_CONTROLLED_REAL_CLIENT"}), "Mission evidence class mismatch for synthetic fixture")
     expect(lambda v: v["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2027-12-31"}), "validity window exceeds explicit policy")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2026-08-31"}), "not valid at dossier as_of")
@@ -801,16 +811,27 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["evidence_conflicts"][0].update({"evidence_ids":["EVID-GOV-REVIEW"]}), "requires at least two evidence records")
     expect(lambda v: v["evidence"][-1].update({"source_ref":"synthetic_internal_governance_review"}), "requires distinct evidence source provenance")
     expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-06-30T23:59:00Z"}), "detection precedes referenced evidence capture")
+    expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-09-01T09:36:00Z"}), "detection must not occur after CONFLICT_DETECTED assessment state timestamp")
 
     def weak_r3_resolution(v: dict[str, Any]) -> None:
         assessment = v["assessments"][-1]
         assessment["state"] = "REVIEWED"
+        assessment["assessed_at"] = "2026-09-01T11:01:00Z"
         assessment["required_review_class"] = "R3"
         v["evidence_conflicts"][0] = {**v["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic weak R3 resolution","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R3","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
 
     expect(weak_r3_resolution, "R3+ resolution requires independence")
+
+    def late_resolution_state(v: dict[str, Any]) -> None:
+        assessment = v["assessments"][-1]
+        assessment["state"] = "REVIEWED"
+        assessment["assessed_at"] = "2026-09-01T10:59:00Z"
+        v["evidence_conflicts"][0] = {**v["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic late resolution","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
+
+    expect(late_resolution_state, "resolution must not occur after assessment latest-state timestamp")
     partial = deepcopy(model)
     partial["assessments"][-1]["state"] = "REVIEWED"
+    partial["assessments"][-1]["assessed_at"] = "2026-09-01T11:01:00Z"
     partial["evidence_conflicts"][0] = {**partial["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic conflict resolved after evidence reconciliation","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
     partial["professional_reviews"].append({"review_id":"REV-SUPPLIER","assessment_id":"ASM-SUPPLIER","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","decision":"ACCEPT","reviewed_at":"2026-09-01T11:05:00Z"})
     partial["decisions"].append({"decision_id":"DEC-SUPPLIER","assessment_id":"ASM-SUPPLIER","review_id":"REV-SUPPLIER","assurance_state":"VERIFIED","authorized_by":"reviewer-02","authorized_actor_type":"HUMAN","effective_at":"2026-09-01T11:10:00Z"})
@@ -825,6 +846,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     aggregate = deepcopy(model)
     aggregate["assessments"][1]["evidence_ids"] = ["EVID-GOV-REVIEW", "EVID-SUPPLIER-ATTESTATION"]
     aggregate["assessments"][1]["state"] = "CONFLICT_DETECTED"
+    aggregate["assessments"][1]["assessed_at"] = "2026-09-01T11:01:00Z"
     aggregate["professional_reviews"] = [item for item in aggregate["professional_reviews"] if item["assessment_id"] != "ASM-ACCESS-SUPPLIER"]
     aggregate["decisions"] = [item for item in aggregate["decisions"] if item["assessment_id"] != "ASM-ACCESS-SUPPLIER"]
     aggregate["evidence_conflicts"].append({"conflict_id":"CONFLICT-ACCESS-SUPPLIER","assessment_id":"ASM-ACCESS-SUPPLIER","evidence_ids":["EVID-GOV-REVIEW","EVID-SUPPLIER-ATTESTATION"],"status":"OPEN","rationale":"Synthetic aggregation blocker","detected_at":"2026-09-01T11:00:00Z","resolution":None})
