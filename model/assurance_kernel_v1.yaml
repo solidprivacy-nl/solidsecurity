@@ -24,6 +24,11 @@ control_scope:
 - SS-RES-001
 - SS-SUP-002
 - SS-MON-001
+materiality_review_minimums:
+  low: R1
+  medium: R2
+  high: R3
+  critical: R4
 requirements:
 - requirement_id: REQ-ACCESS-LIFECYCLE
   source_id: SRC-SYNTH-ACCESS
@@ -261,6 +266,7 @@ assessments:
   assessor_actor_type: HUMAN
   assessor_id: assessor-01
   assessed_at: '2026-09-01T09:40:00Z'
+  materiality: medium
   required_review_class: R2
 - assessment_id: ASM-ACCESS-SUPPLIER
   assessment_version: 1
@@ -275,6 +281,7 @@ assessments:
   assessor_actor_type: HUMAN
   assessor_id: assessor-01
   assessed_at: '2026-09-01T09:42:00Z'
+  materiality: medium
   required_review_class: R2
 - assessment_id: ASM-RECOVERY
   assessment_version: 1
@@ -289,6 +296,7 @@ assessments:
   assessor_actor_type: HUMAN
   assessor_id: assessor-01
   assessed_at: '2026-09-01T09:20:00Z'
+  materiality: medium
   required_review_class: R2
 - assessment_id: ASM-SUPPLIER
   assessment_version: 1
@@ -304,6 +312,7 @@ assessments:
   assessor_actor_type: AI
   assessor_id: ai-assessor-v1
   assessed_at: '2026-09-01T09:35:00Z'
+  materiality: medium
   required_review_class: R2
 evidence_conflicts:
 - conflict_id: CONFLICT-SUPPLIER-01
