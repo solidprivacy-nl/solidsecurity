@@ -74,6 +74,14 @@ The three revenue modes are mutually exclusive and have fail-closed invariants:
 
 A package that does not satisfy the row for its declared mode is invalid rather than reinterpreted. This prevents identical cash streams from being labeled differently and prevents one-time revenue from leaking into recurring economics.
 
+Revenue mode must also match the package's workflow phases:
+
+- `ONE_TIME` requires at least one onboarding/one-time row and **zero recurring rows**;
+- `RECURRING` requires at least one recurring row; onboarding rows may exist and are treated as unrecovered onboarding cost because upfront price is zero;
+- `UPFRONT_PLUS_RECURRING` requires at least one onboarding/one-time row and at least one recurring row.
+
+A package with a mismatched revenue mode/workflow shape is invalid. Recurring work can therefore never disappear from cost calculations merely because a package was labeled `ONE_TIME`, and a recurring price can never produce a fictitious 100% margin when no recurring work exists.
+
 `evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence.
 
 ### Calculation contract
@@ -110,7 +118,7 @@ For each recurring row:
 
 `recurring_customer_minutes_per_month = sum(customer_minutes * monthly_frequency)`
 
-For `RECURRING` and `UPFRONT_PLUS_RECURRING`, the mode invariants guarantee a positive recurring-price denominator:
+For `RECURRING` and `UPFRONT_PLUS_RECURRING`, the mode invariants guarantee a positive recurring-price denominator and at least one recurring work row:
 
 `recurring_price_month = recurring_price_hypothesis / recurring_price_period_months`
 
@@ -127,15 +135,19 @@ Onboarding payback is defined without dividing by a nonpositive contribution:
 
 A zero or negative recurring contribution is therefore a valid adverse sensitivity result, not a division error and not silently treated as eventual payback.
 
-For a `ONE_TIME` package, all recurring revenue, recurring margin and recurring-payback outputs are `NOT_APPLICABLE`; its economics are represented by the upfront contribution/margin against the actual onboarding/one-time delivery cost.
+For a `ONE_TIME` package, recurring rows are prohibited and all recurring revenue, recurring margin and recurring-payback outputs are `NOT_APPLICABLE`; its economics are represented by the upfront contribution/margin against the actual onboarding/one-time delivery cost.
 
 `recurring_professional_minutes_per_client_month = sum(professional_review_minutes * monthly_frequency)`
 
 `professional_client_capacity = available_professional_minutes_per_month / recurring_professional_minutes_per_client_month` when recurring professional minutes are positive; otherwise `NOT_APPLICABLE`.
 
-`expected_occurrences` and `cadence_period_months` must be positive for recurring work rows. The package-level revenue-mode table governs all price/period positivity and exclusivity constraints. This prevents zero denominators, one-time/recurring ambiguity and mixed-period summation.
+`expected_occurrences` and `cadence_period_months` must be positive for recurring work rows. The package-level revenue-mode table plus workflow-phase invariants govern price/period positivity, exclusivity and the required presence/absence of recurring work. This prevents zero denominators, one-time/recurring ambiguity, phantom recurring margin and mixed-period summation.
 
-These are calculation definitions, not published commercial values. Real-client/prospect minutes, internal loaded rates, package-price hypotheses, margins, named provider costs and identifiable measured commercial observations are `PROPRIETARY_RESTRICTED`. Public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and do not disclose restricted pricing or margin assumptions.
+These are calculation definitions, not published commercial values. Classification follows the data owner, not merely the metric name:
+
+- identifiable real-client measurements (including client-linked minutes, workload, review burden, costs or outcomes) are `CLIENT_CONFIDENTIAL` and remain only in the approved client data plane;
+- named prospect/proposal/channel observations, internal loaded rates, package-price hypotheses, margins, named provider costs and de-identified/aggregated operating economics are `PROPRIETARY_RESTRICTED` and belong in the private operations/IP location;
+- public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and disclose no restricted pricing or margin assumptions.
 
 Derived outputs:
 
@@ -173,7 +185,7 @@ A price, workload or capacity assumption may be labeled `VALIDATED_BOUNDED` only
 
 This public document is the **calculation and evidence-class contract**, not the confidential value ledger.
 
-The restricted economics ledger must retain, for every value:
+The private operations/IP economics ledger may retain only non-client-confidential operating/commercial values. For every retained value it records:
 
 - value and unit;
 - workflow/package context;
@@ -185,6 +197,8 @@ The restricted economics ledger must retain, for every value:
 - sample/boundary;
 - last review date;
 - supersession history where the assumption changes.
+
+Identifiable client measurements are never copied into that ledger: they remain `CLIENT_CONFIDENTIAL` in the approved client data plane. Only a deliberately de-identified/aggregated derived value may enter the private operations/IP economics ledger when its source boundary and evidence class remain reconstructable without exposing the client record.
 
 Do not store the restricted ledger, detailed internal rates, price hypotheses, margins, identifiable client/prospect measurements or other commercially sensitive operating intelligence in this public repository. Public-safe synthetic E0 examples remain permitted under `PUBLIC_REPO_POLICY.md` and do not become restricted merely because they contain a minute estimate.
 
@@ -225,9 +239,10 @@ Before any new price list is treated as commercial source of truth:
 3. at least one bounded real engagement supplies measured E2 workload evidence;
 4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E2 workload;
 5. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
-6. the declared revenue mode satisfies its mutually exclusive upfront/recurring price invariants, and all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
+6. the declared revenue mode satisfies its mutually exclusive price invariants **and** its workflow-phase shape; all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
 7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
 8. pricing has an identified ICP/scope boundary;
-9. detailed internal economics are stored in the approved private/restricted location.
+9. identifiable client measurements remain in the approved client data plane while only de-identified/aggregated commercial economics enter the private operations/IP ledger;
+10. detailed internal economics are stored in the approved private/restricted location.
 
 A public-safe formula or empty template does not satisfy this gate by itself.
