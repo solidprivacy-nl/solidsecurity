@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed if current SolidSecurity authority regresses to stale Mission or duplicated Control-runtime doctrine."""
+"""Fail closed if SolidSecurity authority/provenance surfaces regress to stale or duplicated Control doctrine."""
 from pathlib import Path
 import sys
 
@@ -13,12 +13,15 @@ CURRENT_FILES = [
     ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md",
     ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md",
     ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md",
+    ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_V1.md",
     ROOT / "docs" / "DOMAIN_MODEL_V1.md",
     ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md",
     ROOT / "docs" / "PUBLIC_REPO_POLICY.md",
+    ROOT / "docs" / "REVIEW_ADOPTION_R2.md",
     ROOT / "docs" / "WORKPACKAGES_R2.md",
     ROOT / "ROADMAP.md",
     ROOT / "model" / "mission_operating_model_r2.yaml",
+    ROOT / "model" / "review_source_r2.yaml",
     ROOT / "model" / "workpackages_r2.yaml",
 ]
 
@@ -36,6 +39,8 @@ BANNED_EXACT = [
     "product/change B1 assurance",
     "E0/E1 + B1",
     "independent B1",
+    "retain_A_B_for_consequential_changes",
+    "abandon_independent_A_B_governance",
 ]
 
 errors = []
@@ -51,12 +56,15 @@ architecture = (ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
 domain_model_doc = (ROOT / "docs" / "DOMAIN_MODEL_V1.md").read_text(encoding="utf-8")
 workflow = (ROOT / "docs" / "MISSION_DRIVEN_WORKFLOW.md").read_text(encoding="utf-8")
 public_repo_policy = (ROOT / "docs" / "PUBLIC_REPO_POLICY.md").read_text(encoding="utf-8")
+review_adoption = (ROOT / "docs" / "REVIEW_ADOPTION_R2.md").read_text(encoding="utf-8")
 workpackage_index = (ROOT / "docs" / "WORKPACKAGES_R2.md").read_text(encoding="utf-8")
 current = (ROOT / "control" / "CURRENT_STATE.md").read_text(encoding="utf-8")
 bootstrap = (ROOT / "control" / "PROJECT_GOVERNANCE_BOOTSTRAP.md").read_text(encoding="utf-8")
 mission = (ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_R2.md").read_text(encoding="utf-8")
+mission_v1 = (ROOT / "control" / "SOLIDSECURITY_MISSION_CONTRACT_V1.md").read_text(encoding="utf-8")
 assurance = (ROOT / "control" / "SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md").read_text(encoding="utf-8")
 roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+review_source = (ROOT / "model" / "review_source_r2.yaml").read_text(encoding="utf-8")
 workpackages = (ROOT / "model" / "workpackages_r2.yaml").read_text(encoding="utf-8")
 
 required = {
@@ -117,6 +125,15 @@ required = {
             "publication of restricted material always requires an explicit release decision",
         ],
     ),
+    "docs/REVIEW_ADOPTION_R2.md": (
+        review_adoption,
+        [
+            "HISTORICAL_PROVENANCE_ONLY",
+            "not current development routing, review, integration or execution authority",
+            "does not pin a worker topology, lane model or Control protocol",
+            "Current Mission, repository, runtime, review and integration authority must therefore be reconstructed from current canonical sources",
+        ],
+    ),
     "docs/WORKPACKAGES_R2.md": (
         workpackage_index,
         [
@@ -163,6 +180,14 @@ required = {
             "fresh exact-candidate critical review",
         ],
     ),
+    "control/SOLIDSECURITY_MISSION_CONTRACT_V1.md": (
+        mission_v1,
+        [
+            "RETIRED / SUPERSEDED_BY_MISSION_R2",
+            "not** current mission, planning, execution or assurance authority",
+            "does not pin a Control version, runtime-state branch, worker topology or execution protocol",
+        ],
+    ),
     "control/SOLIDSECURITY_ASSURANCE_CONTRACT_V1.md": (
         assurance,
         [
@@ -178,6 +203,14 @@ required = {
             "current central Control authority",
             "fresh exact-candidate project-change review",
             "does not encode a fixed lane count or worker-role topology locally",
+        ],
+    ),
+    "model/review_source_r2.yaml": (
+        review_source,
+        [
+            "authority_status: HISTORICAL_PROVENANCE_ONLY",
+            "current_authority_source: market-predictions/control-plane@main",
+            "retain_risk_proportionate_fresh_exact_candidate_review_for_consequential_changes_without_fixed_worker_topology",
         ],
     ),
     "model/workpackages_r2.yaml": (
