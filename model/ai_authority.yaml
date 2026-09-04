@@ -148,8 +148,8 @@ customer_verified_gate:
   missing_or_unresolved_state: NEEDS_REVIEW
   required_prerequisites:
     - applicable_review_class_satisfied
-    - reviewer_identity_and_scope_competence_recorded
-    - credential_expectation_addressed
+    - reviewer_identity_and_scope_competence_sufficient
+    - credential_expectation_satisfied_or_not_applicable
     - independence_requirement_satisfied
     - reviewer_capacity_confirmed
     - loaded_cost_assumption_recorded
@@ -163,9 +163,11 @@ customer_verified_gate:
     - retention_and_deletion_schedule_ready
   transition_rule: >-
     A customer-facing VERIFIED state may be created only by the authorized human review path
-    after every applicable prerequisite is recorded as satisfied. Missing, unknown, expired or
-    unresolved prerequisites fail closed to NEEDS_REVIEW. This design contract does not itself
-    enable customer VERIFIED claims or approve legal/insurance terms.
+    after every applicable prerequisite is recorded as satisfied, including sufficient scope
+    competence and any applicable credential being satisfied (or explicitly not applicable).
+    Merely recording an insufficient qualification does not satisfy the gate. Missing, unknown,
+    expired, insufficient or unresolved prerequisites fail closed to NEEDS_REVIEW. This design
+    contract does not itself enable customer VERIFIED claims or approve legal/insurance terms.
 prohibited_ai_state_transitions:
   - VERIFIED
   - INDEPENDENTLY_ASSURED
