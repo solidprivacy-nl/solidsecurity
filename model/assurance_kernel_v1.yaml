@@ -47,24 +47,60 @@ requirement_control_maps:
 - mapping_id: MAP-ACCESS-ACCESS
   requirement_id: REQ-ACCESS-LIFECYCLE
   control_id: SS-ACCESS-002
+  framework_ref: SRC-SYNTH-ACCESS
+  framework_version: v1
+  source_requirement_ref: REQ-ACCESS-LIFECYCLE
+  relationship: primary
   coverage: FULL
   rationale: Primary control covers the internally authored access-lifecycle requirement.
+  mapping_status: approved
+  reviewer_id: mapping-reviewer-01
+  reviewer_actor_type: HUMAN
+  mapping_version: 1
+  reviewed_at: '2026-08-31T12:00:00Z'
 - mapping_id: MAP-ACCESS-SUPPLIER
   requirement_id: REQ-ACCESS-LIFECYCLE
   control_id: SS-SUP-002
+  framework_ref: SRC-SYNTH-ACCESS
+  framework_version: v1
+  source_requirement_ref: REQ-ACCESS-LIFECYCLE
+  relationship: partial
   coverage: PARTIAL
   rationale: Supplier governance contributes to third-party access oversight.
+  mapping_status: approved
+  reviewer_id: mapping-reviewer-01
+  reviewer_actor_type: HUMAN
+  mapping_version: 1
+  reviewed_at: '2026-08-31T12:01:00Z'
 - mapping_id: MAP-RECOVERY
   requirement_id: REQ-RECOVERY-TEST
   control_id: SS-RES-001
+  framework_ref: SRC-SYNTH-RESILIENCE
+  framework_version: v1
+  source_requirement_ref: REQ-RECOVERY-TEST
+  relationship: primary
   coverage: FULL
   rationale: Recovery governance directly covers restoration testing.
+  mapping_status: approved
+  reviewer_id: mapping-reviewer-01
+  reviewer_actor_type: HUMAN
+  mapping_version: 1
+  reviewed_at: '2026-08-31T12:02:00Z'
 - mapping_id: MAP-SUPPLIER
   requirement_id: REQ-SUPPLIER-GOV
   control_id: SS-SUP-002
+  framework_ref: SRC-SYNTH-SUPPLIER
+  framework_version: v1
+  source_requirement_ref: REQ-SUPPLIER-GOV
+  relationship: partial
   coverage: PARTIAL
   rationale: Current synthetic implementation covers supplier review but not every
     monitoring aspect.
+  mapping_status: approved
+  reviewer_id: mapping-reviewer-01
+  reviewer_actor_type: HUMAN
+  mapping_version: 1
+  reviewed_at: '2026-08-31T12:03:00Z'
 applicability_decisions:
 - applicability_id: APP-ACCESS
   requirement_id: REQ-ACCESS-LIFECYCLE
