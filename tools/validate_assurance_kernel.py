@@ -235,6 +235,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(implementation.get("control_id") in controls, f"implementation {implementation_id} references control outside canonical control_scope")
         require(implementation.get("scope_id") in scopes, f"implementation {implementation_id} references unknown scope")
         require(implementation.get("implementation_status") in {"DESIGNED", "OPERATING"}, f"implementation {implementation_id} has invalid implementation_status")
+        require(implementation.get("source_of_claim") in {"accepted_human_statement", "generated_policy"}, f"implementation {implementation_id} has invalid source_of_claim")
         if implementation.get("source_of_claim") == "generated_policy":
             require(implementation.get("implementation_status") == "DESIGNED", f"generated policy {implementation_id} must remain DESIGNED")
     for policy_id, policy in validity_policies.items():
@@ -333,6 +334,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(detected_at is not None, f"conflict {conflict_id} detected_at must be a timezone-aware ISO timestamp")
         if detected_at is not None:
             require(detected_at.date() <= as_of, f"conflict {conflict_id} detection must not occur after dossier as_of")
+            for evidence_id in conflict_evidence_ids:
+                capture_time = evidence_capture_times.get(evidence_id)
+                if capture_time is not None:
+                    require(detected_at >= capture_time, f"conflict {conflict_id} detection precedes referenced evidence capture {evidence_id}")
         status = conflict.get("status")
         require(status in {"OPEN", "RESOLVED"}, f"conflict {conflict_id} status invalid")
         if assessment_id in assessments:
@@ -576,6 +581,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].pop("reevaluation_trigger"), "requires reevaluation trigger")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "UNKNOWN"}), "invalid implementation_status")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "DESIGNED"}), "requires OPERATING implementation")
+    expect(lambda v: v["client_implementations"][0].update({"source_of_claim": "generated_polcy"}), "invalid source_of_claim")
     expect(lambda v: v["evidence"][0].update({"valid_from": "2026-09-02", "expires_at": "2026-12-31"}), "not valid at review time")
     expect(lambda v: (v["evidence"][0].update({"expires_at": "2026-09-01"}), v["decisions"][0].update({"effective_at": "2026-09-02T10:05:00Z"})), "not valid at decision time")
     expect(lambda v: v["professional_reviews"][0].update({"reviewed_at": "not-a-timestamp"}), "reviewed_at must be a timezone-aware ISO timestamp")
@@ -624,6 +630,7 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["evidence_conflicts"][0].update({"status":"RESOLVED"}), "requires governed resolution")
     expect(lambda v: v["evidence_conflicts"][0].update({"evidence_ids":["EVID-GOV-REVIEW"]}), "requires at least two evidence records")
     expect(lambda v: v["evidence"][-1].update({"source_ref":"synthetic_internal_governance_review"}), "requires distinct evidence source provenance")
+    expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-06-30T23:59:00Z"}), "detection precedes referenced evidence capture")
     partial = deepcopy(model)
     partial["assessments"][-1]["state"] = "REVIEWED"
     partial["evidence_conflicts"][0] = {**partial["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic conflict resolved after evidence reconciliation","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
