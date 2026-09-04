@@ -16,8 +16,11 @@ AI_AUTHORITY_PATH = ROOT / "model/ai_authority.yaml"
 FOUNDATION_ENUMS_PATH = ROOT / "model/foundation_enums.yaml"
 GOLDEN_PATH = ROOT / "spec/assurance_kernel_v1_dossier.md"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
 class _UniqueKeyLoader(yaml.SafeLoader):
     """Safe YAML loader that rejects duplicate mapping keys."""
+
+
 def _construct_unique_mapping(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode, deep: bool = False) -> dict[Any, Any]:
     mapping: dict[Any, Any] = {}
     for key_node, value_node in node.value:
@@ -26,14 +29,22 @@ def _construct_unique_mapping(loader: yaml.SafeLoader, node: yaml.nodes.MappingN
             raise ValueError(f"duplicate YAML key: {key!r}")
         mapping[key] = loader.construct_object(value_node, deep=deep)
     return mapping
+
+
 _UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _construct_unique_mapping)
+
+
 def _load_yaml_text(text: str, label: str) -> dict[str, Any]:
     value = yaml.load(text, Loader=_UniqueKeyLoader)
     if not isinstance(value, dict):
         raise ValueError(f"{label} root must be a mapping")
     return value
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     return _load_yaml_text(path.read_text(encoding="utf-8"), path.name)
+
+
 def _as_date(value: object) -> date | None:
     if isinstance(value, datetime):
         return None
@@ -45,6 +56,8 @@ def _as_date(value: object) -> date | None:
         except ValueError:
             return None
     return None
+
+
 def _as_datetime(value: object) -> datetime | None:
     if isinstance(value, datetime):
         parsed = value
@@ -56,6 +69,8 @@ def _as_datetime(value: object) -> datetime | None:
     else:
         return None
     return parsed if parsed.tzinfo is not None else None
+
+
 def _index(items: object, key: str, errors: list[str]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     if not isinstance(items, list):
@@ -74,6 +89,8 @@ def _index(items: object, key: str, errors: list[str]) -> dict[str, dict[str, An
             continue
         result[value] = item
     return result
+
+
 def _string_list(value: object, label: str, errors: list[str], *, nonempty: bool = True) -> list[str]:
     if not isinstance(value, list):
         errors.append(f"{label} must be a list")
@@ -89,6 +106,8 @@ def _string_list(value: object, label: str, errors: list[str], *, nonempty: bool
     if len(result) != len(set(result)):
         errors.append(f"{label} must not contain duplicates")
     return result
+
+
 def _proof_levels(proof_ladder: dict[str, Any], errors: list[str]) -> dict[str, int]:
     states = proof_ladder.get("states")
     result: dict[str, int] = {}
@@ -112,6 +131,8 @@ def _proof_levels(proof_ladder: dict[str, Any], errors: list[str]) -> dict[str, 
     if not required.issubset(result):
         errors.append(f"canonical proof ladder missing states: {sorted(required - set(result))}")
     return result
+
+
 def _review_classes(ai_authority: dict[str, Any], errors: list[str]) -> dict[str, int]:
     classes = ai_authority.get("review_classes")
     if not isinstance(classes, dict):
@@ -127,6 +148,8 @@ def _review_classes(ai_authority: dict[str, Any], errors: list[str]) -> dict[str
     if not required.issubset(result):
         errors.append(f"canonical AI authority missing review classes: {sorted(required - set(result))}")
     return result
+
+
 def _enum_values(enums: dict[str, Any], key: str, errors: list[str]) -> set[str]:
     value = enums.get(key)
     if not isinstance(value, list) or not value or any(not isinstance(item, str) or not item for item in value):
@@ -135,15 +158,21 @@ def _enum_values(enums: dict[str, Any], key: str, errors: list[str]) -> set[str]
     if len(value) != len(set(value)):
         errors.append(f"canonical foundation enum {key} contains duplicates")
     return set(value)
+
+
 def _evidence_valid_at(item: dict[str, Any], as_of: date) -> bool:
     valid_from = _as_date(item.get("valid_from"))
     expires_at = _as_date(item.get("expires_at"))
     return valid_from is not None and expires_at is not None and valid_from <= as_of <= expires_at
+
+
 def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof_ladder: dict[str, Any], ai_authority: dict[str, Any], foundation_enums: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
     errors: list[str] = []
+
     def require(condition: bool, message: str) -> None:
         if not condition:
             errors.append(message)
+
     proof_levels = _proof_levels(proof_ladder, errors)
     review_classes = _review_classes(ai_authority, errors)
     assessment_results = _enum_values(foundation_enums, "assessment_result", errors)
@@ -151,6 +180,7 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     require(model.get("status") == "R2_WP01_CANDIDATE", "assurance kernel must remain an R2-WP01 candidate")
     require(model.get("mission_gap") == "SS-R2-GAP-01", "assurance kernel must remain bound to SS-R2-GAP-01")
     require(model.get("semantic_projection_only") is True, "assurance kernel must remain an explicit semantic projection, not a persistence schema")
+    require(model.get("mission_evidence_class") in {"E0_DESIGN", "E1_SYNTHETIC"}, "synthetic Mission evidence class invalid")
     as_of = _as_date(model.get("as_of"))
     require(as_of is not None, "as_of must be a valid ISO date")
     if as_of is None:
@@ -161,6 +191,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     if not isinstance(materiality_minimums, dict):
         materiality_minimums = {}
     sources = _index(model.get("sources"), "source_id", errors)
+    for source_id, source in sources.items():
+        require(source.get("source_type") == "internal_synthetic_requirement_set", f"source {source_id} has non-synthetic source type")
+        source_version = source.get("version")
+        require(isinstance(source_version, str) and bool(source_version.strip()), f"source {source_id} requires non-empty version")
     scopes = _index(model.get("scopes"), "scope_id", errors)
     requirements = _index(model.get("requirements"), "requirement_id", errors)
     catalog_controls = _index(control_catalog.get("controls"), "id", errors)
@@ -213,7 +247,11 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             requirement = requirements[requirement_id]
             source = sources.get(requirement.get("source_id"), {})
             require(item.get("source_id") == requirement.get("source_id"), f"applicability {applicability_id} source provenance mismatch")
-            require(item.get("source_framework_version") == source.get("version"), f"applicability {applicability_id} source framework version mismatch")
+            source_version = source.get("version")
+            framework_version = item.get("source_framework_version")
+            require(isinstance(framework_version, str) and bool(framework_version.strip()), f"applicability {applicability_id} requires non-empty source framework version")
+            if isinstance(source_version, str) and source_version.strip() and isinstance(framework_version, str) and framework_version.strip():
+                require(framework_version == source_version, f"applicability {applicability_id} source framework version mismatch")
         require(isinstance(item.get("rationale"), str) and bool(item.get("rationale")), f"applicability {applicability_id} requires rationale")
         require(item.get("proposer_actor_type") in {"AI", "HUMAN"}, f"applicability {applicability_id} proposer actor type invalid")
         require(isinstance(item.get("proposer_id"), str) and bool(item.get("proposer_id")), f"applicability {applicability_id} requires proposer identity")
@@ -556,6 +594,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
     require(any(value == "PARTIAL" for value in derived_coverage.values()), "kernel must demonstrate PARTIAL coverage")
     require(any(value == "GAP" for value in derived_coverage.values()), "kernel must demonstrate GAP coverage")
     return errors, {"as_of": as_of, "sources": sources, "scopes": scopes, "requirements": requirements, "controls": controls, "maps_by_requirement": maps_by_requirement, "implementations": implementations, "evidence": evidence, "assessments": assessments, "assessments_by_requirement": assessments_by_requirement, "assessments_by_requirement_control": assessments_by_requirement_control, "conflicts_by_assessment": conflicts_by_assessment, "open_conflicts_by_assessment": open_conflicts_by_assessment, "reviews": reviews, "reviews_by_assessment": reviews_by_assessment, "decisions_by_assessment": decisions_by_assessment, "applicability_by_requirement": applicability_by_requirement, "coverage": derived_coverage, "orphan_requirements": orphan_requirements, "orphan_controls": orphan_controls, "multi_control_requirements": multi_control_requirements, "shared_controls": shared_controls, "shared_evidence": shared_evidence}
+
+
 def _assurance_state(requirement_id: str, derived: dict[str, Any]) -> str:
     coverage = derived["coverage"].get(requirement_id)
     if coverage == "GAP":
@@ -576,12 +616,16 @@ def _assurance_state(requirement_id: str, derived: dict[str, Any]) -> str:
     if coverage == "PARTIAL":
         return "PARTIAL_COVERAGE"
     return "VERIFIED"
+
+
 def _applicability_token(requirement_id: str, derived: dict[str, Any]) -> str:
     items = derived["applicability_by_requirement"].get(requirement_id, [])
     if len(items) != 1:
         return "MISSING_APPLICABILITY"
     item = items[0]
     return f"{item['applicability_id']}@{item['scope_id']}"
+
+
 def _traces(requirement_id: str, derived: dict[str, Any]) -> list[str]:
     requirement = derived["requirements"][requirement_id]
     source_id = requirement["source_id"]
@@ -616,6 +660,8 @@ def _traces(requirement_id: str, derived: dict[str, Any]) -> list[str]:
                 chain.append(str(assessment["state"]))
             traces.append(" -> ".join(chain))
     return traces
+
+
 def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
     lines = ["# SolidSecurity Synthetic Assurance Kernel Dossier", "", "Source: `model/assurance_kernel_v1.yaml`", "Canonical control catalog: `model/sample_controls.yaml`", "Canonical assessment results: `model/foundation_enums.yaml`", f"As-of: {(_as_date(model.get('as_of')) or date.min).isoformat()}", "Data class: synthetic only; no real client data.", "", "## Coverage", "", "| Requirement | Applicability decision | Scope | Status | Coverage | Controls | Assurance state |", "| --- | --- | --- | --- | --- | --- | --- |"]
     for requirement_id in sorted(derived["requirements"]):
@@ -637,16 +683,29 @@ def render_dossier(model: dict[str, Any], derived: dict[str, Any]) -> str:
     generated_ids = sorted(iid for iid, item in derived["implementations"].items() if item.get("source_of_claim") == "generated_policy")
     lines.extend(["", "## Kernel demonstrations", "", f"- Multi-control obligation: `{first_multi}` -> {', '.join(f'`{cid}`' for cid in first_multi_controls) if first_multi_controls else 'none'}", f"- Shared control reuse: {'; '.join(shared_control_lines) if shared_control_lines else 'none'}", f"- Shared evidence reuse: {'; '.join(shared_evidence_lines) if shared_evidence_lines else 'none'}", f"- Orphan requirements: {', '.join(f'`{rid}`' for rid in derived['orphan_requirements']) if derived['orphan_requirements'] else 'none'}", f"- Orphan controls: {', '.join(f'`{cid}`' for cid in derived['orphan_controls']) if derived['orphan_controls'] else 'none'}", f"- Open evidence conflicts: {', '.join(f'`{cid}`' for cid in open_conflict_ids) if open_conflict_ids else 'none'}", f"- Reopened after evidence expiry: {', '.join(f'`{aid}`' for aid in reopened_ids) if reopened_ids else 'none'}", f"- Generated-policy design-only implementations: {', '.join(f'`{iid}`' for iid in generated_ids) if generated_ids else 'none'}", "", "This dossier is synthetic validation evidence. It is not a legal/compliance verdict, certification, independent assurance statement, or real-client assessment.", ""])
     return "\n".join(lines)
+
+
 def _expect_regression_failure(base: dict[str, Any], authorities: tuple[dict[str, Any], ...], mutate, expected: str, failures: list[str]) -> None:
     candidate = deepcopy(base)
     mutate(candidate)
     errors, _ = validate_model(candidate, *authorities)
     if not any(expected in error for error in errors):
         failures.append(f"regression did not fail closed: {expected}")
+
+
 def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ...]) -> list[str]:
     failures: list[str] = []
+
     def expect(mutate, expected: str) -> None:
         _expect_regression_failure(model, authorities, mutate, expected, failures)
+
+    expect(lambda v: v.update({"mission_evidence_class": "E2_CONTROLLED_REAL_CLIENT"}), "synthetic Mission evidence class invalid")
+    expect(lambda v: v["sources"][0].update({"source_type": "real_client_requirement_set"}), "non-synthetic source type")
+    expect(lambda v: v["sources"][0].pop("version"), "requires non-empty version")
+    expect(lambda v: v["sources"][0].update({"version": ""}), "requires non-empty version")
+    expect(lambda v: v["applicability_decisions"][0].pop("source_framework_version"), "requires non-empty source framework version")
+    expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": ""}), "requires non-empty source framework version")
+    expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": "v2"}), "source framework version mismatch")
     expect(lambda v: v["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2027-12-31"}), "validity window exceeds explicit policy")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2026-08-31"}), "not valid at dossier as_of")
@@ -661,9 +720,11 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["applicability_decisions"][0].pop("reevaluation_trigger"), "requires reevaluation trigger")
     expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R3", "review_class": "R3", "independence_class": "INTERNAL_QUALIFIED"}), "R3+ review requires independence")
     expect(lambda v: v["applicability_decisions"][0].update({"required_review_class": "R4", "review_class": "R4", "independence_class": "INDEPENDENT_EXTERNAL"}), "R4 review requires external authority provenance")
+
     def applicability_self_review(v: dict[str, Any]) -> None:
         item = v["applicability_decisions"][0]
         item.update({"proposer_actor_type": "HUMAN", "proposer_id": "reviewer-01", "required_review_class": "R3", "review_class": "R3", "independence_class": "INDEPENDENT_INTERNAL"})
+
     expect(applicability_self_review, "R3+ reviewer must differ from proposer")
     expect(lambda v: v["applicability_decisions"][0].update({"reviewed_at": "2026-09-01T09:41:00Z"}), "predates applicability review")
     expect(lambda v: v["client_implementations"][0].update({"implementation_status": "UNKNOWN"}), "invalid implementation_status")
@@ -688,49 +749,65 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["control_scope"].append("SS-NOT-A-CONTROL"), "references unknown canonical control")
     expect(lambda v: v["expected_coverage"].update({"REQ-SUPPLIER-GOV": "FULL"}), "derived coverage does not match expected_coverage")
     expect(lambda v: v["client_implementations"][-1].update({"implementation_status": "OPERATING"}), "must remain DESIGNED")
+
     def generated_policy_promotion(v: dict[str, Any]) -> None:
         v["assessments"][1]["implementation_id"] = "IMP-GENERATED-POLICY"
+
     expect(generated_policy_promotion, "cannot assess generated-policy implementation for assurance")
+
     def future_capture_before_review(v: dict[str, Any]) -> None:
         for item in v["evidence"]:
             if item["evidence_id"] == "EVID-GOV-REVIEW":
                 item["captured_at"] = "2026-09-01T10:01:00Z"
+
     expect(future_capture_before_review, "predates relied-on evidence capture")
+
     def cross_scope(v: dict[str, Any]) -> None:
         v["scopes"].append({"scope_id": "SCOPE-SYNTH-OTHER", "name": "Synthetic other scope"})
         v["client_implementations"][0]["scope_id"] = "SCOPE-SYNTH-OTHER"
+
     expect(cross_scope, "implementation scope does not match requirement applicability scope")
+
     def cross_scope_evidence(v: dict[str, Any]) -> None:
         v["scopes"].append({"scope_id": "SCOPE-SYNTH-OTHER", "name": "Synthetic other scope"})
         v["evidence"][0]["scope_id"] = "SCOPE-SYNTH-OTHER"
         v["evidence"][0]["coverage_scope"] = "SCOPE-SYNTH-OTHER"
+
     expect(cross_scope_evidence, "scope does not match assessed scope")
+
     def duplicate_decision(v: dict[str, Any]) -> None:
         extra = deepcopy(v["decisions"][0])
         extra["decision_id"] = "DEC-ACCESS-SECOND"
         extra["effective_at"] = "2026-09-01T10:07:00Z"
         v["decisions"].append(extra)
+
     expect(duplicate_decision, "must have at most one current assurance decision")
+
     def stale_recovery(v: dict[str, Any]) -> None:
         for assessment in v["assessments"]:
             if assessment["assessment_id"] == "ASM-RECOVERY":
                 assessment["state"] = "REVIEWED"
                 assessment["proposed_proof_level"] = "EVIDENCED"
+
     expect(stale_recovery, "with no evidence valid at as_of must be REOPENED")
+
     def promote_conflict(v: dict[str, Any]) -> None:
         v["assessments"][-1]["state"] = "REVIEWED"
         v["professional_reviews"].append({"review_id":"REV-SUPPLIER-BAD","assessment_id":"ASM-SUPPLIER","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R2","independence_class":"INTERNAL_QUALIFIED","decision":"ACCEPT","reviewed_at":"2026-09-01T11:00:00Z"})
         v["decisions"].append({"decision_id":"DEC-SUPPLIER-BAD","assessment_id":"ASM-SUPPLIER","review_id":"REV-SUPPLIER-BAD","assurance_state":"VERIFIED","authorized_by":"reviewer-02","authorized_actor_type":"HUMAN","effective_at":"2026-09-01T11:05:00Z"})
+
     expect(promote_conflict, "open evidence conflict cannot have assurance decision")
     expect(lambda v: v["evidence_conflicts"][0].update({"status":"RESOLVED"}), "requires governed resolution")
     expect(lambda v: v["evidence_conflicts"][0].update({"evidence_ids":["EVID-GOV-REVIEW"]}), "requires at least two evidence records")
     expect(lambda v: v["evidence"][-1].update({"source_ref":"synthetic_internal_governance_review"}), "requires distinct evidence source provenance")
     expect(lambda v: v["evidence_conflicts"][0].update({"detected_at":"2026-06-30T23:59:00Z"}), "detection precedes referenced evidence capture")
+
     def weak_r3_resolution(v: dict[str, Any]) -> None:
         assessment = v["assessments"][-1]
         assessment["state"] = "REVIEWED"
         assessment["required_review_class"] = "R3"
         v["evidence_conflicts"][0] = {**v["evidence_conflicts"][0], "status":"RESOLVED", "resolution":{"rationale":"Synthetic weak R3 resolution","reviewer_id":"reviewer-02","reviewer_actor_type":"HUMAN","review_class":"R3","independence_class":"INTERNAL_QUALIFIED","resolved_at":"2026-09-01T11:00:00Z","state_transition":"REVIEWED"}}
+
     expect(weak_r3_resolution, "R3+ resolution requires independence")
     partial = deepcopy(model)
     partial["assessments"][-1]["state"] = "REVIEWED"
@@ -780,6 +857,8 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
         if "duplicate YAML key" not in str(exc):
             failures.append("duplicate YAML key regression failed for the wrong reason")
     return failures
+
+
 def main() -> int:
     try:
         model = _load_yaml(MODEL_PATH)
@@ -818,5 +897,7 @@ def main() -> int:
     print("SOLIDSECURITY_ASSURANCE_KERNEL=PASS")
     print("coverage=" + ",".join(f"{key}:{derived['coverage'][key]}" for key in sorted(derived["coverage"])) + f" orphan_requirements={len(derived['orphan_requirements'])} orphan_controls={len(derived['orphan_controls'])} shared_controls={len(derived['shared_controls'])} shared_evidence={len(derived['shared_evidence'])}")
     return 0
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
