@@ -59,12 +59,20 @@ Required fields per workflow step:
 
 Required package-level revenue fields:
 
-- `revenue_mode`: `ONE_TIME`, `RECURRING`, or `UPFRONT_PLUS_RECURRING`;
-- `upfront_price_hypothesis`: the one-time package price or onboarding/upfront fee; `0` when no upfront revenue is assumed;
-- `recurring_price_hypothesis`: required only when recurring revenue exists;
-- `recurring_price_period_months`: positive whenever recurring revenue exists.
+- `revenue_mode`: exactly one of `ONE_TIME`, `RECURRING`, or `UPFRONT_PLUS_RECURRING`;
+- `upfront_price_hypothesis`: the one-time package price or onboarding/upfront fee;
+- `recurring_price_hypothesis`: the recurring package price for its declared period;
+- `recurring_price_period_months`: the recurring price period in months when recurring revenue exists.
 
-For `ONE_TIME`, the full package price is represented by `upfront_price_hypothesis` and no recurring revenue/margin/payback output is calculated. For `RECURRING`, `upfront_price_hypothesis` may be `0`; onboarding cost is then recovered, if at all, from recurring contribution. `UPFRONT_PLUS_RECURRING` keeps both revenue streams explicit.
+The three revenue modes are mutually exclusive and have fail-closed invariants:
+
+| `revenue_mode` | `upfront_price_hypothesis` | `recurring_price_hypothesis` | `recurring_price_period_months` |
+| --- | --- | --- | --- |
+| `ONE_TIME` | `> 0` | exactly `0` | `NOT_APPLICABLE` |
+| `RECURRING` | exactly `0` | `> 0` | `> 0` |
+| `UPFRONT_PLUS_RECURRING` | `> 0` | `> 0` | `> 0` |
+
+A package that does not satisfy the row for its declared mode is invalid rather than reinterpreted. This prevents identical cash streams from being labeled differently and prevents one-time revenue from leaking into recurring economics.
 
 `evidence_status` and `mission_evidence_class` are independent. A measured pilot workload is not automatically market/commercial evidence.
 
@@ -88,7 +96,7 @@ Onboarding rows are one-time work units; repeated onboarding actions are represe
 
 `upfront_contribution_before_overhead = upfront_price_hypothesis - onboarding_delivery_cost`
 
-`upfront_gross_margin_sensitivity = upfront_contribution_before_overhead / upfront_price_hypothesis` when `upfront_price_hypothesis > 0`.
+`upfront_gross_margin_sensitivity = upfront_contribution_before_overhead / upfront_price_hypothesis` when `upfront_price_hypothesis > 0`; otherwise `NOT_APPLICABLE`.
 
 `unrecovered_onboarding_cost = max(0, onboarding_delivery_cost - upfront_price_hypothesis)`
 
@@ -102,7 +110,7 @@ For each recurring row:
 
 `recurring_customer_minutes_per_month = sum(customer_minutes * monthly_frequency)`
 
-For a package with recurring revenue:
+For `RECURRING` and `UPFRONT_PLUS_RECURRING`, the mode invariants guarantee a positive recurring-price denominator:
 
 `recurring_price_month = recurring_price_hypothesis / recurring_price_period_months`
 
@@ -110,15 +118,22 @@ For a package with recurring revenue:
 
 `recurring_gross_margin_sensitivity = monthly_recurring_contribution_before_overhead / recurring_price_month`
 
-`onboarding_payback_months = unrecovered_onboarding_cost / positive monthly_recurring_contribution_before_overhead`
+Onboarding payback is defined without dividing by a nonpositive contribution:
 
-For a `ONE_TIME` package, recurring margin and onboarding-payback-in-months are `NOT_APPLICABLE`; its economics are represented by the upfront contribution/margin against the actual onboarding/one-time delivery cost.
+- if `revenue_mode == ONE_TIME`: `onboarding_payback_months = NOT_APPLICABLE`;
+- else if `unrecovered_onboarding_cost == 0`: `onboarding_payback_months = 0`;
+- else if `monthly_recurring_contribution_before_overhead > 0`: `onboarding_payback_months = unrecovered_onboarding_cost / monthly_recurring_contribution_before_overhead`;
+- else: `onboarding_payback_months = NOT_RECOVERABLE`.
+
+A zero or negative recurring contribution is therefore a valid adverse sensitivity result, not a division error and not silently treated as eventual payback.
+
+For a `ONE_TIME` package, all recurring revenue, recurring margin and recurring-payback outputs are `NOT_APPLICABLE`; its economics are represented by the upfront contribution/margin against the actual onboarding/one-time delivery cost.
 
 `recurring_professional_minutes_per_client_month = sum(professional_review_minutes * monthly_frequency)`
 
-`professional_client_capacity = available_professional_minutes_per_month / recurring_professional_minutes_per_client_month`
+`professional_client_capacity = available_professional_minutes_per_month / recurring_professional_minutes_per_client_month` when recurring professional minutes are positive; otherwise `NOT_APPLICABLE`.
 
-`expected_occurrences`, `cadence_period_months` and `recurring_price_period_months` must be positive whenever their recurring terms apply. Price hypotheses are non-negative. This prevents one-time revenue from being treated as recurring revenue and prevents monthly, quarterly and annual amounts from being added without normalization.
+`expected_occurrences` and `cadence_period_months` must be positive for recurring work rows. The package-level revenue-mode table governs all price/period positivity and exclusivity constraints. This prevents zero denominators, one-time/recurring ambiguity and mixed-period summation.
 
 These are calculation definitions, not published commercial values. Real-client/prospect minutes, internal loaded rates, package-price hypotheses, margins, named provider costs and identifiable measured commercial observations are `PROPRIETARY_RESTRICTED`. Public-safe synthetic/model minute examples may remain public when explicitly labeled `HYPOTHESIS` / `E0_DESIGN`, contain no client/prospect identity and do not disclose restricted pricing or margin assumptions.
 
@@ -128,10 +143,10 @@ Derived outputs:
 - upfront contribution and upfront gross-margin sensitivity where an upfront/one-time price exists;
 - recurring monthly delivery cost where recurring service exists;
 - recurring monthly contribution and gross-margin sensitivity where recurring revenue exists;
-- unrecovered onboarding cost and recurring-payback months where applicable;
+- unrecovered onboarding cost and recurring-payback months or `NOT_RECOVERABLE` where applicable;
 - professional minutes per client/month;
 - customer minutes per onboarding and recurring month;
-- client capacity per professional monthly minute envelope;
+- client capacity per professional monthly minute envelope where a professional-minute denominator exists;
 - margin impact of external review/assurance requirements.
 
 ## Evidence rules
@@ -210,8 +225,8 @@ Before any new price list is treated as commercial source of truth:
 3. at least one bounded real engagement supplies measured E2 workload evidence;
 4. any ICP/channel/willingness-to-pay conclusion uses separate E3 evidence rather than inferred E2 workload;
 5. hypothesis, observed-market, measured-pilot and validated-bounded values are separated;
-6. one-time/upfront revenue is separated from recurring revenue and all recurring costs/prices are normalized to the declared monthly model period before margin/payback calculations;
-7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback and recurring capacity are visible;
+6. the declared revenue mode satisfies its mutually exclusive upfront/recurring price invariants, and all recurring costs/prices are normalized to the declared monthly model period before recurring margin/payback calculations;
+7. upfront contribution, unrecovered onboarding cost, applicable onboarding payback/`NOT_RECOVERABLE` status and recurring capacity are visible;
 8. pricing has an identified ICP/scope boundary;
 9. detailed internal economics are stored in the approved private/restricted location.
 
