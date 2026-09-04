@@ -55,7 +55,7 @@ This design does **not** authorize real-client data or production deployment.
 - current Control runtime version, locks, scheduling, worker topology and integration state are external live facts and must be read fresh;
 - consequential project candidates retain exact candidate/head/base binding and fresh critical review;
 - external/independent exact-candidate review remains required whenever the current project or Control gate requires it;
-- stale review never follows a moved candidate;
+- **candidate movement invalidates stale review**; review evidence never follows a moved candidate;
 - no direct project worker writes to canonical Control state outside the current central contract;
 - no SolidSecurity-specific scheduler, intake/handover runtime plane or provider fallback;
 - `principal_manual_relay_count=0` remains the target/invariant.
