@@ -222,16 +222,64 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(requirement.get("source_id") in sources, f"requirement {requirement_id} references unknown source")
     maps_by_requirement: dict[str, list[dict[str, Any]]] = {rid: [] for rid in requirements}
     requirements_by_control: dict[str, set[str]] = {cid: set() for cid in controls}
+    mapping_review_times: dict[tuple[str, str], datetime] = {}
+    allowed_mapping_relationships = {"supports", "primary", "partial", "contextual"}
     for mapping_id, mapping in mappings.items():
         requirement_id = mapping.get("requirement_id")
         control_id = mapping.get("control_id")
+        requirement = requirements.get(str(requirement_id))
+        source = sources.get(requirement.get("source_id"), {}) if isinstance(requirement, dict) else {}
+        source_id = requirement.get("source_id") if isinstance(requirement, dict) else None
+        source_version = source.get("version") if isinstance(source, dict) else None
         require(requirement_id in requirements, f"mapping {mapping_id} references unknown requirement")
         require(control_id in controls, f"mapping {mapping_id} references control outside canonical control_scope")
-        require(mapping.get("coverage") in {"FULL", "PARTIAL"}, f"mapping {mapping_id} coverage must be FULL or PARTIAL")
+        require(mapping.get("framework_ref") == source_id, f"mapping {mapping_id} framework/source reference mismatch")
+        framework_version = mapping.get("framework_version")
+        require(isinstance(framework_version, str) and bool(framework_version.strip()), f"mapping {mapping_id} requires framework version")
+        if isinstance(source_version, str) and source_version.strip() and isinstance(framework_version, str) and framework_version.strip():
+            require(framework_version == source_version, f"mapping {mapping_id} framework version mismatch")
+        require(mapping.get("source_requirement_ref") == requirement_id, f"mapping {mapping_id} source requirement reference mismatch")
+        relationship = mapping.get("relationship")
+        require(relationship in allowed_mapping_relationships, f"mapping {mapping_id} relationship invalid")
+        coverage = mapping.get("coverage")
+        require(coverage in {"FULL", "PARTIAL"}, f"mapping {mapping_id} coverage must be FULL or PARTIAL")
+        if coverage == "FULL":
+            require(relationship in {"primary", "supports"}, f"mapping {mapping_id} FULL coverage relationship invalid")
+        if coverage == "PARTIAL":
+            require(relationship in {"partial", "contextual", "supports"}, f"mapping {mapping_id} PARTIAL coverage relationship invalid")
         require(isinstance(mapping.get("rationale"), str) and bool(mapping.get("rationale")), f"mapping {mapping_id} requires rationale")
-        if requirement_id in maps_by_requirement and control_id in controls:
-            maps_by_requirement[requirement_id].append(mapping)
-            requirements_by_control[control_id].add(requirement_id)
+        require(mapping.get("mapping_status") == "approved", f"mapping {mapping_id} must be approved before contributing to coverage")
+        require(mapping.get("reviewer_actor_type") == "HUMAN", f"mapping {mapping_id} requires human reviewer authority")
+        reviewer_id = mapping.get("reviewer_id")
+        require(isinstance(reviewer_id, str) and bool(reviewer_id.strip()), f"mapping {mapping_id} requires reviewer identity")
+        mapping_version = mapping.get("mapping_version")
+        require(isinstance(mapping_version, int) and not isinstance(mapping_version, bool) and mapping_version > 0, f"mapping {mapping_id} requires positive mapping version")
+        reviewed_at = _as_datetime(mapping.get("reviewed_at"))
+        require(reviewed_at is not None, f"mapping {mapping_id} reviewed_at must be a timezone-aware ISO timestamp")
+        if reviewed_at is not None:
+            require(reviewed_at.date() <= as_of, f"mapping {mapping_id} review must not occur after dossier as_of")
+        governance_ok = (
+            requirement_id in requirements
+            and control_id in controls
+            and mapping.get("framework_ref") == source_id
+            and isinstance(framework_version, str) and bool(framework_version.strip())
+            and framework_version == source_version
+            and mapping.get("source_requirement_ref") == requirement_id
+            and relationship in allowed_mapping_relationships
+            and coverage in {"FULL", "PARTIAL"}
+            and mapping.get("mapping_status") == "approved"
+            and mapping.get("reviewer_actor_type") == "HUMAN"
+            and isinstance(reviewer_id, str) and bool(reviewer_id.strip())
+            and isinstance(mapping_version, int) and not isinstance(mapping_version, bool) and mapping_version > 0
+            and reviewed_at is not None
+        )
+        if governance_ok:
+            pair = (str(requirement_id), str(control_id))
+            require(pair not in mapping_review_times, f"duplicate approved mapping for requirement/control pair {pair[0]}->{pair[1]}")
+            if pair not in mapping_review_times:
+                mapping_review_times[pair] = reviewed_at
+                maps_by_requirement[str(requirement_id)].append(mapping)
+                requirements_by_control[str(control_id)].add(str(requirement_id))
     applicability_by_requirement: dict[str, list[dict[str, Any]]] = {rid: [] for rid in requirements}
     applicability_review_times: dict[str, datetime] = {}
     applicability_effective_dates: dict[str, date] = {}
@@ -363,6 +411,9 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             app_effective = applicability_effective_dates.get(str(requirement_id))
             if app_effective is not None:
                 require(assessed_at.date() >= app_effective, f"assessment {assessment_id} predates applicability effective date for requirement {requirement_id}")
+            mapping_reviewed_at = mapping_review_times.get((str(requirement_id), str(control_id)))
+            if mapping_reviewed_at is not None:
+                require(assessed_at >= mapping_reviewed_at, f"assessment {assessment_id} predates approved mapping review")
         apps = applicability_by_requirement.get(requirement_id, [])
         assessed_scope = apps[0].get("scope_id") if len(apps) == 1 else None
         if implementation_id in implementations:
@@ -373,9 +424,10 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
             require(implementation.get("source_of_claim") != "generated_policy", f"assessment {assessment_id} cannot assess generated-policy implementation for assurance")
         if requirement_id in requirements and control_id in controls:
             mapped_controls = {item.get("control_id") for item in maps_by_requirement.get(requirement_id, [])}
-            require(control_id in mapped_controls, f"assessment {assessment_id} control is not mapped to its requirement")
-            assessments_by_requirement[requirement_id].append(assessment)
-            assessments_by_requirement_control.setdefault((requirement_id, control_id), []).append(assessment)
+            require(control_id in mapped_controls, f"assessment {assessment_id} control is not backed by an approved governed mapping")
+            if control_id in mapped_controls:
+                assessments_by_requirement[requirement_id].append(assessment)
+                assessments_by_requirement_control.setdefault((requirement_id, control_id), []).append(assessment)
         evidence_ids = _string_list(assessment.get("evidence_ids"), f"assessment {assessment_id} evidence_ids", errors)
         resolved_evidence: list[dict[str, Any]] = []
         for evidence_id in evidence_ids:
@@ -528,7 +580,8 @@ def validate_model(model: dict[str, Any], control_catalog: dict[str, Any], proof
         require(assessment_id in assessments, f"decision {decision_id} references unknown assessment")
         require(review_id in reviews, f"decision {decision_id} references unknown professional review")
         require(decision.get("authorized_actor_type") == "HUMAN", f"VERIFIED decision {decision_id} requires human authority")
-        require(bool(decision.get("authorized_by")), f"decision {decision_id} requires attributable human authorization")
+        authorized_by = decision.get("authorized_by")
+        require(isinstance(authorized_by, str) and bool(authorized_by.strip()), f"decision {decision_id} requires string human authorization identity")
         effective_at = _as_datetime(decision.get("effective_at"))
         require(effective_at is not None, f"decision {decision_id} effective_at must be a timezone-aware ISO timestamp")
         if effective_at is not None:
@@ -711,12 +764,19 @@ def run_regressions(model: dict[str, Any], authorities: tuple[dict[str, Any], ..
     expect(lambda v: v["sources"][0].update({"source_type": "real_client_requirement_set"}), "non-synthetic source type")
     expect(lambda v: v["sources"][0].pop("version"), "requires non-empty version")
     expect(lambda v: v["sources"][0].update({"version": ""}), "requires non-empty version")
+    expect(lambda v: v["requirement_control_maps"][0].update({"mapping_status": "proposed"}), "must be approved before contributing to coverage")
+    expect(lambda v: v["requirement_control_maps"][0].update({"reviewer_actor_type": "AI"}), "requires human reviewer authority")
+    expect(lambda v: v["requirement_control_maps"][0].update({"framework_version": "v2"}), "framework version mismatch")
+    expect(lambda v: v["requirement_control_maps"][0].update({"source_requirement_ref": "REQ-OTHER"}), "source requirement reference mismatch")
+    expect(lambda v: v["requirement_control_maps"][0].update({"mapping_version": 0}), "requires positive mapping version")
+    expect(lambda v: v["requirement_control_maps"][0].update({"reviewed_at": "2026-09-01T09:41:00Z"}), "predates approved mapping review")
     expect(lambda v: v["applicability_decisions"][0].pop("source_framework_version"), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": ""}), "requires non-empty source framework version")
     expect(lambda v: v["applicability_decisions"][0].update({"source_framework_version": "v2"}), "source framework version mismatch")
     expect(lambda v: v["evidence"][0].update({"source_type": "real_client_export"}), "non-synthetic evidence source type")
     expect(lambda v: v["evidence"][0].update({"mission_evidence_class": "E2_CONTROLLED_REAL_CLIENT"}), "Mission evidence class mismatch for synthetic fixture")
     expect(lambda v: v["decisions"][0].update({"authorized_actor_type": "AI"}), "requires human authority")
+    expect(lambda v: v["decisions"][0].update({"authorized_by": True}), "requires string human authorization identity")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2027-12-31"}), "validity window exceeds explicit policy")
     expect(lambda v: v["evidence"][0].update({"expires_at": "2026-08-31"}), "not valid at dossier as_of")
     expect(lambda v: v["evidence"][0].update({"valid_from": "2026-10-01", "expires_at": "2026-12-31"}), "not valid at dossier as_of")
