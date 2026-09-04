@@ -63,6 +63,8 @@ Required fields per workflow step:
 
 The calculation method is intentionally conventional and auditable. **Month is the common recurring model period.** Mixed cadences are normalized before they are summed.
 
+`operator_minutes`, `professional_review_minutes`, `customer_minutes`, `external_specialist_cost` and `variable_provider_tooling_cost` are **expected per-occurrence values inclusive of the ordinary rework/exception burden represented by that row**. `rework_or_exception_rate` is retained as a diagnostic/segmentation driver explaining those expected values; it is not multiplied into them a second time. If source measurements exclude rework or exception effort, that effort must first be added as separate work rows or converted into inclusive expected per-occurrence values before package economics are calculated. This keeps exceptions economically visible without double-counting them.
+
 `operator_cost = operator_minutes / 60 * loaded_operator_rate`
 
 `professional_cost = professional_review_minutes / 60 * loaded_professional_rate`
