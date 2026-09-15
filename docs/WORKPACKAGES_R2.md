@@ -6,7 +6,7 @@ This file is intentionally an index, not a second specification.
 
 | Workpackage | Purpose | Dependency | Required evidence |
 |---|---|---|---|
-| `R2-WP01` | Executable assurance kernel | M1 + Mission R2 canonical | E0/E1 + B1 |
+| `R2-WP01` | Executable assurance kernel | M1 + Mission R2 canonical | E0/E1 + fresh exact-candidate project-change review under current Control |
 | `R2-WP02` | Launch ICP, GTM, economics, repository/IP | Mission R2 canonical | E0 + progressive E3 |
 | `R2-WP03` | Professional trust and liability readiness | Mission R2 canonical | E0 + qualified external review where required |
 | `R2-WP04` | Bounded real design partner | WP01+WP02+WP03 + minimum safe real-client envelope + explicit principal data gate | E2/E3 |
@@ -14,8 +14,9 @@ This file is intentionally an index, not a second specification.
 
 ## Execution doctrine
 
-- WP01–WP03 may be prepared independently where Control resource/authority rules permit it.
+- WP01–WP03 may be prepared independently where current central Control resource/authority rules permit it.
+- Consequential project/change candidates retain exact candidate/head/base binding and fresh exact-candidate review; candidate movement invalidates stale review evidence.
+- This project does not encode a fixed Control worker lane count, worker-role topology or local assurance lane.
 - WP04 is fail-closed until its real-client/data/contract/professional entry gates are satisfied.
 - WP05 must not substitute synthetic assumptions for observed WP04 friction.
 - Later connectors/interoperability/white-label ideas are options, not active workpackages.
-- Mechanical B0 may be deterministic/self-executed; consequential semantic/security/authority changes retain independent B1.

@@ -1,14 +1,14 @@
-# Mission-Driven Workflow V1
+# Mission-Driven Workflow R2
 
 ## Purpose
 
-This document connects three different flows without mixing their authority:
+This document keeps three flows separate:
 
 1. the **customer service lifecycle**;
 2. the **SolidSecurity product/runtime workflow**;
-3. the **Control mission-development workflow** that decides what SolidSecurity builds next.
+3. the **central Control development boundary** that governs what SolidSecurity builds next.
 
-The customer never interacts with the Control development queue. The Control plane never stores client evidence.
+The customer never interacts with the Control development queue. Control never stores client evidence as project/runtime state.
 
 ---
 
@@ -16,112 +16,62 @@ The customer never interacts with the Control development queue. The Control pla
 
 ## A1. Qualification and scope
 
-SolidSecurity speaks with the prospective customer and establishes organization type, business context, existing obligations, key systems/suppliers, desired outcome and service fit.
-
-Output:
-
-- provisional organization profile;
-- likely framework/obligation scope;
-- service proposition (for example Care or Supplier);
-- explicit unknowns.
+Establish organization context, actual obligations/pressures, key systems/suppliers, desired outcome, service fit and explicit unknowns. Direct Cbw/NIS2 positioning requires a real applicability basis.
 
 ## A2. Operator-led onboarding
 
-A SolidSecurity professional leads the onboarding conversation. The customer is not handed a large self-service questionnaire.
-
-The operator records structured facts while the customer explains the organization. AI may turn notes/transcripts into proposed structured facts, but facts requiring confidence or interpretation are validated by a professional.
+A SolidSecurity professional leads the conversation. The customer is not handed a large self-service GRC questionnaire. AI may propose structured facts from notes/transcripts; material facts and interpretations remain reviewable.
 
 ## A3. Targeted information request
 
-From the known facts and gaps, SolidSecurity generates a short customer-friendly request containing only what is still needed.
-
-Possible channels:
-
-- email;
-- secure upload link;
-- short question form;
-- meeting follow-up.
-
-Every request maps internally to the relevant fact, control, evidence need or decision.
+Ask only for information/evidence that is still needed. Requests map internally to a fact, control, evidence need or decision and may use email, secure upload, short questions or meeting follow-up.
 
 ## A4. Evidence inbox and extraction
 
-Received files, answers and notes enter the client dossier.
-
-AI may:
-
-- classify documents;
-- extract relevant facts/passages;
-- identify candidate controls/requirements;
-- detect contradictions/expired evidence;
-- propose missing information.
-
-Every material extraction retains source/provenance. AI output remains proposed until governed acceptance where required.
+Received files, answers and notes enter the client dossier. AI may classify, extract, compare, detect conflicts/expiry and propose missing information, while preserving provenance. AI output remains proposed until the applicable review/decision boundary is satisfied.
 
 ## A5. Scope and control instantiation
 
-SolidSecurity confirms applicable scope and instantiates the relevant common controls for the client.
+Confirm applicability and instantiate relevant common controls without collapsing object types:
 
-Canonical separation remains:
-
-`Requirement != Control != Implementation != Evidence != Assessment != Review`
+`Requirement != Control != Implementation != Evidence != Assessment != Review != Decision`
 
 ## A6. Assessment and findings
 
-For each applicable control, SolidSecurity records what the customer actually does, what evidence exists, what remains uncertain and what the professional assessment is.
-
-Strong evidence can prove a gap. Generated policy text does not raise proof level by itself.
+Record what the client actually does, what evidence exists, what remains uncertain and the resulting governed assessment. A generated policy never raises proof level by itself.
 
 ## A7. Remediation and managed execution
 
-SolidSecurity converts findings into a prioritized plan.
-
-The system explicitly separates:
+Separate:
 
 - work SolidSecurity can perform;
-- information/evidence needed from the customer;
-- decisions the customer must make;
-- work waiting on an external supplier;
-- material items requiring professional review.
+- evidence/information required from the customer;
+- customer decisions;
+- supplier dependencies;
+- material professional-review items.
 
-SolidSecurity should perform the first category rather than turning it back into customer homework.
+SolidSecurity performs the first category rather than returning it as customer homework.
 
 ## A8. Professional review
 
-Material/ambiguous conclusions enter the review queue. AI cannot self-verify them.
+Material/ambiguous conclusions enter the review path. The reviewer can accept, modify, reject or escalate and must be able to reconstruct scope, evidence and provenance.
 
-The reviewer can accept, modify or reject proposed conclusions and must be able to reconstruct the evidence/provenance behind them.
+## A9. Client visibility
 
-## A9. Client dashboard and baseline output
+The customer surface shows in ordinary language:
 
-The dashboard translates internal control state into ordinary language.
-
-It shows at minimum:
-
-- overall management status by recognizable domain;
+- current state;
 - what is demonstrably arranged;
 - attention points;
-- actions/decisions required from the customer;
-- work currently performed by SolidSecurity;
-- recently completed SolidSecurity work;
-- available reports and last review date.
+- required actions/decisions;
+- SolidSecurity work;
+- available reports and review freshness.
 
-Avoid a single percentage that implies mathematical certainty of compliance.
+Do not require control-ID/GRC literacy and do not present a single percentage as mathematical certainty of compliance.
 
 ## A10. Recurring managed cycle
 
-The client dossier remains alive after baseline delivery.
-
-Recurring triggers include:
-
-- evidence expiry;
-- outstanding actions;
-- new suppliers/systems/AI use;
-- incidents/material changes;
-- scheduled control reviews;
-- relevant requirement/source changes.
-
-The cycle repeats only the affected parts rather than restarting a full audit.
+Re-open only affected parts of the dossier when evidence expires, actions remain open, systems/suppliers/AI use change, incidents occur, scheduled reviews become due or relevant source requirements change.
 
 ---
 
@@ -129,44 +79,17 @@ The cycle repeats only the affected parts rather than restarting a full audit.
 
 ## B1. Operator Workspace
 
-This is the primary professional interface and exposes full domain detail.
-
-Core work queues/views:
-
-- client portfolio;
-- onboarding/intake;
-- evidence inbox;
-- controls/implementations;
-- findings/actions;
-- client requests;
-- AI proposals;
-- professional review queue;
-- approvals/reports;
-- recurring/expiry queue.
+Primary professional work surface for client portfolio, onboarding, evidence, implementations, findings/actions, client requests, AI proposals, professional review, decisions/reports and recurring/expiry work.
 
 ## B2. Client Dashboard
 
-This is a customer-management interface, not a GRC workbench.
-
-Default navigation should stay small, for example:
-
-- Overzicht;
-- Wat is geregeld;
-- Acties & besluiten;
-- Rapportages/bewijs.
+A simple customer-management surface, not a GRC workbench. Default navigation should remain small and outcome-oriented.
 
 ## B3. Interaction Layer
 
-Low-friction external actions may be completed through expiring/scoped links where appropriate:
+Low-friction external actions may use scoped/expiring links for evidence upload, focused questions, fact confirmation and approvals. Every completed interaction writes back to the same authoritative dossier.
 
-- upload evidence;
-- answer one or a few questions;
-- confirm a fact;
-- approve/sign off a document/decision.
-
-The completed interaction writes back into the same authoritative dossier; there is no separate questionnaire truth.
-
-## B4. Data flow
+## B4. Designed data flow
 
 ```text
 Client / SolidSecurity operator
@@ -187,64 +110,71 @@ Shared PostgreSQL <----> Private evidence object store
 Nightly:
 PostgreSQL logical backup + evidence object sync/export
           -> checksum/manifest -> encrypted off-site backup
+          -> periodic actual restore proof
 ```
+
+This architecture is designed but does not authorize real-client processing until the explicit R2 real-client gate is satisfied.
 
 ---
 
-# C. Mission-driven development workflow
+# C. Central Control development boundary
 
-This flow determines what product/service capability is built next. It uses the current Control Minimal Core lifecycle; no SolidSecurity-specific orchestration layer exists.
+This flow determines what project capability is built next. SolidSecurity does not implement or mirror its own orchestration layer.
 
-## C1. Authoritative mission
+## C1. Authority
 
-The canonical machine-readable SolidSecurity mission resides in `market-predictions/control-plane/control/missions/SOLIDSECURITY.mission.json` when that revision is independently assured and integrated.
+- human-readable local doctrine: `control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`;
+- canonical machine-readable mission: current SolidSecurity mission in `market-predictions/control-plane`;
+- canonical Control architecture/index and runtime state: current central Control sources.
 
-The local human-readable contract is `control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`.
+Chat memory and local `CURRENT_STATE.md` are never execution/completion authority.
 
-## C2. State reconstruction
+## C2. Work eligibility
 
-Before deriving work, Control reads authoritative repository/project/runtime state. Chat memory is context only and cannot establish completion, execution or assurance.
+Central Control reconstructs authoritative mission/repository/runtime facts and selects only eligible dependency-satisfied work under its current canonical architecture.
 
-## C3. Work selection
+SolidSecurity supplies the workpackage purpose, evidence class, dependencies, acceptance criteria and authority boundaries. It does not prescribe a permanent Control worker topology, claim protocol, transport or scheduler.
 
-Choose the highest-priority eligible unsatisfied mission work whose dependencies are satisfied.
+## C3. Bounded implementation
 
-One Minimal Core task should represent one immutable purpose/operation. Do not combine unrelated implementation objectives merely to reduce issue count.
+Implementation changes only authorized target-repository scope and remains bound to the exact task/purpose and current Control authority. A scheduler/chat invocation is not START_PROVEN or completion evidence by itself.
 
-## C4. Single authoritative queue
+No project worker may bypass central Control by creating a project-local queue, claim store, handover plane or direct canonical runtime mutation path.
 
-Authorized work is materialized directly as one validated task in the existing `control/DISPATCH_QUEUE.json` authority. There is no separate project intake state plane, handover lifecycle, retry lineage or SolidSecurity scheduler.
+## C4. Fresh exact-candidate review
 
-The task reserves only its immediate predefined successor.
+Consequential changes are reviewed against the exact candidate/head/base and applicable acceptance criteria.
 
-## C5. Worker claim / START_PROVEN
+- deterministic tests/CI cover mechanical invariants;
+- review is fresh and evidence-first rather than a restatement of implementation claims;
+- candidate movement invalidates stale review;
+- `PASS`, `FAIL` and `INDETERMINATE` remain the bounded project-change verdicts;
+- `INDETERMINATE` fails closed;
+- repair changes create a new candidate that must be reviewed again;
+- external/organizationally independent exact-candidate review is mandatory whenever the workpackage, material risk, current repository policy or central Control gate requires it.
 
-A scheduler or chat wake-up is not execution evidence. A bounded authoritative claim proves execution start.
+Central Control may implement fresh critical review with its current runner architecture; SolidSecurity does not create a permanent second assurance lane to achieve review separation.
 
-- A1/A2 perform implementation, repair or project integration work.
-- B1 performs independent exact-head assurance.
-- role capacity and repository exclusivity remain enforced by Control.
+## C5. Post-review behavior
 
-## C6. Immutable result and successor
+A PASS proves only the review gate. Integration, release, deployment and customer authority remain separate and require the current applicable authority.
 
-Each execution produces an exact-task/exact-run immutable result.
+Central Control may hold, integrate, repair or continue only according to its current governed state and repository authority. SolidSecurity does not create a semantic integration task or other local continuation mechanism merely to mirror one Control version.
 
-- implementation `COMPLETED` may materialize exactly one ASSURANCE successor;
-- implementation `BLOCKED` creates no semantic successor;
-- assurance `PASS` may materialize exactly one PROJECT_INTEGRATION successor;
-- assurance `FAIL` may materialize exactly one REPAIR successor;
-- assurance `INDETERMINATE` creates no semantic successor;
-- infrastructure/transport failure is not a semantic verdict and does not create a retry tree.
+## C6. Hard project invariants
 
-## C7. Governed integration and mission-state update
-
-After exact-head PASS and governed integration, authoritative outcome evidence is evaluated against the mission criterion. A gap is SATISFIED only when the evidence is sufficient, not merely because a PR merged.
-
-Control can then select or materialize the next eligible mission work.
-
-## C8. Exact-head rule
-
-Consequential candidates are frozen to their exact candidate SHA for B1. If the candidate changes, assurance must be refreshed. B1 is read-only and cannot repair, merge, release or deploy.
+```text
+central_control_authority=1
+project_local_runtime_state_plane=false
+project_local_scheduler=false
+direct_control_runtime_bypass=false
+exact_candidate_binding=true
+stale_review_after_candidate_movement=false
+deterministic_validation_where_mechanical=true
+external_review_when_required=true
+provider_fallback_introduced_locally=false
+principal_manual_relay_target=0
+```
 
 ---
 
@@ -254,38 +184,19 @@ Before introducing a new service, table family, provider, queue, abstraction or 
 
 1. Which mission criterion does it advance?
 2. Which observed workflow/risk requires it?
-3. Can the same outcome be achieved with an existing object/process/tool?
-4. Does it reduce customer burden or operator work, or materially improve evidence/assurance?
-5. What new operational failure modes does it create?
-6. Can it be deferred until a synthetic/real workflow proves the distinction matters?
+3. Can an existing object/process/tool satisfy the requirement?
+4. Does it reduce customer/operator/reviewer work or materially improve evidence/assurance?
+5. What new failure modes does it create?
+6. Can it wait until synthetic or real workflow evidence proves it is needed?
 
 If no concrete mission/risk evidence exists, defer it.
 
-Examples of intentionally deferred complexity:
-
-- separate database per customer;
-- custom KMS/envelope-encryption system;
-- active-active multi-cloud database;
-- broad enterprise framework import;
-- permanent embeddings/vector memory for all evidence;
-- environment write/remediation connectors;
-- multiple autonomous development queues.
+Intentionally deferred complexity includes database-per-client by default, custom KMS/envelope encryption, active-active multi-cloud, broad framework imports, permanent embeddings for all evidence, write-capable environment connectors and competing development queues.
 
 ---
 
 # E. Mission evidence
 
-Mission progress should increasingly be demonstrated by operational evidence such as:
+Mission progress should increasingly be demonstrated with evidence such as end-to-end workflow completion, actual customer/operator/reviewer effort, AI proposal acceptance/edit/rejection, evidence/assertion reuse, customer comprehension, tenant-isolation negatives, backup/restore proof, professional-review exceptions and recurring-cycle effort.
 
-- end-to-end workflow completion;
-- customer inputs/actions required per onboarding;
-- professional minutes/hours per client step;
-- percentage of AI proposals accepted/modified/rejected;
-- number of evidence items reused across requirements/questionnaires;
-- customer dashboard comprehension/action completion;
-- cross-tenant negative test results;
-- backup/restore results;
-- number and materiality of professional review exceptions;
-- recurring cycle effort versus initial baseline effort.
-
-These measures are inputs to product decisions, not vanity KPIs or automatic compliance claims.
+These are decision inputs, not vanity KPIs or automatic compliance claims.

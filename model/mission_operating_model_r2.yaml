@@ -1,5 +1,5 @@
 version: 2
-status: MISSION_R2_CANDIDATE
+status: MISSION_R2_CANONICAL
 mission_revision: 2026-08-20-r2
 governance_issue: 31
 supersedes: 2026-08-15-r1
@@ -55,7 +55,11 @@ proof_substitution_rules:
 
 professional_trust_domains:
   product_change_assurance:
-    mechanism: worker_a_worker_b_exact_head
+    mechanism: current_control_exact_candidate_review_contract
+    exact_candidate_binding_required: true
+    stale_review_after_candidate_movement_forbidden: true
+    external_independent_review_when_applicable_gate_requires: true
+    local_fixed_worker_topology_required: false
     customer_assurance_qualification: false
   customer_professional_review:
     requires:
@@ -112,7 +116,10 @@ mapping_kernel:
     - coverage_gap
     - orphan_requirement_detection
     - orphan_control_detection
+    - common_control_or_evidence_reuse_across_obligations
   protected_source_text_copy_forbidden: true
+  canonical_traceability_chain_required: true
+  proof_ladder_and_ai_authority_enforced: true
 
 commercial_validation:
   prices_are_hypotheses_until_measured: true
@@ -127,6 +134,7 @@ commercial_validation:
     - evidence_reuse_ratio
     - questionnaire_answer_reuse_ratio
   validated_package_requires_real_measurement: true
+  bounded_price_package_requires_observed_willingness_to_pay_or_commitment: true
 
 defensibility:
   not_assumed_durable_moats:
@@ -155,6 +163,7 @@ repository_ip:
     - client_data
     - secrets
   public_safe_material_requires_deliberate_release_decision: true
+  create_separate_private_storage_only_when_first_restricted_artifact_exists: true
 
 success_criteria_additions:
   SS-SC-09: real_world_design_partner_validation
@@ -162,8 +171,8 @@ success_criteria_additions:
   SS-SC-11: launch_market_evidence
   SS-SC-12: governed_ip_repository_posture
 
+completed_predecessor: R2-00_CURRENT_M1_CONVERGENCE
 active_sequence:
-  - R2-00_CURRENT_M1_CONVERGENCE
   - R2-01_EXECUTABLE_ASSURANCE_KERNEL
   - R2-02_LAUNCH_AND_TRUST_READINESS
   - R2-03_BOUNDED_REAL_DESIGN_PARTNER

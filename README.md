@@ -2,58 +2,49 @@
 
 **Aantoonbaar in control. Zonder eigen complianceafdeling.**
 
-SolidSecurity is an AI-enabled managed security & compliance service model for small healthcare organizations and compliance-exposed SMEs. It combines a reusable control backbone, structured evidence, AI-assisted operations and explicit professional review.
+SolidSecurity is an AI-enabled managed security & compliance service for healthcare organizations and other compliance-exposed SMEs. It combines a reusable control backbone, structured evidence, AI-assisted operations and explicit professional review.
 
 > **Automation lowers the work, not the standard.**
 
-## Mission status
+## Canonical status
 
-`MISSION_SYSTEM_V1 / CANDIDATE`
+- project mission: **Mission R2 / canonical**;
+- domain model: **M1 / canonical schema contract**;
+- development governance: **central Control-managed**;
+- current active product sequence starts with **R2-WP01 — Executable assurance kernel**;
+- production deployment and real-client data remain separately gated.
 
-Project mission/governance work: [issue #25](https://github.com/solidprivacy-nl/solidsecurity/issues/25)
+The local mission doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`](control/SOLIDSECURITY_MISSION_CONTRACT_R2.md). The canonical machine-readable mission and current execution authority live in `market-predictions/control-plane`. SolidSecurity deliberately does **not** duplicate Control runtime versions, worker topology, queue mechanics or cutover state locally; those facts must be read fresh from Control's current canonical authority.
 
-The governing project doctrine is [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md). Development is controlled through the existing Control Minimal Core lifecycle and its single authoritative dispatch queue.
-
-Development is deliberately **mission-first, service-first, evidence-first and simplest-safe-architecture-first**. Software is built only where it advances a measurable customer/service/assurance outcome.
+Development is deliberately **mission-first, service-first, evidence-first and simplest-safe-architecture-first**. Software is built only where it advances a measurable customer, service or assurance outcome.
 
 ## Product model
 
 SolidSecurity is not primarily a self-service GRC portal.
 
 1. **Operator Workspace** — the professional cockpit where SolidSecurity performs the compliance work.
-2. **Client Dashboard** — a simple customer view of current status, what is arranged, attention points, actions/decisions, SolidSecurity work and reports.
+2. **Client Dashboard** — a simple customer view of current state, what is arranged, attention points, actions/decisions, SolidSecurity work and reports.
 3. **Interaction Layer** — email, secure uploads, targeted questions and approvals for low-friction customer participation.
 
 The customer supplies knowledge, evidence and decisions that genuinely require them; SolidSecurity owns and executes the process.
 
-## Target market
-
-SolidSecurity is designed primarily for organizations that are too small for a full internal security/compliance function but increasingly need to demonstrate control because of:
-
-- Dutch Cybersecurity Act (Cbw) / NIS2 obligations or supply-chain pressure;
-- NEN 7510 and healthcare information-security expectations;
-- ISO 27001 readiness or certification ambitions;
-- GDPR/privacy governance;
-- responsible AI / EU AI Act governance;
-- customer questionnaires, tenders and assurance requests.
-
 ## Core doctrine
 
-1. **One control, multiple obligations.** Common controls are mapped to multiple external frameworks instead of maintaining isolated checklists.
-2. **Requirement is not control; control is not evidence.** External obligations, internal controls, client implementations, evidence, assessments and assurance decisions are separate objects.
+1. **One control, multiple obligations.** Common controls and evidence are reused where scope and validity allow; client truth is not duplicated per framework.
+2. **Requirement is not control; control is not evidence.** Requirements, controls, implementations, evidence, assessments, reviews and decisions are separate objects.
 3. **AI proposes; humans remain accountable.** AI may extract, map, draft, compare and recommend. Material assurance, legal interpretation and risk acceptance require qualified human judgment.
-4. **No paper compliance.** A generated policy is only a designed artifact, never proof that a control operates effectively.
-5. **Traceability over confidence theater.** Material conclusions must be reconstructable from source to requirement to control to implementation to evidence to review.
+4. **No paper compliance.** A generated policy is a designed artifact, not proof that a control operates.
+5. **Traceability over confidence theater.** Material conclusions must be reconstructable through `Source -> Requirement -> Control -> Customer Implementation -> Evidence -> Assessment -> Professional Review -> Decision / Assurance State`.
 6. **Managed service before self-service.** Do not transfer long compliance workflows to the customer when SolidSecurity can perform them.
-7. **Simplest safe architecture first.** Additional providers, databases, cryptographic subsystems or abstractions require a concrete risk/workflow/customer need.
-8. **Client data is not project data.** This repository is the product/control-plane source of truth, never a client dossier store.
+7. **Simplest safe architecture first.** Additional providers, databases, cryptographic subsystems or abstractions require a concrete risk, workflow or customer need.
+8. **Client data is not project data.** This repository is a public-safe product/control-plane source of truth, never a client dossier store.
 
 ## Data-plane direction
 
-The V1 target is deliberately conventional:
+The designed V1 data plane is deliberately conventional and is **not yet a real-client deployment authorization**:
 
 - one shared multi-tenant PostgreSQL database;
-- `tenant_id` plus server-side authorization/RLS defense in depth;
+- `tenant_id` plus server-side authorization and RLS/equivalent defense in depth;
 - one private evidence/object store;
 - immutable reviewed evidence versions with hashes;
 - TLS and provider encryption at rest;
@@ -62,34 +53,45 @@ The V1 target is deliberately conventional:
 
 Database-per-client, custom KMS/envelope encryption and active-active multi-cloud are not V1 defaults.
 
-## Mission-driven development
+## Mission-driven development boundary
 
-The current development lifecycle is intentionally small:
+SolidSecurity defines **what must be achieved and proved**; central Control owns **how governed development is scheduled, locked, reviewed and integrated**.
 
-`Mission Contract -> authoritative state -> eligible work -> one Minimal Core task -> bounded claim / START_PROVEN -> immutable result -> at most one predefined successor -> exact-head B1 where required -> governed integration -> mission-state update`
+Project-level invariants:
 
-`control/DISPATCH_QUEUE.json` remains the single execution authority. SolidSecurity does not create its own intake state plane, retry lineage, scheduler or competing queue.
+- one canonical central Control authority; no SolidSecurity-specific queue, scheduler, claim store or handover state plane;
+- exact candidate/head/base binding for consequential repository changes;
+- deterministic tests/CI where checks are mechanical;
+- fresh critical exact-candidate review for consequential changes, with external/independent exact-candidate review when the current project/Control gate requires it;
+- candidate movement invalidates stale review evidence;
+- integration requires current live repository/Control authority in addition to review PASS;
+- no direct worker mutation of canonical Control runtime state outside the current Control contract;
+- no provider fallback or duplicate runtime architecture introduced by SolidSecurity;
+- `principal_manual_relay_count=0` remains the operating target;
+- chat memory is never execution, completion or assurance authority.
+
+The current Control implementation may evolve. That evolution does not change SolidSecurity Mission R2 unless a governed Mission revision changes the project outcome, evidence or authority requirements.
 
 ## Repository map
 
-- [`control/SOLIDSECURITY_MISSION_CONTRACT_V1.md`](control/SOLIDSECURITY_MISSION_CONTRACT_V1.md) — governing project mission, success criteria and authority boundaries
-- [`ROADMAP.md`](ROADMAP.md) — mission-driven product roadmap and exit evidence
-- [`docs/MISSION_DRIVEN_WORKFLOW.md`](docs/MISSION_DRIVEN_WORKFLOW.md) — customer, runtime and Control development workflows
+- [`control/SOLIDSECURITY_MISSION_CONTRACT_R2.md`](control/SOLIDSECURITY_MISSION_CONTRACT_R2.md) — canonical local project mission doctrine
+- [`ROADMAP.md`](ROADMAP.md) — active R2 roadmap and evidence gates
+- [`docs/MISSION_DRIVEN_WORKFLOW.md`](docs/MISSION_DRIVEN_WORKFLOW.md) — customer, product/runtime and central-Control development boundaries
 - [`STRATEGY.md`](STRATEGY.md) — market, product and differentiation doctrine
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — target architecture and trust boundaries
 - [`docs/OPERATING_MODEL.md`](docs/OPERATING_MODEL.md) — managed-service operating system
-- [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — canonical conceptual entities
+- [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — conceptual entities
+- [`docs/DOMAIN_MODEL_V1.md`](docs/DOMAIN_MODEL_V1.md) — canonical M1 schema contract
 - [`docs/COMMON_CONTROL_MODEL.md`](docs/COMMON_CONTROL_MODEL.md) — cross-framework control backbone
 - [`docs/AI_AUTHORITY_MODEL.md`](docs/AI_AUTHORITY_MODEL.md) — AI/human authority boundaries
 - [`docs/DATA_RESILIENCE_ARCHITECTURE.md`](docs/DATA_RESILIENCE_ARCHITECTURE.md) — lean shared data-plane and resilience doctrine
-- [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md) — what may and may not live in this public repo
-- [`docs/workflows/`](docs/workflows/) — detailed care/supplier workflow material
-- [`model/`](model/) — machine-readable project models
+- [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md) — explicit public/private information boundary
+- [`model/`](model/) — machine-readable canonical project models
 - [`adr/`](adr/) — architectural decisions
-- [`control/`](control/) — project governance and assurance state
+- [`control/`](control/) — local project governance doctrine; live Control runtime state remains central
 
 ## Public repository notice
 
-This repository is currently public during the early phase. Public visibility does **not** mean that client data, secrets, proprietary evidence rubrics, private prompts or confidential operating material belong here. See [`docs/PUBLIC_REPO_POLICY.md`](docs/PUBLIC_REPO_POLICY.md).
+This repository currently contains only deliberately public-safe product, model, schema and synthetic material. Client data, secrets and proprietary operating intelligence are prohibited. Proprietary mapping detail, evidence-sufficiency logic, private prompts, detailed GTM/economics and accumulated operating intelligence are private/restricted by default.
 
 No open-source license is granted by this repository unless a file or component explicitly says otherwise.

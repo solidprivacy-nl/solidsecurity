@@ -1,8 +1,18 @@
 # Public Repository Information Policy
 
-## Purpose
+## Current decision
 
-The repository is temporarily public for collaboration, transparency and GitHub Actions economics. Public visibility must not accidentally publish client data, secrets or the highest-value proprietary operating intelligence.
+SolidSecurity uses a **public-safe product/model/schema/synthetic core with private/restricted operating IP by default**.
+
+This is the canonical repository boundary before R2-WP01 produces material mapping/evidence logic:
+
+- this public repository may contain deliberately public-safe methodology, generic internally authored controls, architecture, schemas, code, synthetic fixtures and non-sensitive roadmap material;
+- proprietary detailed mappings, evidence-sufficiency rules, private prompts, detailed GTM/economics and accumulated operating intelligence are `PROPRIETARY_RESTRICTED` by default;
+- client data is never product-repository data;
+- secrets are never stored in Git;
+- do **not** create a separate private repository/service speculatively: create the smallest private durable store/repository when the first restricted artifact actually needs to be persisted.
+
+A later open-core/private-repo decision may supersede this boundary, but publication of restricted material always requires an explicit release decision.
 
 ## Core assumption
 
@@ -24,55 +34,36 @@ Examples:
 - public ADRs;
 - synthetic test data;
 - non-sensitive roadmap;
-- public-safe schemas;
+- public-safe schemas/code;
 - high-level open-source evaluations.
 
-### PROPRIETARY_RESTRICTED — do not publish here
+### PROPRIETARY_RESTRICTED — prohibited here unless explicitly released
 
 Examples:
 
-- detailed cross-framework mapping matrices that constitute material SolidSecurity IP;
-- evidence-sufficiency rubrics and scoring recipes;
+- detailed cross-framework mapping matrices constituting material SolidSecurity IP;
+- evidence-sufficiency rubrics/scoring recipes;
 - private control test procedures;
 - accumulated remediation playbooks/benchmarks;
-- internal pricing algorithms/margin models;
-- production prompts/system instructions that materially encode proprietary method;
+- detailed internal pricing/margin models;
+- production prompts/system instructions materially encoding proprietary method;
 - partner contractual terms;
-- unreleased security architecture details that raise exploitation risk.
-
-These belong in a later private control/operations repository.
+- unreleased exploit-relevant security detail;
+- accumulated real operational intelligence.
 
 ### CLIENT_CONFIDENTIAL — prohibited
 
-Examples:
-
-- client identities unless explicitly public and necessary;
-- client policies/contracts;
-- system, supplier and asset inventories;
-- vulnerabilities;
-- incidents;
-- implementation claims;
-- client assessments/evidence;
-- staff/patient/client personal data;
-- customer credentials or architecture.
+Examples include client identities where unnecessary, policies/contracts, asset/system/supplier inventories, vulnerabilities/incidents, implementation claims, client assessments/evidence and personal data.
 
 These belong only in the approved client data plane.
 
-### SECRET — prohibited everywhere except approved secret store
+### SECRET — prohibited in Git
 
-- API keys;
-- passwords;
-- tokens;
-- private keys;
-- signing material;
-- database credentials;
-- production secrets.
+API keys, passwords, tokens, private keys, signing material, database credentials and production secrets belong only in an approved secret store.
 
-Never store secrets in Git, including private repositories.
+## Publication test
 
-## Pre-commit/publication test
-
-Before committing material to this public repository ask:
+Before public commit ask:
 
 1. Is it derived from or about a real customer?
 2. Does it contain security-sensitive operational detail?
@@ -80,27 +71,23 @@ Before committing material to this public repository ask:
 4. Would disclosure materially reduce SolidSecurity's future competitive advantage?
 5. Do we have redistribution rights for third-party content?
 
-If any answer is uncertain, classify upward and do not publish until reviewed.
+If uncertain, classify upward and do not publish until reviewed.
 
 ## Third-party standards
 
-Do not assume that publicly accessible or zero-price standards may be redistributed. Store references and internally authored summaries unless licensing clearly permits copying.
+Do not assume publicly accessible or zero-price standards may be redistributed. Store references and internally authored summaries unless licensing clearly permits copying.
 
-## Repository transition triggers
+## Storage decision when restricted material first appears
 
-Perform a formal public/private/open-core decision before the earliest of:
+Use the simplest proven option that meets the need:
 
-- first real client-data processing;
-- material proprietary mapping/evidence rubric development;
-- production application source containing sensitive security logic;
-- commercial launch where competitors have a clear incentive to monitor the repository.
+1. private Git repository for versioned operating IP/code/config where Git is appropriate;
+2. approved private object/document storage for non-code artifacts;
+3. approved client data plane for customer data;
+4. approved secret store for credentials.
 
-## Visibility options later
+Do not create a new database, service, encryption subsystem or multi-repo topology merely to anticipate future restricted material.
 
-1. **Public core + private operations/IP** — preferred if public development remains strategically useful.
-2. **Private repository** — simplest confidentiality model.
-3. **Explicit open-core** — only after deliberate licensing/business-model decision.
+## Licensing posture
 
-## Licensing posture today
-
-Public visibility is not an open-source grant. No general open-source license is currently granted by this repository. Third-party components retain their own licenses.
+Public visibility is not an open-source grant. No general open-source license is granted by this repository unless a component explicitly states otherwise. Third-party components retain their own licenses.
