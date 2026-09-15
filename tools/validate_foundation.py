@@ -35,6 +35,29 @@ def require(condition: bool, message: str) -> None:
         fail(message)
 
 
+def forbidden_public_assumption_paths(value: object, path: str = "ai_authority") -> list[str]:
+    """Find capacity/cost payloads outside the one public-safe contract."""
+    found: list[str] = []
+    allowed_boolean_flags = {"capacity_assumption_required", "loaded_cost_assumption_required"}
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{path}.{key}"
+            if path == "ai_authority" and key == "professional_review_assumption_record_contract":
+                continue
+            normalized = str(key).lower()
+            if (
+                normalized == "value"
+                or normalized in {"reviewer_capacity", "loaded_cost"}
+                or ("assumption" in normalized and normalized not in allowed_boolean_flags)
+            ):
+                found.append(child_path)
+            found.extend(forbidden_public_assumption_paths(child, child_path))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            found.extend(forbidden_public_assumption_paths(item, f"{path}[{index}]"))
+    return found
+
+
 domains_doc = load_yaml("control_domains.yaml")
 controls_doc = load_yaml("sample_controls.yaml")
 assertions_doc = load_yaml("sample_control_assertions.yaml")
@@ -45,6 +68,8 @@ classification_doc = load_yaml("data_classification.yaml")
 roles_doc = load_yaml("roles.yaml")
 pilot_gate_doc = load_yaml("pilot_gate.yaml")
 entities_doc = load_yaml("entities.yaml")
+claim_doc = load_yaml("claim_vocabulary.yaml")
+mission_doc = load_yaml("mission_operating_model_r2.yaml")
 
 # Common controls.
 domains = domains_doc.get("domains", {}) if isinstance(domains_doc, dict) else {}
@@ -90,8 +115,10 @@ for index, assertion in enumerate(assertions):
     aid = assertion.get("id")
     cid = assertion.get("control_id")
     require(cid in control_ids, f"{aid!r} references unknown control {cid!r}")
-    require(isinstance(aid, str) and re.fullmatch(re.escape(str(cid)) + r"-A[0-9]+", aid) is not None,
-            f"assertion id {aid!r} must extend its control id")
+    require(
+        isinstance(aid, str) and re.fullmatch(re.escape(str(cid)) + r"-A[0-9]+", aid) is not None,
+        f"assertion id {aid!r} must extend its control id",
+    )
     require(aid not in assertion_ids, f"duplicate assertion id: {aid}")
     assertion_ids.add(str(aid))
     require(assertion.get("materiality") in {"low", "medium", "high", "critical"}, f"{aid} invalid materiality")
@@ -108,7 +135,7 @@ for protected in ("VERIFIED", "INDEPENDENTLY_ASSURED"):
     if protected in proof_by_id:
         require(proof_by_id[protected].get("ai_can_assign") is False, f"AI must not assign {protected}")
 
-# AI authority must retain red-line actions and prohibited state transitions.
+# AI authority retains the existing red-line boundary.
 authority = ai_doc.get("authority_classes", {}) if isinstance(ai_doc, dict) else {}
 require(set(authority) == {"GREEN", "AMBER", "RED"}, "ai_authority.yaml must define GREEN/AMBER/RED exactly")
 red_examples = set(authority.get("RED", {}).get("examples", [])) if isinstance(authority.get("RED"), dict) else set()
@@ -125,20 +152,184 @@ prohibited = set(ai_doc.get("prohibited_ai_state_transitions", [])) if isinstanc
 required_prohibited = {"VERIFIED", "INDEPENDENTLY_ASSURED", "RISK_ACCEPTED", "EXCEPTION_APPROVED", "CERTIFIED"}
 require(required_prohibited.issubset(prohibited), f"AI transition deny-list missing: {sorted(required_prohibited - prohibited)}")
 
+# WP03 professional-review contract: explicit classes, bounded claims, no hidden assumption values.
+require(ai_doc.get("version") == 2, "ai_authority.yaml WP03 contract must be version 2")
+review_descriptions = ai_doc.get("review_classes", {}) if isinstance(ai_doc, dict) else {}
+require(isinstance(review_descriptions, dict) and set(review_descriptions) == valid_review_classes,
+        "ai_authority.yaml review_classes must define R0..R4 exactly")
+
+claim_classes = claim_doc.get("claim_classes", {}) if isinstance(claim_doc, dict) else {}
+canonical_claim_classes = {
+    "C0_DESCRIPTIVE_FACT",
+    "C1_PROPOSED_ASSESSMENT",
+    "C2_EVIDENCE_LINKED",
+    "C3_PROFESSIONALLY_REVIEWED",
+    "C4_INDEPENDENTLY_ASSURED",
+    "C5_CERTIFIED",
+}
+require(isinstance(claim_classes, dict) and set(claim_classes) == canonical_claim_classes,
+        "claim_vocabulary.yaml claim classes must remain canonical C0..C5")
+
+customer_reviews = ai_doc.get("customer_professional_review_classes", {}) if isinstance(ai_doc, dict) else {}
+require(isinstance(customer_reviews, dict) and set(customer_reviews) == valid_review_classes,
+        "customer professional review classes must define R0..R4 exactly")
+for review_class in sorted(valid_review_classes):
+    item = customer_reviews.get(review_class, {}) if isinstance(customer_reviews, dict) else {}
+    require(isinstance(item, dict), f"customer professional review {review_class} must be an object")
+    if not isinstance(item, dict):
+        continue
+    permitted = item.get("permitted_claim_classes", [])
+    require(isinstance(permitted, list) and set(permitted).issubset(canonical_claim_classes),
+            f"customer professional review {review_class} references noncanonical claim class")
+    require("C4_INDEPENDENTLY_ASSURED" not in permitted and "C5_CERTIFIED" not in permitted,
+            f"customer professional review {review_class} must not authorize external assurance/certification")
+    for field in ("competence_expectation", "credential_expectation", "independence_requirement", "escalation"):
+        require(isinstance(item.get(field), str) and bool(item[field].strip()),
+                f"customer professional review {review_class} missing {field}")
+
+require(customer_reviews.get("R0", {}).get("customer_verified_authority") == "prohibited",
+        "R0 must not authorize customer VERIFIED")
+require(customer_reviews.get("R1", {}).get("customer_verified_authority") == "prohibited",
+        "R1 must not authorize customer VERIFIED")
+for review_class in ("R2", "R3"):
+    require(customer_reviews.get(review_class, {}).get("customer_verified_authority")
+            == "permitted_only_when_customer_verified_gate_passes",
+            f"{review_class} customer VERIFIED authority must remain gated")
+require(customer_reviews.get("R4", {}).get("customer_verified_authority") == "external_authority_dependent",
+        "R4 customer VERIFIED authority must remain external-authority dependent")
+for review_class in ("R1", "R2", "R3", "R4"):
+    require(customer_reviews.get(review_class, {}).get("capacity_assumption_required") is True,
+            f"{review_class} must require reviewer capacity")
+    require(customer_reviews.get(review_class, {}).get("loaded_cost_assumption_required") is True,
+            f"{review_class} must require loaded professional cost")
+
+assumption_contract = ai_doc.get("professional_review_assumption_record_contract", {}) if isinstance(ai_doc, dict) else {}
+required_assumption_fields = {
+    "review_class",
+    "assumption_type",
+    "unit",
+    "evidence_status",
+    "mission_evidence_class",
+    "calculation_reference",
+    "restricted_record_ref",
+}
+require(isinstance(assumption_contract, dict), "professional review assumption contract must be an object")
+if isinstance(assumption_contract, dict):
+    require(assumption_contract.get("value_data_classification") == "INTERNAL",
+            "professional review assumption values must use INTERNAL classification")
+    require(assumption_contract.get("public_repo_values_prohibited") is True,
+            "professional review assumption numeric values must remain out of public Git")
+    require(assumption_contract.get("public_safe_shape_exact") is True,
+            "professional review assumption public shape must remain fail-closed")
+    require(set(assumption_contract.get("common_required_fields", [])) == required_assumption_fields,
+            "professional review assumption common fields drifted")
+    require(assumption_contract.get("vocabulary_sources") == {
+        "evidence_status": "docs/COMMERCIAL_MODEL.md",
+        "mission_evidence_class": "model/mission_operating_model_r2.yaml:evidence_classes",
+    }, "professional review assumption vocabularies must reference canonical sources")
+    assumption_types = assumption_contract.get("assumption_types", {})
+    require(isinstance(assumption_types, dict) and set(assumption_types) == {"reviewer_capacity", "loaded_cost"},
+            "professional review assumption types must be reviewer_capacity and loaded_cost")
+    require(assumption_types.get("reviewer_capacity") == {
+        "unit": "professional_minutes_per_month",
+        "type_specific_required_fields": [],
+    }, "reviewer capacity assumption shape drifted")
+    require(assumption_types.get("loaded_cost") == {
+        "unit": "currency_per_professional_hour",
+        "type_specific_required_fields": ["currency_code"],
+        "currency_standard": "ISO_4217",
+    }, "loaded cost assumption shape/currency contract drifted")
+
+require(not forbidden_public_assumption_paths(ai_doc),
+        "ai_authority.yaml contains public capacity/cost assumption payload outside the canonical contract")
+
+mission_evidence_classes = mission_doc.get("evidence_classes", {}) if isinstance(mission_doc, dict) else {}
+required_mission_evidence_classes = {
+    "E0_DESIGN",
+    "E1_SYNTHETIC",
+    "E2_CONTROLLED_REAL_CLIENT",
+    "E3_MARKET_COMMERCIAL",
+    "E4_REPEATED_OPERATIONAL",
+}
+require(isinstance(mission_evidence_classes, dict)
+        and set(mission_evidence_classes) == required_mission_evidence_classes,
+        "Mission R2 evidence-class identifiers drifted from E0..E4")
+
+# The commercial contract is the source of evidence-status semantics. Validate vocabulary, not prose layout.
+commercial_contract_path = ROOT / "docs" / "COMMERCIAL_MODEL.md"
+require(commercial_contract_path.exists(), "canonical commercial evidence-status contract is missing")
+if commercial_contract_path.exists():
+    commercial_contract = commercial_contract_path.read_text(encoding="utf-8")
+    required_commercial_tokens = {
+        "HYPOTHESIS",
+        "OBSERVED_MARKET",
+        "MEASURED_PILOT",
+        "VALIDATED_BOUNDED",
+        "E3_MARKET_COMMERCIAL",
+    }
+    missing_tokens = sorted(token for token in required_commercial_tokens if token not in commercial_contract)
+    require(not missing_tokens, f"commercial evidence contract missing canonical token(s): {missing_tokens}")
+
+separation = ai_doc.get("trust_domain_separation", {}) if isinstance(ai_doc, dict) else {}
+expected_separation = {
+    "product_change_b1_is_customer_professional_review": False,
+    "customer_professional_review_is_external_independent_assurance": False,
+    "internal_review_may_claim_certification": False,
+}
+require(separation == expected_separation, "trust-domain separation must remain fail-closed")
+
+verified_gate = ai_doc.get("customer_verified_gate", {}) if isinstance(ai_doc, dict) else {}
+required_verified_prerequisites = {
+    "applicable_review_class_satisfied",
+    "reviewer_identity_and_scope_competence_sufficient",
+    "credential_expectation_satisfied_or_not_applicable",
+    "independence_requirement_satisfied",
+    "reviewer_capacity_confirmed",
+    "loaded_cost_assumption_recorded",
+    "escalation_path_available",
+    "liability_and_insurance_posture_reviewed",
+    "contractual_scope_and_liability_limits_reviewed",
+    "verified_report_language_approved",
+    "post_verification_incident_posture_defined",
+    "client_contract_and_dpa_ready",
+    "subprocessor_review_ready",
+    "retention_and_deletion_schedule_ready",
+}
+require(isinstance(verified_gate, dict), "customer_verified_gate must be an object")
+if isinstance(verified_gate, dict):
+    require(verified_gate.get("readiness_status") == "DESIGN_ONLY",
+            "customer VERIFIED gate must remain DESIGN_ONLY")
+    require(verified_gate.get("fail_closed") is True, "customer VERIFIED gate must fail closed")
+    require(verified_gate.get("customer_verified_currently_enabled") is False,
+            "WP03 must not enable customer VERIFIED")
+    require(verified_gate.get("legal_contract_approval_currently_enabled") is False,
+            "WP03 must not approve legal contract terms")
+    require(verified_gate.get("missing_or_unresolved_state") == "NEEDS_REVIEW",
+            "unresolved VERIFIED prerequisites must resolve to NEEDS_REVIEW")
+    require(set(verified_gate.get("required_prerequisites", [])) == required_verified_prerequisites,
+            "customer VERIFIED prerequisite set drifted")
+    transition_rule = verified_gate.get("transition_rule", "")
+    require(isinstance(transition_rule, str)
+            and "sufficient scope competence" in transition_rule
+            and "credential" in transition_rule
+            and "not applicable" in transition_rule,
+            "customer VERIFIED transition rule must require competence and credential gating")
+
 # Applicability must preserve unresolved/professional-review states.
 applicability = set(enums_doc.get("applicability_status", [])) if isinstance(enums_doc, dict) else set()
 required_applicability = {"APPLICABLE", "NOT_APPLICABLE", "UNDETERMINED", "PENDING_PROFESSIONAL_REVIEW"}
 require(required_applicability.issubset(applicability), "foundation_enums.yaml weakens applicability state model")
 
-# Client/secret material must remain impossible to classify as public-repo-safe.
+# Client/secret/internal material must remain impossible to classify as public-repo-safe.
 classes = classification_doc.get("classes", {}) if isinstance(classification_doc, dict) else {}
-for name in ("CLIENT_CONFIDENTIAL", "CLIENT_HIGH_SENSITIVITY", "SECRET"):
+for name in ("INTERNAL", "CLIENT_CONFIDENTIAL", "CLIENT_HIGH_SENSITIVITY", "SECRET"):
     require(name in classes, f"data classification missing {name}")
     if name in classes:
         require(classes[name].get("public_github") == "prohibited", f"{name} must be prohibited in public GitHub")
 require(classes.get("CLIENT_HIGH_SENSITIVITY", {}).get("external_llm") == "deny_by_default",
         "CLIENT_HIGH_SENSITIVITY must be deny_by_default for external LLM")
-require(classes.get("SECRET", {}).get("external_llm") == "prohibited", "SECRET must be prohibited for external LLM")
+require(classes.get("SECRET", {}).get("external_llm") == "prohibited",
+        "SECRET must be prohibited for external LLM")
 
 # Agent role cannot acquire human-only decision authority through model drift.
 roles = roles_doc.get("roles", {}) if isinstance(roles_doc, dict) else {}
@@ -157,26 +348,45 @@ required_human_only = {
 }
 require(required_human_only.issubset(human_only), f"human-only actions missing: {sorted(required_human_only - human_only)}")
 
-# Real client data remains fail-closed during design.
-require(pilot_gate_doc.get("real_client_data_allowed") is False, "pilot_gate must keep real_client_data_allowed=false")
-require(pilot_gate_doc.get("state") == "DESIGN_ONLY", "pilot_gate state must remain DESIGN_ONLY before separately authorized transition")
-required_gate_names = {
+# Real client data remains fail-closed during design. Protect the complete current gate set.
+require(pilot_gate_doc.get("real_client_data_allowed") is False,
+        "pilot_gate must keep real_client_data_allowed=false")
+require(pilot_gate_doc.get("state") == "DESIGN_ONLY",
+        "pilot_gate state must remain DESIGN_ONLY before separately authorized transition")
+expected_gate_names = {
     "foundation_assurance",
+    "public_private_boundary",
+    "client_contract_and_dpa",
+    "subprocessor_review",
+    "retention_schedule",
     "tenant_isolation_test",
+    "rbac_mfa_test",
+    "encryption_secrets_test",
+    "evidence_integrity_test",
+    "audit_logging_test",
+    "backup_restore_test",
+    "export_delete_test",
     "llm_processing_policy_test",
+    "agent_permission_test",
+    "incident_tabletop",
     "independent_security_data_governance_assurance",
     "principal_real_pilot_authorization",
 }
 gates = pilot_gate_doc.get("gates", {}) if isinstance(pilot_gate_doc, dict) else {}
-require(required_gate_names.issubset(set(gates)), f"pilot gate missing: {sorted(required_gate_names - set(gates))}")
+require(isinstance(gates, dict) and set(gates) == expected_gate_names,
+        f"pilot gate set drifted: expected {sorted(expected_gate_names)}, got {sorted(gates) if isinstance(gates, dict) else []}")
+if isinstance(gates, dict):
+    for gate_name in sorted(expected_gate_names):
+        require(gates.get(gate_name) == "required", f"protected pilot gate {gate_name} must remain required")
 
 # Foundation traceability entities must remain present.
 entities = entities_doc.get("entities", {}) if isinstance(entities_doc, dict) else {}
 required_entities = {
     "Requirement", "Control", "ControlAssertion", "ImplementationClaim", "Evidence",
-    "Assessment", "ReviewQueueItem", "Review", "Decision", "ApprovedAssertion", "AssuranceLabels"
+    "Assessment", "ReviewQueueItem", "Review", "Decision", "ApprovedAssertion", "AssuranceLabels",
 }
-require(required_entities.issubset(set(entities)), f"entity model missing: {sorted(required_entities - set(entities))}")
+require(required_entities.issubset(set(entities)),
+        f"entity model missing: {sorted(required_entities - set(entities))}")
 
 if errors:
     print("SOLIDSECURITY_FOUNDATION_VALIDATION=FAIL")

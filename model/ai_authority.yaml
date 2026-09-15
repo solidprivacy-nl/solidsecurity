@@ -1,4 +1,4 @@
-version: 1
+version: 2
 authority_classes:
   GREEN:
     mode: autonomous_preparation
@@ -36,6 +36,138 @@ review_classes:
   R2: mandatory_qualified_professional_review
   R3: independent_reviewer_required
   R4: external_authority_or_certification_dependent
+customer_professional_review_classes:
+  R0:
+    human_reviewer_required: false
+    customer_verified_authority: prohibited
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+    competence_expectation: mechanical_transformation_only
+    credential_expectation: none
+    independence_requirement: not_applicable
+    capacity_assumption_required: false
+    loaded_cost_assumption_required: false
+    escalation: R1_or_higher_when_nonmechanical_or_material
+  R1:
+    human_reviewer_required: true
+    customer_verified_authority: prohibited
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+    competence_expectation: trained_internal_operator_for_defined_process
+    credential_expectation: documented_if_process_requires_it
+    independence_requirement: not_independent_assurance
+    capacity_assumption_required: true
+    loaded_cost_assumption_required: true
+    escalation: R2_for_material_professional_judgment
+  R2:
+    human_reviewer_required: true
+    customer_verified_authority: permitted_only_when_customer_verified_gate_passes
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
+    competence_expectation: qualified_professional_for_scope
+    credential_expectation: documented_and_satisfied_where_applicable
+    independence_requirement: internal_qualified_allowed_only_without_material_conflict
+    capacity_assumption_required: true
+    loaded_cost_assumption_required: true
+    escalation: reassign_or_R3_when_competence_credentials_independence_or_material_conflict_insufficient
+  R3:
+    human_reviewer_required: true
+    customer_verified_authority: permitted_only_when_customer_verified_gate_passes
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
+    competence_expectation: qualified_professional_for_scope
+    credential_expectation: documented_and_satisfied_where_applicable
+    independence_requirement: independent_internal_or_external
+    capacity_assumption_required: true
+    loaded_cost_assumption_required: true
+    escalation: reassign_independent_reviewer_or_R4_when_competence_credentials_or_external_authority_requirements_insufficient
+  R4:
+    human_reviewer_required: true
+    customer_verified_authority: external_authority_dependent
+    permitted_claim_classes:
+      - C0_DESCRIPTIVE_FACT
+      - C1_PROPOSED_ASSESSMENT
+      - C2_EVIDENCE_LINKED
+      - C3_PROFESSIONALLY_REVIEWED
+    competence_expectation: external_authority_or_certification_body_requirements
+    credential_expectation: external_authority_requirements_apply
+    independence_requirement: external_authority
+    capacity_assumption_required: true
+    loaded_cost_assumption_required: true
+    escalation: external_authority_certification_body_or_regulator
+professional_review_assumption_record_contract:
+  value_data_classification: INTERNAL
+  public_repo_values_prohibited: true
+  public_safe_shape_exact: true
+  common_required_fields:
+    - review_class
+    - assumption_type
+    - unit
+    - evidence_status
+    - mission_evidence_class
+    - calculation_reference
+    - restricted_record_ref
+  vocabulary_sources:
+    evidence_status: docs/COMMERCIAL_MODEL.md
+    mission_evidence_class: model/mission_operating_model_r2.yaml:evidence_classes
+  assumption_types:
+    reviewer_capacity:
+      unit: professional_minutes_per_month
+      type_specific_required_fields: []
+    loaded_cost:
+      unit: currency_per_professional_hour
+      type_specific_required_fields:
+        - currency_code
+      currency_standard: ISO_4217
+  rule: >-
+    R1-R4 capacity and loaded-cost prerequisites are satisfied only by an attributable record
+    using this exact public-safe shape. Evidence status uses the current commercial validation
+    contract and Mission evidence class uses the canonical Mission R2 evidence_classes keys.
+    Loaded-cost records additionally identify an ISO 4217 currency code. The numeric capacity or
+    cost value is INTERNAL under canonical data classification and remains outside public Git,
+    referenced by restricted_record_ref; public Git contains no value field or embedded record.
+trust_domain_separation:
+  product_change_b1_is_customer_professional_review: false
+  customer_professional_review_is_external_independent_assurance: false
+  internal_review_may_claim_certification: false
+customer_verified_gate:
+  readiness_status: DESIGN_ONLY
+  fail_closed: true
+  customer_verified_currently_enabled: false
+  legal_contract_approval_currently_enabled: false
+  missing_or_unresolved_state: NEEDS_REVIEW
+  required_prerequisites:
+    - applicable_review_class_satisfied
+    - reviewer_identity_and_scope_competence_sufficient
+    - credential_expectation_satisfied_or_not_applicable
+    - independence_requirement_satisfied
+    - reviewer_capacity_confirmed
+    - loaded_cost_assumption_recorded
+    - escalation_path_available
+    - liability_and_insurance_posture_reviewed
+    - contractual_scope_and_liability_limits_reviewed
+    - verified_report_language_approved
+    - post_verification_incident_posture_defined
+    - client_contract_and_dpa_ready
+    - subprocessor_review_ready
+    - retention_and_deletion_schedule_ready
+  transition_rule: >-
+    A customer-facing VERIFIED state may be created only by the authorized human review path
+    after every applicable prerequisite is recorded as satisfied, including sufficient scope
+    competence and any applicable credential being satisfied (or explicitly not applicable).
+    Merely recording an insufficient qualification does not satisfy the gate. Missing, unknown,
+    expired, insufficient or unresolved prerequisites fail closed to NEEDS_REVIEW. This design
+    contract does not itself enable customer VERIFIED claims or approve legal/insurance terms.
 prohibited_ai_state_transitions:
   - VERIFIED
   - INDEPENDENTLY_ASSURED
