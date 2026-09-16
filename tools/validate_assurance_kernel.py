@@ -48,7 +48,7 @@ def load_yaml(path: Path) -> dict[str, Any]:
 
 def as_date(value: object) -> date | None:
     if isinstance(value, datetime):
-        return value.date()
+        return value.astimezone(timezone.utc).date() if value.tzinfo is not None else None
     if isinstance(value, date):
         return value
     if isinstance(value, str):
@@ -69,6 +69,11 @@ def as_dt(value: object) -> datetime | None:
             return None
         return parsed if parsed.tzinfo is not None else None
     return None
+
+
+def utc_date(value: datetime) -> date:
+    """Return the UTC calendar date represented by a timezone-aware timestamp."""
+    return value.astimezone(timezone.utc).date()
 
 
 def clean_id(value: object) -> bool:
@@ -276,7 +281,7 @@ def validate(
         require(reviewed_at is not None, f"mapping {mapping_id} requires reviewed_at")
         require(nonempty_string(mapping.get("rationale")), f"mapping {mapping_id} requires rationale")
         if reviewed_at is not None:
-            require(reviewed_at.date() <= as_of, f"mapping {mapping_id} review occurs after dossier as_of")
+            require(utc_date(reviewed_at) <= as_of, f"mapping {mapping_id} review occurs after dossier as_of")
         if rid in requirements and cid in controls and mapping.get("mapping_status") == "approved" and reviewed_at is not None:
             pair = (str(rid), str(cid))
             require(pair not in mapping_review_times, f"duplicate approved mapping for {pair[0]}->{pair[1]}")
@@ -337,7 +342,7 @@ def validate(
         require(effective is not None and expires is not None and effective <= as_of <= expires,
                 f"applicability {app_id} effective window invalid")
         if reviewed_at is not None and effective is not None:
-            require(reviewed_at.date() <= effective,
+            require(utc_date(reviewed_at) <= effective,
                     f"applicability {app_id} review must not occur after effective date")
         require(nonempty_string(app.get("reevaluation_trigger")),
                 f"applicability {app_id} requires reevaluation trigger")
@@ -377,7 +382,7 @@ def validate(
             declared_at = as_dt(impl.get("declared_at"))
             require(declared_at is not None, f"accepted implementation {impl_id} requires declared_at")
             if declared_at is not None:
-                require(declared_at.date() <= as_of,
+                require(utc_date(declared_at) <= as_of,
                         f"accepted implementation {impl_id} declared after dossier as_of")
                 implementation_declared_times[impl_id] = declared_at
 
@@ -400,7 +405,7 @@ def validate(
         captured_at = as_dt(item.get("captured_at"))
         require(captured_at is not None, f"evidence {evidence_id} captured_at invalid")
         if captured_at is not None:
-            require(captured_at.date() <= as_of, f"evidence {evidence_id} captured after dossier as_of")
+            require(utc_date(captured_at) <= as_of, f"evidence {evidence_id} captured after dossier as_of")
             evidence_capture_times[evidence_id] = captured_at
         start = as_date(item.get("valid_from"))
         end = as_date(item.get("expires_at"))
@@ -479,7 +484,7 @@ def validate(
         assessed_at = as_dt(assessment.get("assessed_at"))
         require(assessed_at is not None, f"assessment {assessment_id} assessed_at invalid")
         if assessed_at is not None:
-            require(assessed_at.date() <= as_of, f"assessment {assessment_id} occurs after dossier as_of")
+            require(utc_date(assessed_at) <= as_of, f"assessment {assessment_id} occurs after dossier as_of")
             assessment_times[assessment_id] = assessed_at
             declared_at = implementation_declared_times.get(str(impl_id))
             if declared_at is not None:
@@ -491,7 +496,7 @@ def validate(
                         f"assessment {assessment_id} predates applicability review")
             app_effective = app_effective_dates.get(str(rid))
             if app_effective is not None:
-                require(assessed_at.date() >= app_effective,
+                require(utc_date(assessed_at) >= app_effective,
                         f"assessment {assessment_id} predates applicability effective date")
             mapping_reviewed = mapping_review_times.get((str(rid), str(cid)))
             if mapping_reviewed is not None:
@@ -598,7 +603,7 @@ def validate(
         reviewed_at = as_dt(review.get("reviewed_at"))
         require(reviewed_at is not None, f"review {review_id} reviewed_at invalid")
         if reviewed_at is not None:
-            require(reviewed_at.date() <= as_of,
+            require(utc_date(reviewed_at) <= as_of,
                     f"review {review_id} occurs after dossier as_of")
         if assessment is not None:
             required_class = assessment.get("required_review_class")
@@ -615,7 +620,7 @@ def validate(
                             f"review {review_id} relies on evidence captured after review")
                 item = evidence.get(str(eid), {})
                 if reviewed_at is not None:
-                    require(evidence_valid(item, reviewed_at.date()),
+                    require(evidence_valid(item, utc_date(reviewed_at)),
                             f"review {review_id} relies on evidence outside its validity window: {eid}")
             reviews_by_assessment[str(aid)].append(review)
 
@@ -637,7 +642,7 @@ def validate(
         effective = as_dt(decision.get("effective_at"))
         require(effective is not None, f"decision {decision_id} effective_at invalid")
         if effective is not None:
-            require(effective.date() <= as_of,
+            require(utc_date(effective) <= as_of,
                     f"decision {decision_id} occurs after dossier as_of")
         if assessment is not None:
             app = apps_by_req.get(str(assessment.get("requirement_id")), [{}])[0]
@@ -652,7 +657,7 @@ def validate(
             for eid in assessment.get("evidence_ids", []):
                 item = evidence.get(str(eid), {})
                 if effective is not None:
-                    require(evidence_valid(item, effective.date()),
+                    require(evidence_valid(item, utc_date(effective)),
                             f"decision {decision_id} relies on evidence outside its validity window at decision time: {eid}")
             if review is not None and effective is not None:
                 reviewed_at = as_dt(review.get("reviewed_at"))
@@ -663,8 +668,10 @@ def validate(
 
     for pair, current in current_by_pair.items():
         evidence_ids = current.get("evidence_ids", []) if isinstance(current.get("evidence_ids"), list) else []
-        any_valid = any(evidence_valid(evidence.get(str(eid), {}), as_of) for eid in evidence_ids)
-        if not any_valid:
+        all_valid = bool(evidence_ids) and all(
+            evidence_valid(evidence.get(str(eid), {}), as_of) for eid in evidence_ids
+        )
+        if not all_valid:
             require(current.get("state") == "REOPENED",
                     f"current assessment {current.get('assessment_id')} with expired evidence must be REOPENED")
             proposed = current.get("proposed_proof_level")
@@ -872,7 +879,11 @@ def regressions(
                    "predates assessment")
     expect_failure(lambda value: value["professional_reviews"][0].update({"reviewed_at": "2026-09-03T10:00:00Z"}),
                    "review REV-ACCESS occurs after dossier as_of")
+    expect_failure(lambda value: value["professional_reviews"][0].update({"reviewed_at": "2026-09-02T23:59:00-12:00"}),
+                   "review REV-ACCESS occurs after dossier as_of")
     expect_failure(lambda value: value["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}),
+                   "decision DEC-ACCESS occurs after dossier as_of")
+    expect_failure(lambda value: value["decisions"][0].update({"effective_at": "2026-09-02T23:59:00-12:00"}),
                    "decision DEC-ACCESS occurs after dossier as_of")
     expect_failure(lambda value: value["evidence"][0].update({"captured_at": "2026-09-01T09:50:00Z"}),
                    "uses evidence captured after assessment")
@@ -880,6 +891,8 @@ def regressions(
                    "requires positive mapping version")
     expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2028-12-31"}),
                    "validity window exceeds explicit kernel policy")
+    expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2026-09-01"}),
+                   "current assessment ASM-ACCESS with expired evidence must be REOPENED")
 
     def make_review_r3(value: dict[str, Any]) -> None:
         value["assessments"][0]["materiality"] = "high"
