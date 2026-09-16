@@ -597,10 +597,10 @@ def validate(
         require(review.get("decision") == "ACCEPT", f"review {review_id} must be ACCEPT")
         reviewed_at = as_dt(review.get("reviewed_at"))
         require(reviewed_at is not None, f"review {review_id} reviewed_at invalid")
+        if reviewed_at is not None:
+            require(reviewed_at.date() <= as_of,
+                    f"review {review_id} occurs after dossier as_of")
         if assessment is not None:
-            pair = (str(assessment.get("requirement_id")), str(assessment.get("control_id")))
-            require(current_by_pair.get(pair, {}).get("assessment_id") == aid,
-                    f"review {review_id} must bind to current assessment")
             required_class = assessment.get("required_review_class")
             if actual_class in review_rank and required_class in review_rank:
                 require(review_rank[actual_class] >= review_rank[required_class],
@@ -636,23 +636,24 @@ def validate(
                 f"decision {decision_id} requires clean authorizer identity")
         effective = as_dt(decision.get("effective_at"))
         require(effective is not None, f"decision {decision_id} effective_at invalid")
+        if effective is not None:
+            require(effective.date() <= as_of,
+                    f"decision {decision_id} occurs after dossier as_of")
         if assessment is not None:
-            pair = (str(assessment.get("requirement_id")), str(assessment.get("control_id")))
-            require(current_by_pair.get(pair, {}).get("assessment_id") == aid,
-                    f"decision {decision_id} must bind to current assessment")
             app = apps_by_req.get(str(assessment.get("requirement_id")), [{}])[0]
             require(app.get("status") == "APPLICABLE",
                     f"decision {decision_id} requires current APPLICABLE determination")
             require(assessment.get("state") == "REVIEWED",
-                    f"decision {decision_id} requires REVIEWED current assessment")
+                    f"decision {decision_id} requires REVIEWED assessment")
             require(assessment.get("proposed_proof_level") == "EVIDENCED",
                     f"decision {decision_id} requires an EVIDENCED assessment proposal; human review performs VERIFIED promotion")
             require(not open_conflict_by_assessment.get(str(aid)),
                     f"decision {decision_id} blocked by open evidence conflict")
             for eid in assessment.get("evidence_ids", []):
                 item = evidence.get(str(eid), {})
-                require(evidence_valid(item, as_of),
-                        f"decision {decision_id} relies on evidence not valid at as_of: {eid}")
+                if effective is not None:
+                    require(evidence_valid(item, effective.date()),
+                            f"decision {decision_id} relies on evidence outside its validity window at decision time: {eid}")
             if review is not None and effective is not None:
                 reviewed_at = as_dt(review.get("reviewed_at"))
                 if reviewed_at is not None:
@@ -869,6 +870,10 @@ def regressions(
                    "evidence EVID-ACCESS-RECERT is not linked to implementation IMP-ACCESS")
     expect_failure(lambda value: value["professional_reviews"][0].update({"reviewed_at": "2026-06-01T10:00:00Z"}),
                    "predates assessment")
+    expect_failure(lambda value: value["professional_reviews"][0].update({"reviewed_at": "2026-09-03T10:00:00Z"}),
+                   "review REV-ACCESS occurs after dossier as_of")
+    expect_failure(lambda value: value["decisions"][0].update({"effective_at": "2026-09-03T10:05:00Z"}),
+                   "decision DEC-ACCESS occurs after dossier as_of")
     expect_failure(lambda value: value["evidence"][0].update({"captured_at": "2026-09-01T09:50:00Z"}),
                    "uses evidence captured after assessment")
     expect_failure(lambda value: value["requirement_control_maps"][0].update({"mapping_version": 0}),
@@ -886,6 +891,27 @@ def regressions(
         value["applicability_decisions"][0]["required_review_class"] = "R3"
         value["applicability_decisions"][0]["review_class"] = "R3"
     expect_failure(make_app_r3, "R3+ requires independent reviewer")
+
+    def supersede_reviewed_assessment(value: dict[str, Any]) -> None:
+        value["evidence"][0]["expires_at"] = "2026-09-01"
+        newer = deepcopy(value["assessments"][0])
+        newer.update({
+            "assessment_id": "ASM-ACCESS-V2",
+            "assessment_version": 2,
+            "evidence_ids": ["EVID-GOV-REVIEW"],
+            "assessed_at": "2026-09-02T11:00:00Z",
+        })
+        value["assessments"].append(newer)
+    expect_success(
+        supersede_reviewed_assessment,
+        lambda d: (
+            d["current_by_pair"][("REQ-ACCESS-LIFECYCLE", "SS-ACCESS-002")]["assessment_id"] == "ASM-ACCESS-V2"
+            and bool(d["decisions_by_assessment"].get("ASM-ACCESS"))
+            and not d["decisions_by_assessment"].get("ASM-ACCESS-V2")
+            and assurance_state("REQ-ACCESS-LIFECYCLE", d) == "PENDING_REVIEW"
+        ),
+        "historical authorization remains valid without promoting newer current assessment",
+    )
 
     def pending_orphan(value: dict[str, Any]) -> None:
         value["applicability_decisions"][3]["status"] = "PENDING_PROFESSIONAL_REVIEW"
