@@ -671,7 +671,8 @@ def validate(
         all_valid = bool(evidence_ids) and all(
             evidence_valid(evidence.get(str(eid), {}), as_of) for eid in evidence_ids
         )
-        if not all_valid:
+        has_open_conflict = bool(open_conflict_by_assessment.get(str(current.get("assessment_id"))))
+        if not all_valid and not has_open_conflict:
             require(current.get("state") == "REOPENED",
                     f"current assessment {current.get('assessment_id')} with expired evidence must be REOPENED")
             proposed = current.get("proposed_proof_level")
@@ -893,6 +894,17 @@ def regressions(
                    "validity window exceeds explicit kernel policy")
     expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2026-09-01"}),
                    "current assessment ASM-ACCESS with expired evidence must be REOPENED")
+
+    def expire_open_conflict_evidence(value: dict[str, Any]) -> None:
+        value["evidence"][4]["expires_at"] = "2026-09-01"
+    expect_success(
+        expire_open_conflict_evidence,
+        lambda d: (
+            d["current_by_pair"][("REQ-SUPPLIER-GOV", "SS-SUP-002")]["state"] == "CONFLICT_DETECTED"
+            and assurance_state("REQ-SUPPLIER-GOV", d) == "BLOCKED_CONFLICT"
+        ),
+        "open conflict remains the primary blocker when supporting evidence expires",
+    )
 
     def make_review_r3(value: dict[str, Any]) -> None:
         value["assessments"][0]["materiality"] = "high"
