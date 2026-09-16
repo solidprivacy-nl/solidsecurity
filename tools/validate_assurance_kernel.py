@@ -539,6 +539,9 @@ def validate(
             items,
             key=lambda item: as_dt(item.get("assessed_at")) or datetime.min.replace(tzinfo=timezone.utc),
         )
+        ordered_versions = [item.get("assessment_version") for item in ordered]
+        require(ordered_versions == sorted(ordered_versions),
+                f"assessment history {pair[0]}->{pair[1]} versions must increase with chronology")
         current_by_pair[pair] = ordered[-1]
 
     open_conflict_by_assessment: dict[str, list[dict[str, Any]]] = {aid: [] for aid in assessments}
@@ -653,12 +656,17 @@ def validate(
             app = apps_by_req.get(str(assessment.get("requirement_id")), [{}])[0]
             require(app.get("status") == "APPLICABLE",
                     f"decision {decision_id} requires current APPLICABLE determination")
-            require(assessment.get("state") == "REVIEWED",
-                    f"decision {decision_id} requires REVIEWED assessment")
+            require(assessment.get("state") in {"REVIEWED", "REOPENED"},
+                    f"decision {decision_id} requires REVIEWED or historically authorized REOPENED assessment")
             require(assessment.get("result") == "SATISFACTORY",
                     f"decision {decision_id} requires SATISFACTORY assessment result")
-            require(assessment.get("proposed_proof_level") == "EVIDENCED",
-                    f"decision {decision_id} requires an EVIDENCED assessment proposal; human review performs VERIFIED promotion")
+            proposed = assessment.get("proposed_proof_level")
+            if assessment.get("state") == "REVIEWED":
+                require(proposed == "EVIDENCED",
+                        f"decision {decision_id} requires an EVIDENCED assessment proposal; human review performs VERIFIED promotion")
+            elif proposed in proof_levels:
+                require(proof_levels[proposed] <= proof_levels["IMPLEMENTED"],
+                        f"historically authorized REOPENED assessment for decision {decision_id} must remain non-green")
             require(not open_conflict_by_assessment.get(str(aid)),
                     f"decision {decision_id} blocked by open evidence conflict")
             for eid in assessment.get("evidence_ids", []):
@@ -930,6 +938,25 @@ def regressions(
                    "validity window exceeds explicit kernel policy")
     expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2026-09-01"}),
                    "current assessment ASM-ACCESS with expired evidence must be REOPENED")
+
+    def swap_recovery_versions(value: dict[str, Any]) -> None:
+        value["assessments"][2]["assessment_version"] = 2
+        value["assessments"][3]["assessment_version"] = 1
+    expect_failure(swap_recovery_versions,
+                   "assessment history REQ-RECOVERY-TEST->SS-RES-001 versions must increase with chronology")
+
+    def reopen_verified_after_expiry(value: dict[str, Any]) -> None:
+        value["evidence"][0]["expires_at"] = "2026-09-01"
+        value["assessments"][0]["state"] = "REOPENED"
+        value["assessments"][0]["proposed_proof_level"] = "IMPLEMENTED"
+    expect_success(
+        reopen_verified_after_expiry,
+        lambda d: (
+            bool(d["decisions_by_assessment"].get("ASM-ACCESS"))
+            and assurance_state("REQ-ACCESS-LIFECYCLE", d) == "REOPENED"
+        ),
+        "historical authorization remains attributable after current evidence expiry reopens state",
+    )
 
     def expire_open_conflict_evidence(value: dict[str, Any]) -> None:
         value["evidence"][4]["expires_at"] = "2026-09-01"
