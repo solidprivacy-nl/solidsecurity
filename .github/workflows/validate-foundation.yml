@@ -31,6 +31,7 @@ on:
       - 'tools/validate_domain_model.py'
       - 'tools/validate_mission_r2.py'
       - 'tools/validate_authority_drift.py'
+      - 'tools/validate_assurance_kernel.py'
       - 'requirements-validation.txt'
       - '.github/workflows/validate-foundation.yml'
   workflow_dispatch:
@@ -56,6 +57,7 @@ jobs:
           python -m py_compile tools/validate_domain_model.py
           python -m py_compile tools/validate_mission_r2.py
           python -m py_compile tools/validate_authority_drift.py
+          python -m py_compile tools/validate_assurance_kernel.py
       - name: Validate machine-readable foundation
         run: python tools/validate_foundation.py
       - name: Validate customer claim authority
@@ -68,3 +70,5 @@ jobs:
         run: python tools/validate_mission_r2.py
       - name: Validate current authority drift
         run: python tools/validate_authority_drift.py
+      - name: Validate executable assurance kernel and deterministic dossier
+        run: python tools/validate_assurance_kernel.py
