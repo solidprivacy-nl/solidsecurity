@@ -264,7 +264,7 @@ def validate(
                 f"mapping {mapping_id} source version mismatch")
         require(mapping.get("source_requirement_ref") == rid,
                 f"mapping {mapping_id} requirement provenance mismatch")
-        require(mapping.get("relationship") in {"primary", "partial", "supporting"},
+        require(mapping.get("relationship") in {"supports", "primary", "partial", "contextual"},
                 f"mapping {mapping_id} relationship invalid")
         require(mapping.get("coverage") in {"FULL", "PARTIAL"},
                 f"mapping {mapping_id} coverage invalid")
@@ -356,11 +356,16 @@ def validate(
         require(len(items) == 1, f"requirement {rid} must have exactly one applicability decision")
 
     implementation_declared_times: dict[str, datetime] = {}
+    implementation_pairs: set[tuple[str, str]] = set()
     for impl_id, impl in implementations.items():
         require(impl.get("control_id") in controls,
                 f"implementation {impl_id} references unknown/out-of-scope control")
         require(impl.get("scope_id") in scopes,
                 f"implementation {impl_id} references unknown scope")
+        pair = (str(impl.get("scope_id")), str(impl.get("control_id")))
+        require(pair not in implementation_pairs,
+                f"duplicate client implementation for scope/control {pair[0]}->{pair[1]}")
+        implementation_pairs.add(pair)
         require(impl.get("source_of_claim") in {"accepted_human_statement", "generated_policy"},
                 f"implementation {impl_id} source_of_claim invalid")
         require(impl.get("implementation_status") in {"DESIGNED", "OPERATING"},
@@ -650,6 +655,8 @@ def validate(
                     f"decision {decision_id} requires current APPLICABLE determination")
             require(assessment.get("state") == "REVIEWED",
                     f"decision {decision_id} requires REVIEWED assessment")
+            require(assessment.get("result") == "SATISFACTORY",
+                    f"decision {decision_id} requires SATISFACTORY assessment result")
             require(assessment.get("proposed_proof_level") == "EVIDENCED",
                     f"decision {decision_id} requires an EVIDENCED assessment proposal; human review performs VERIFIED promotion")
             require(not open_conflict_by_assessment.get(str(aid)),
@@ -738,8 +745,13 @@ def assurance_state(requirement_id: str, derived: dict[str, Any]) -> str:
     coverage = derived["coverage"][requirement_id]
     if coverage == "GAP":
         return "GAP"
-    pairs = [pair for pair in derived["current_by_pair"] if pair[0] == requirement_id]
-    current = [derived["current_by_pair"][pair] for pair in sorted(pairs)]
+    mapped_pairs = [
+        (requirement_id, str(item.get("control_id")))
+        for item in derived["maps_by_req"].get(requirement_id, [])
+    ]
+    if any(pair not in derived["current_by_pair"] for pair in mapped_pairs):
+        return "PENDING_REVIEW"
+    current = [derived["current_by_pair"][pair] for pair in sorted(mapped_pairs)]
     if any(derived["open_conflict_by_assessment"].get(item["assessment_id"]) for item in current):
         return "BLOCKED_CONFLICT"
     if any(item.get("state") == "REOPENED" for item in current):
@@ -767,7 +779,7 @@ def trace_lines(derived: dict[str, Any]) -> list[str]:
             decision = linked_decisions[0]
             review = derived["reviews"].get(str(decision.get("review_id")), {})
             review_text = f"{review.get('review_id')}[{review.get('review_class')}]"
-            decision_text = str(decision.get("assurance_state"))
+            decision_text = f"{decision.get('decision_id')}[{decision.get('assurance_state')}]"
         else:
             review_text = "none"
             decision_text = "none"
@@ -784,7 +796,7 @@ def render(model: dict[str, Any], derived: dict[str, Any]) -> str:
         "# SolidSecurity Synthetic Assurance Kernel Dossier",
         "",
         "Source: `model/assurance_kernel_v1.yaml`",
-        "As-of: 2026-09-02",
+        f"As-of: {derived['as_of'].isoformat()}",
         "Customer-facing: no; synthetic validation only.",
         "",
         "## Coverage",
@@ -859,6 +871,9 @@ def regressions(
             failures.append("fresh recovery reassessment did not supersede historical REOPENED state")
         if not any(item.get("state") == "REOPENED" for item in derived["assessments"].values()):
             failures.append("fixture no longer preserves historical REOPENED assessment")
+        rendered = render(model, derived)
+        if "DEC-ACCESS[VERIFIED]" not in rendered:
+            failures.append("decision identity is missing from deterministic trace output")
 
     expect_failure(lambda value: value["assessments"][0].update({"proposed_proof_level": "VERIFIED"}),
                    "proposal must stay at or below EVIDENCED")
@@ -870,8 +885,25 @@ def regressions(
                    "current assessment ASM-RECOVERY-V2 with expired evidence must be REOPENED")
     expect_failure(lambda value: value["evidence"][4].update({"source_ref": "synthetic_internal_governance_review"}),
                    "requires distinct evidence sources")
-    expect_failure(lambda value: value["assessments"][0].update({"implementation_id": "IMP-GENERATED-POLICY"}),
-                   "cannot promote generated policy")
+
+    def use_generated_policy(value: dict[str, Any]) -> None:
+        value["client_implementations"].append({
+            "implementation_id": "IMP-GENERATED-POLICY",
+            "control_id": "SS-ACCESS-002",
+            "scope_id": "SCOPE-SYNTH-CARE",
+            "implementation_status": "DESIGNED",
+            "source_of_claim": "generated_policy",
+        })
+        value["assessments"][0]["implementation_id"] = "IMP-GENERATED-POLICY"
+    expect_failure(use_generated_policy, "cannot promote generated policy")
+
+    def duplicate_live_implementation(value: dict[str, Any]) -> None:
+        duplicate = deepcopy(value["client_implementations"][0])
+        duplicate["implementation_id"] = "IMP-ACCESS-DUPLICATE"
+        value["client_implementations"].append(duplicate)
+    expect_failure(duplicate_live_implementation,
+                   "duplicate client implementation for scope/control SCOPE-SYNTH-CARE->SS-ACCESS-002")
+
     expect_failure(lambda value: value.update({"customer_facing": True}),
                    "synthetic kernel must not be customer-facing")
     expect_failure(lambda value: value["implementation_evidence_links"].pop(0),
@@ -890,6 +922,10 @@ def regressions(
                    "uses evidence captured after assessment")
     expect_failure(lambda value: value["requirement_control_maps"][0].update({"mapping_version": 0}),
                    "requires positive mapping version")
+    expect_failure(lambda value: value["requirement_control_maps"][0].update({"relationship": "supporting"}),
+                   "relationship invalid")
+    expect_failure(lambda value: value["assessments"][0].update({"result": "PARTIAL"}),
+                   "decision DEC-ACCESS requires SATISFACTORY assessment result")
     expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2028-12-31"}),
                    "validity window exceeds explicit kernel policy")
     expect_failure(lambda value: value["evidence"][0].update({"expires_at": "2026-09-01"}),
@@ -938,6 +974,16 @@ def regressions(
         "historical authorization remains valid without promoting newer current assessment",
     )
 
+    def remove_current_access_assessment(value: dict[str, Any]) -> None:
+        value["assessments"] = [item for item in value["assessments"] if item.get("assessment_id") != "ASM-ACCESS"]
+        value["professional_reviews"] = [item for item in value["professional_reviews"] if item.get("assessment_id") != "ASM-ACCESS"]
+        value["decisions"] = [item for item in value["decisions"] if item.get("assessment_id") != "ASM-ACCESS"]
+    expect_success(
+        remove_current_access_assessment,
+        lambda d: assurance_state("REQ-ACCESS-LIFECYCLE", d) == "PENDING_REVIEW",
+        "mapped requirement without current assessment fails closed as PENDING_REVIEW",
+    )
+
     def pending_orphan(value: dict[str, Any]) -> None:
         value["applicability_decisions"][3]["status"] = "PENDING_PROFESSIONAL_REVIEW"
     expect_success(
@@ -953,6 +999,12 @@ def regressions(
         lambda d: assurance_state("REQ-ORPHAN-MONITORING", d) == "NOT_APPLICABLE",
         "canonical NOT_APPLICABLE remains representable and fail-closed",
     )
+
+    changed_cutoff = deepcopy(model)
+    changed_cutoff["as_of"] = "2026-09-03"
+    changed_errors, changed_derived = validate(changed_cutoff, *authorities)
+    if changed_errors or "As-of: 2026-09-03" not in render(changed_cutoff, changed_derived):
+        failures.append(f"rendered dossier does not derive As-of from validated model date; errors={changed_errors}")
 
     try:
         yaml.load("a: 1\na: 2\n", Loader=UniqueKeyLoader)
