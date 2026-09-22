@@ -523,6 +523,8 @@ def validate(
                     if captured_at is not None and assessed_at is not None:
                         require(captured_at <= assessed_at,
                                 f"assessment {assessment_id} uses evidence captured after assessment")
+                        require(evidence_valid(item, utc_date(assessed_at)),
+                                f"assessment {assessment_id} uses evidence invalid at assessment time")
                     evidence_users[str(eid)].add(assessment_id)
         if rid in requirements and cid in controls:
             assessments_by_pair.setdefault((str(rid), str(cid)), []).append(assessment)
@@ -555,6 +557,10 @@ def validate(
         resolved = [evidence.get(eid) for eid in ids] if isinstance(ids, list) else []
         require(all(item is not None for item in resolved),
                 f"conflict {conflict_id} references unknown evidence")
+        if assessment is not None and isinstance(ids, list):
+            assessment_evidence = assessment.get("evidence_ids", [])
+            require(all(eid in assessment_evidence for eid in ids),
+                    f"conflict {conflict_id} evidence must belong to assessment {aid}")
         if all(item is not None for item in resolved) and resolved:
             require(len({item.get("source_ref") for item in resolved}) >= 2,
                     f"conflict {conflict_id} requires distinct evidence sources")
@@ -928,6 +934,10 @@ def regressions(
                    "decision DEC-ACCESS occurs after dossier as_of")
     expect_failure(lambda value: value["evidence"][0].update({"captured_at": "2026-09-01T09:50:00Z"}),
                    "uses evidence captured after assessment")
+    expect_failure(lambda value: value["evidence"][0].update({"valid_from": "2026-09-02"}),
+                   "uses evidence invalid at assessment time")
+    expect_failure(lambda value: value["evidence_conflicts"][0]["evidence_ids"].__setitem__(0, "EVID-ACCESS-RECERT"),
+                   "conflict CONFLICT-SUPPLIER-01 evidence must belong to assessment ASM-SUPPLIER")
     expect_failure(lambda value: value["requirement_control_maps"][0].update({"mapping_version": 0}),
                    "requires positive mapping version")
     expect_failure(lambda value: value["requirement_control_maps"][0].update({"relationship": "supporting"}),
